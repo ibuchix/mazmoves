@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +15,9 @@ import { ContactStep } from "@/components/move-request/ContactStep";
 
 export default function RequestMove() {
   const [step, setStep] = useState(1);
-  const [moveType, setMoveType] = useState<MoveType | null>(null);
+  const location = useLocation();
+  const initialMoveType = location.state?.moveType || null;
+  const [moveType, setMoveType] = useState<MoveType | null>(initialMoveType);
   const navigate = useNavigate();
   const { toast } = useToast();
   
@@ -50,7 +52,7 @@ export default function RequestMove() {
         description: "Your move request has been submitted. Moving companies will contact you soon.",
       });
 
-      navigate("/dashboard");
+      navigate("/");
     } catch (error) {
       toast({
         title: "Error",

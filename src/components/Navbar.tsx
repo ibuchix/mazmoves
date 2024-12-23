@@ -11,7 +11,7 @@ export default function Navbar() {
               <img 
                 src="/lovable-uploads/b700dde9-463e-4b6e-8523-ec9f718b3beb.png" 
                 alt="MAZ Moves" 
-                className="h-12 transform hover:scale-105 transition-transform duration-200" 
+                className="h-14 transform hover:scale-105 transition-transform duration-200" 
               />
             </Link>
           </div>
@@ -22,7 +22,7 @@ export default function Navbar() {
             <Link to="/contact" className="text-[#040480] hover:text-[#1f3dd2] font-medium">Contact</Link>
           </div>
           <div>
-            <Button className="bg-[#d2491f] hover:bg-[#84d21f] text-white px-6 py-2 h-9 text-sm font-medium">
+            <Button className="bg-[#d2491f] hover:bg-[#84d21f] text-white px-4 py-1 h-8 text-sm font-medium">
               Work with us
             </Button>
           </div>

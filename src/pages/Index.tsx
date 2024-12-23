@@ -8,6 +8,12 @@ export default function Index() {
   const [moveType, setMoveType] = useState<MoveType | null>(null);
   const navigate = useNavigate();
 
+  const handleGetQuotes = () => {
+    if (moveType) {
+      navigate('/request-move', { state: { moveType } });
+    }
+  };
+
   return (
     <div className="flex-1">
       {/* Hero Section */}
@@ -17,28 +23,30 @@ export default function Index() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="text-white space-y-8">
               <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-                Moving Made Simple
+                Professional Moving Services at Your Fingertips
               </h1>
               <p className="text-xl text-gray-100 leading-relaxed">
-                Get instant quotes from trusted movers in your area. Our service is completely free to use.
+                Get instant quotes from trusted movers in your area. Our platform connects you with verified moving professionals to ensure a smooth relocation experience.
               </p>
-              <div className="flex items-center space-x-2 text-lg text-gray-100">
-                <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                <span>Free to use</span>
-              </div>
-              <div className="flex items-center space-x-2 text-lg text-gray-100">
-                <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                <span>Verified movers only</span>
-              </div>
-              <div className="flex items-center space-x-2 text-lg text-gray-100">
-                <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                <span>Instant quotes</span>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-3">
+                  <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span className="text-lg">100% Free Service</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span className="text-lg">Verified Professional Movers</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span className="text-lg">Instant Quote Comparison</span>
+                </div>
               </div>
             </div>
             <div className="bg-white/95 backdrop-blur-sm p-8 rounded-lg shadow-lg">
@@ -49,11 +57,7 @@ export default function Index() {
               />
               <Button 
                 className="w-full mt-6 bg-[#d2491f] hover:bg-[#84d21f] text-white text-base px-6 py-2"
-                onClick={() => {
-                  if (moveType) {
-                    navigate('/request-move');
-                  }
-                }}
+                onClick={handleGetQuotes}
                 disabled={!moveType}
               >
                 Get Free Quotes
