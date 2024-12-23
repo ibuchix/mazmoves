@@ -2,9 +2,11 @@ import { Button } from "@/components/ui/button";
 import { MoveTypeStep } from "@/components/move-request/MoveTypeStep";
 import { useState } from "react";
 import { MoveType } from "@/types/move-request";
+import { useNavigate } from "react-router-dom";
 
 export default function Index() {
   const [moveType, setMoveType] = useState<MoveType | null>(null);
+  const navigate = useNavigate();
 
   return (
     <div className="flex-1">
@@ -31,7 +33,7 @@ export default function Index() {
                 className="w-full mt-6 bg-[#d2491f] hover:bg-[#84d21f] text-white text-lg px-8 py-6 h-auto"
                 onClick={() => {
                   if (moveType) {
-                    window.location.href = '/request-move';
+                    navigate('/request-move');
                   }
                 }}
                 disabled={!moveType}
