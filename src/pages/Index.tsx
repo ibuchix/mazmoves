@@ -38,31 +38,28 @@ export default function Index() {
             </div>
             
             {/* Content Section - Now on the right */}
-            <div className="text-white space-y-6">
-              <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-                Professional Moving Made Simple
-              </h1>
-              <p className="text-xl text-gray-100">
+            <div className="text-white flex flex-col justify-center space-y-8 pl-8">
+              <p className="text-2xl text-gray-100 font-light mb-8">
                 Get instant quotes from trusted movers. Free to use, no obligations.
               </p>
-              <div className="space-y-3">
-                <div className="flex items-center space-x-3">
-                  <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="space-y-6">
+                <div className="flex items-center space-x-4">
+                  <svg className="w-8 h-8 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
-                  <span>Verified Professional Movers</span>
+                  <span className="text-xl">Verified Professional Movers</span>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center space-x-4">
+                  <svg className="w-8 h-8 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
-                  <span>Compare Multiple Quotes</span>
+                  <span className="text-xl">Compare Multiple Quotes</span>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center space-x-4">
+                  <svg className="w-8 h-8 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
-                  <span>100% Free Service</span>
+                  <span className="text-xl">100% Free Service</span>
                 </div>
               </div>
             </div>
