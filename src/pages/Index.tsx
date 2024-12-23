@@ -1,14 +1,13 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useRealtimeAssignments } from "@/hooks/use-realtime-assignments";
 
-const Index = () => {
+export default function Index() {
+  useRealtimeAssignments();
+  
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div>
+      <h1>Welcome to the Index Page</h1>
+      <p>This is where you can manage your assignments.</p>
+      {/* Additional content can go here */}
     </div>
   );
-};
-
-export default Index;
+}
