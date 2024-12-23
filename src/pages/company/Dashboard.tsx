@@ -6,24 +6,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRealtimeAssignments } from "@/hooks/use-realtime-assignments";
 import { Truck, Clock, CheckCircle, XCircle } from "lucide-react";
-import { Tables } from "@/integrations/supabase/types";
-import { Address } from "@/types/address";
-
-type MoveAssignmentWithRequest = Tables<"move_assignments"> & {
-  move_requests: Omit<Tables<"move_requests">, "pickup_address" | "delivery_address"> & {
-    pickup_address: Address;
-    delivery_address: Address;
-  }
-}
+import { MoveAssignmentWithRequest } from "@/types/move";
 
 export default function CompanyDashboard() {
   const { session } = useAuth();
   const navigate = useNavigate();
   
-  // Use realtime updates for assignments
   useRealtimeAssignments();
 
-  // Redirect if not logged in or not a company
   useEffect(() => {
     const checkAuth = async () => {
       if (!session?.user) {
@@ -45,7 +35,6 @@ export default function CompanyDashboard() {
     checkAuth();
   }, [session, navigate]);
 
-  // Fetch company data
   const { data: company } = useQuery({
     queryKey: ["company", session?.user?.email],
     queryFn: async () => {
@@ -61,7 +50,6 @@ export default function CompanyDashboard() {
     enabled: !!session?.user?.email,
   });
 
-  // Fetch assignments
   const { data: assignments } = useQuery<MoveAssignmentWithRequest[]>({
     queryKey: ["assignments", company?.id],
     queryFn: async () => {
@@ -76,7 +64,16 @@ export default function CompanyDashboard() {
         .eq("company_id", company?.id);
 
       if (error) throw error;
-      return data as MoveAssignmentWithRequest[];
+      
+      // Transform the JSON fields into proper Address objects
+      return data?.map(assignment => ({
+        ...assignment,
+        move_requests: {
+          ...assignment.move_requests,
+          pickup_address: assignment.move_requests.pickup_address as any,
+          delivery_address: assignment.move_requests.delivery_address as any
+        }
+      })) as MoveAssignmentWithRequest[];
     },
     enabled: !!company?.id,
   });
