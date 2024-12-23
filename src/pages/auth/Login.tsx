@@ -17,15 +17,15 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F8F9FF] to-[#FFFFFF]">
-      <div className="max-w-md w-full space-y-8 p-10 bg-white rounded-xl shadow-xl">
-        <div className="text-center space-y-3">
-          <h1 className="text-4xl font-bold text-[#040480]">Welcome Back</h1>
+      <div className="max-w-md w-full p-10 bg-white rounded-xl shadow-xl">
+        <div className="text-center space-y-4 mb-8">
+          <h1 className="text-4xl font-bold text-[#040480]">Welcome</h1>
           <p className="text-gray-600">
-            Sign in to your account to continue
+            Sign in to your account or create a new one
           </p>
         </div>
         
-        <div className="mt-8">
+        <div className="space-y-6">
           <Auth
             supabaseClient={supabase}
             appearance={{
@@ -35,6 +35,14 @@ export default function Login() {
                   colors: {
                     brand: '#040480',
                     brandAccent: '#1f3dd2',
+                    inputBackground: 'white',
+                    inputBorder: '#e2e8f0',
+                    inputBorderHover: '#1f3dd2',
+                    inputBorderFocus: '#1f3dd2',
+                  },
+                  borderRadii: {
+                    button: '0.5rem',
+                    input: '0.5rem',
                   },
                 },
               },
@@ -42,6 +50,7 @@ export default function Login() {
                 container: 'auth-container',
                 button: 'auth-button',
                 input: 'auth-input',
+                label: 'text-sm font-medium text-gray-700',
               },
             }}
             theme="light"
@@ -49,9 +58,9 @@ export default function Login() {
           />
         </div>
 
-        <div className="mt-6 text-center">
+        <div className="mt-8 text-center">
           <p className="text-sm text-gray-600">
-            Need help? Contact our support team
+            Need help? <a href="#" className="text-[#1f3dd2] hover:underline">Contact support</a>
           </p>
         </div>
       </div>
