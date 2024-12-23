@@ -21,34 +21,7 @@ export default function Index() {
         <div className="absolute inset-0 bg-black opacity-5"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="text-white space-y-8">
-              <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-                Professional Moving Services at Your Fingertips
-              </h1>
-              <p className="text-xl text-gray-100 leading-relaxed">
-                Get instant quotes from trusted movers in your area. Our platform connects you with verified moving professionals to ensure a smooth relocation experience.
-              </p>
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3">
-                  <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  <span className="text-lg">100% Free Service</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  <span className="text-lg">Verified Professional Movers</span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  <span className="text-lg">Instant Quote Comparison</span>
-                </div>
-              </div>
-            </div>
+            {/* Form Section - Now on the left */}
             <div className="bg-white/95 backdrop-blur-sm p-8 rounded-lg shadow-lg">
               <h2 className="text-2xl font-bold text-[#040480] mb-6">Start Your Move</h2>
               <MoveTypeStep
@@ -62,6 +35,36 @@ export default function Index() {
               >
                 Get Free Quotes
               </Button>
+            </div>
+            
+            {/* Content Section - Now on the right */}
+            <div className="text-white space-y-6">
+              <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+                Professional Moving Made Simple
+              </h1>
+              <p className="text-xl text-gray-100">
+                Get instant quotes from trusted movers. Free to use, no obligations.
+              </p>
+              <div className="space-y-3">
+                <div className="flex items-center space-x-3">
+                  <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Verified Professional Movers</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>Compare Multiple Quotes</span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                  <span>100% Free Service</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
