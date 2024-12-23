@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Address } from "@/types/address";
+import { Tables } from "@/types/database";
 
 type MoveType = "domestic" | "commercial" | "international";
 type PropertySize = "1" | "2" | "3" | "4" | "5+" | "office" | "warehouse" | "retail";
@@ -37,14 +38,23 @@ export default function RequestMove() {
 
   const onSubmit = async (data: MoveRequestForm) => {
     try {
-      const { error } = await supabase.from("move_requests").insert({
-        customer_id: (await supabase.auth.getUser()).data.user?.id,
+      const user = await supabase.auth.getUser();
+      if (!user.data.user) {
+        throw new Error("User not authenticated");
+      }
+
+      const moveRequest: Tables["move_requests"]["Insert"] = {
+        customer_id: user.data.user.id,
         pickup_address: data.pickupAddress,
         delivery_address: data.deliveryAddress,
         requested_date: data.moveDate,
         estimated_size: data.propertySize,
         special_instructions: data.specialInstructions,
-      });
+      };
+
+      const { error } = await supabase
+        .from("move_requests")
+        .insert(moveRequest);
 
       if (error) throw error;
 
