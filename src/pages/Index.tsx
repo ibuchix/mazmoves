@@ -1,164 +1,79 @@
-import { useEffect, useState } from "react";
-import { useRealtimeAssignments } from "@/hooks/use-realtime-assignments";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/components/AuthProvider";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Database } from "@/integrations/supabase/types";
-import { Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-
-type MoveAssignmentWithRequest = Database['public']['Tables']['move_assignments']['Row'] & {
-  move_requests: {
-    pickup_address: {
-      street: string;
-      city: string;
-      state: string;
-    }
-  }
-};
-
-interface MoveAssignment {
-  id: string;
-  request_id: string;
-  status: Database['public']['Enums']['assignment_status'] | null;
-  assigned_date: string;
-  estimated_cost: number | null;
-  pickup_address: {
-    street: string;
-    city: string;
-    state: string;
-  };
-}
+import { Button } from "@/components/ui/button";
 
 export default function Index() {
-  useRealtimeAssignments();
-  const [assignments, setAssignments] = useState<MoveAssignment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { session } = useAuth();
-  const { toast } = useToast();
-
-  useEffect(() => {
-    const fetchAssignments = async () => {
-      try {
-        setIsLoading(true);
-        const { data: assignmentsData, error } = await supabase
-          .from('move_assignments')
-          .select(`
-            *,
-            move_requests (
-              pickup_address
-            )
-          `)
-          .order('assigned_date', { ascending: false });
-
-        if (error) {
-          throw error;
-        }
-
-        if (!assignmentsData) return;
-
-        const formattedAssignments: MoveAssignment[] = assignmentsData.map((assignment: MoveAssignmentWithRequest) => ({
-          id: assignment.id,
-          request_id: assignment.request_id,
-          status: assignment.status,
-          assigned_date: assignment.assigned_date || '',
-          estimated_cost: assignment.estimated_cost,
-          pickup_address: assignment.move_requests.pickup_address
-        }));
-
-        setAssignments(formattedAssignments);
-      } catch (error) {
-        console.error('Error fetching assignments:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load assignments. Please try again later.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAssignments();
-
-    const channel = supabase
-      .channel('assignments-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'move_assignments'
-        },
-        async (payload) => {
-          console.log('Assignment change detected:', payload);
-          try {
-            await fetchAssignments();
-          } catch (error) {
-            console.error('Error refreshing assignments:', error);
-            toast({
-              title: "Error",
-              description: "Failed to refresh assignments. Please reload the page.",
-              variant: "destructive",
-            });
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [session, toast]);
-
   return (
-    <div className="container mx-auto p-6 bg-gradient-to-r from-[#F2FCE2] to-[#E5DEFF]">
-      <h1 className="text-2xl font-bold mb-6 text-[#1A1F2C]">Move Assignments Dashboard</h1>
-      
-      {isLoading ? (
-        <div className="flex justify-center items-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-[#9b87f5]" />
+    <div className="flex-1">
+      {/* Hero Section */}
+      <section className="bg-gradient-to-r from-[#040480] to-[#1f3dd2] text-white py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6">Professional Moving Services</h1>
+            <p className="text-xl mb-8">Making your move smooth and stress-free</p>
+            <Button className="bg-[#d2491f] hover:bg-[#84d21f] text-white text-lg px-8 py-6 h-auto">
+              Get Your Free Quote
+            </Button>
+          </div>
         </div>
-      ) : assignments.length === 0 ? (
-        <div className="text-center py-8 bg-white rounded-lg shadow-sm">
-          <p className="text-[#8A898C]">No assignments found</p>
+      </section>
+
+      {/* Services Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center text-[#040480] mb-12">Our Services</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {[
+              {
+                title: "Residential Moving",
+                description: "Professional home moving services tailored to your needs"
+              },
+              {
+                title: "Commercial Moving",
+                description: "Efficient business relocation with minimal disruption"
+              },
+              {
+                title: "Packing Services",
+                description: "Expert packing and unpacking for a worry-free move"
+              }
+            ].map((service, index) => (
+              <div key={index} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
+                <h3 className="text-xl font-semibold text-[#040480] mb-4">{service.title}</h3>
+                <p className="text-gray-600">{service.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      ) : (
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          <Table>
-            <TableHeader className="bg-[#F1F0FB]">
-              <TableRow>
-                <TableHead className="text-[#403E43]">Assignment ID</TableHead>
-                <TableHead className="text-[#403E43]">Status</TableHead>
-                <TableHead className="text-[#403E43]">Pickup Location</TableHead>
-                <TableHead className="text-[#403E43]">Assigned Date</TableHead>
-                <TableHead className="text-[#403E43]">Estimated Cost</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {assignments.map((assignment) => (
-                <TableRow key={assignment.id} className="hover:bg-[#F1F0FB] transition-colors">
-                  <TableCell className="font-medium text-[#6E59A5]">{assignment.id}</TableCell>
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-sm ${
-                      assignment.status === 'completed' ? 'bg-[#F2FCE2] text-green-700' :
-                      assignment.status === 'active' ? 'bg-[#D3E4FD] text-blue-700' :
-                      'bg-[#FFDEE2] text-red-700'
-                    }`}>
-                      {assignment.status}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-[#403E43]">
-                    {assignment.pickup_address?.street}, {assignment.pickup_address?.city}, {assignment.pickup_address?.state}
-                  </TableCell>
-                  <TableCell className="text-[#403E43]">{new Date(assignment.assigned_date).toLocaleDateString()}</TableCell>
-                  <TableCell className="text-[#403E43]">${assignment.estimated_cost || 'N/A'}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+      </section>
+
+      {/* Why Choose Us Section */}
+      <section className="py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-center text-[#040480] mb-12">Why Choose MAZ Moves</h2>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {[
+              { title: "Professional Team", description: "Experienced and trained movers" },
+              { title: "Reliable Service", description: "On-time and efficient moving" },
+              { title: "Affordable Rates", description: "Competitive pricing and free quotes" },
+              { title: "Full Insurance", description: "Your belongings are protected" }
+            ].map((feature, index) => (
+              <div key={index} className="text-center">
+                <h3 className="text-xl font-semibold text-[#040480] mb-4">{feature.title}</h3>
+                <p className="text-gray-600">{feature.description}</p>
+              </div>
+            ))}
+          </div>
         </div>
-      )}
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-gradient-to-r from-[#d2491f] to-[#84d21f] text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold mb-6">Ready to Move?</h2>
+          <p className="text-xl mb-8">Contact us today for a free, no-obligation quote</p>
+          <Button className="bg-white text-[#040480] hover:bg-gray-100 text-lg px-8 py-6 h-auto">
+            Contact Us Now
+          </Button>
+        </div>
+      </section>
     </div>
   );
 }
