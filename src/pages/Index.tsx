@@ -12,25 +12,43 @@ export default function Index() {
     <div className="flex-1">
       {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-[#040480] to-[#1f3dd2] py-20">
-        <div className="absolute inset-0 bg-black opacity-10"></div>
+        <div className="absolute inset-0 bg-black opacity-5"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="grid md:grid-cols-2 gap-12 items-center">
-            <div className="text-white">
-              <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                Professional Moving Solutions for Your Peace of Mind
+            <div className="text-white space-y-8">
+              <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+                Moving Made Simple
               </h1>
-              <p className="text-xl mb-8 text-gray-100">
-                Expert moving services tailored to your needs. Let us handle your move while you focus on what matters most.
+              <p className="text-xl text-gray-100 leading-relaxed">
+                Get instant quotes from trusted movers in your area. Our service is completely free to use.
               </p>
+              <div className="flex items-center space-x-2 text-lg text-gray-100">
+                <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>Free to use</span>
+              </div>
+              <div className="flex items-center space-x-2 text-lg text-gray-100">
+                <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>Verified movers only</span>
+              </div>
+              <div className="flex items-center space-x-2 text-lg text-gray-100">
+                <svg className="w-6 h-6 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+                <span>Instant quotes</span>
+              </div>
             </div>
-            <div className="bg-white p-8 rounded-lg shadow-xl">
+            <div className="bg-white/95 backdrop-blur-sm p-8 rounded-lg shadow-lg">
               <h2 className="text-2xl font-bold text-[#040480] mb-6">Start Your Move</h2>
               <MoveTypeStep
                 value={moveType}
                 onChange={(value) => setMoveType(value)}
               />
               <Button 
-                className="w-full mt-6 bg-[#d2491f] hover:bg-[#84d21f] text-white text-lg px-8 py-6 h-auto"
+                className="w-full mt-6 bg-[#d2491f] hover:bg-[#84d21f] text-white text-base px-6 py-2"
                 onClick={() => {
                   if (moveType) {
                     navigate('/request-move');
@@ -38,14 +56,13 @@ export default function Index() {
                 }}
                 disabled={!moveType}
               >
-                Continue
+                Get Free Quotes
               </Button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Services Section */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center text-[#040480] mb-12">Our Services</h2>
@@ -73,7 +90,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* Why Choose Us Section */}
       <section className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl font-bold text-center text-[#040480] mb-12">Why Choose MAZ Moves</h2>
@@ -93,7 +109,6 @@ export default function Index() {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="bg-gradient-to-r from-[#d2491f] to-[#84d21f] text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-6">Ready to Move?</h2>
