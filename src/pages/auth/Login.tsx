@@ -41,7 +41,6 @@ export default function Login() {
                     inputBorderFocus: '#1f3dd2',
                   },
                   radii: {
-                    borderRadius: '0.5rem',
                     buttonBorderRadius: '0.5rem',
                     inputBorderRadius: '0.5rem',
                   },
