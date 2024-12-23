@@ -1,5 +1,3 @@
-import { Address } from "@/types/address";
-
 export type Json =
   | string
   | number
@@ -13,7 +11,7 @@ export type Database = {
     Tables: {
       companies: {
         Row: {
-          business_address: Address
+          business_address: Json
           contact_email: string
           contact_phone: string | null
           created_at: string | null
@@ -27,7 +25,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          business_address: Address
+          business_address: Json
           contact_email: string
           contact_phone?: string | null
           created_at?: string | null
@@ -41,7 +39,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          business_address?: Address
+          business_address?: Json
           contact_email?: string
           contact_phone?: string | null
           created_at?: string | null
@@ -107,19 +105,19 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "move_requests"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       move_requests: {
         Row: {
           created_at: string | null
           customer_id: string
-          delivery_address: Address
+          delivery_address: Json
           estimated_size: string | null
           estimated_value: number | null
           id: string
           inventory_list: Json | null
-          pickup_address: Address
+          pickup_address: Json
           requested_date: string
           special_instructions: string | null
           status: Database["public"]["Enums"]["request_status"] | null
@@ -128,12 +126,12 @@ export type Database = {
         Insert: {
           created_at?: string | null
           customer_id: string
-          delivery_address: Address
+          delivery_address: Json
           estimated_size?: string | null
           estimated_value?: number | null
           id?: string
           inventory_list?: Json | null
-          pickup_address: Address
+          pickup_address: Json
           requested_date: string
           special_instructions?: string | null
           status?: Database["public"]["Enums"]["request_status"] | null
@@ -142,12 +140,12 @@ export type Database = {
         Update: {
           created_at?: string | null
           customer_id?: string
-          delivery_address?: Address
+          delivery_address?: Json
           estimated_size?: string | null
           estimated_value?: number | null
           id?: string
           inventory_list?: Json | null
-          pickup_address?: Address
+          pickup_address?: Json
           requested_date?: string
           special_instructions?: string | null
           status?: Database["public"]["Enums"]["request_status"] | null
@@ -160,12 +158,12 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          }
+          },
         ]
       }
       users: {
         Row: {
-          address: Address | null
+          address: Json | null
           created_at: string | null
           email: string
           full_name: string
@@ -176,7 +174,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          address?: Address | null
+          address?: Json | null
           created_at?: string | null
           email: string
           full_name: string
@@ -187,7 +185,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          address?: Address | null
+          address?: Json | null
           created_at?: string | null
           email?: string
           full_name?: string
