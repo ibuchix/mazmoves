@@ -142,9 +142,8 @@ export default function Index() {
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-sm ${
                       assignment.status === 'completed' ? 'bg-[#F2FCE2] text-green-700' :
-                      assignment.status === 'in_progress' ? 'bg-[#FEF7CD] text-yellow-700' :
-                      assignment.status === 'cancelled' ? 'bg-[#FFDEE2] text-red-700' :
-                      'bg-[#D3E4FD] text-blue-700'
+                      assignment.status === 'active' ? 'bg-[#D3E4FD] text-blue-700' :
+                      'bg-[#FFDEE2] text-red-700'
                     }`}>
                       {assignment.status}
                     </span>
