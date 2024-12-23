@@ -3,13 +3,24 @@ import { useRealtimeAssignments } from "@/hooks/use-realtime-assignments";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Database } from "@/integrations/supabase/types";
+
+type MoveAssignmentWithRequest = Database['public']['Tables']['move_assignments']['Row'] & {
+  move_requests: {
+    pickup_address: {
+      street: string;
+      city: string;
+      state: string;
+    }
+  }
+};
 
 interface MoveAssignment {
   id: string;
   request_id: string;
-  status: string;
+  status: Database['public']['Enums']['assignment_status'] | null;
   assigned_date: string;
-  estimated_cost: number;
+  estimated_cost: number | null;
   pickup_address: {
     street: string;
     city: string;
@@ -40,10 +51,18 @@ export default function Index() {
         return;
       }
 
-      setAssignments(assignmentsData.map(assignment => ({
-        ...assignment,
+      if (!assignmentsData) return;
+
+      const formattedAssignments: MoveAssignment[] = assignmentsData.map((assignment: MoveAssignmentWithRequest) => ({
+        id: assignment.id,
+        request_id: assignment.request_id,
+        status: assignment.status,
+        assigned_date: assignment.assigned_date || '',
+        estimated_cost: assignment.estimated_cost,
         pickup_address: assignment.move_requests.pickup_address
-      })));
+      }));
+
+      setAssignments(formattedAssignments);
     };
 
     fetchAssignments();
