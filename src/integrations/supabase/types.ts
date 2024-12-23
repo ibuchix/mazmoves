@@ -1,3 +1,4 @@
+// Basic JSON type
 export type Json =
   | string
   | number
@@ -6,12 +7,22 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+// Address type for consistent structure
+export type Address = {
+  street?: string;
+  city: string;
+  state?: string;
+  zipCode?: string;
+  country?: string;
+}
+
+// Database types
 export type Database = {
   public: {
     Tables: {
       companies: {
         Row: {
-          business_address: Json
+          business_address: Address
           contact_email: string
           contact_phone: string | null
           created_at: string | null
@@ -25,7 +36,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          business_address: Json
+          business_address: Address
           contact_email: string
           contact_phone?: string | null
           created_at?: string | null
@@ -39,7 +50,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          business_address?: Json
+          business_address?: Address
           contact_email?: string
           contact_phone?: string | null
           created_at?: string | null
@@ -105,19 +116,19 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "move_requests"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       move_requests: {
         Row: {
           created_at: string | null
           customer_id: string
-          delivery_address: Json
+          delivery_address: Address
           estimated_size: string | null
           estimated_value: number | null
           id: string
           inventory_list: Json | null
-          pickup_address: Json
+          pickup_address: Address
           requested_date: string
           special_instructions: string | null
           status: Database["public"]["Enums"]["request_status"] | null
@@ -126,12 +137,12 @@ export type Database = {
         Insert: {
           created_at?: string | null
           customer_id: string
-          delivery_address: Json
+          delivery_address: Address
           estimated_size?: string | null
           estimated_value?: number | null
           id?: string
           inventory_list?: Json | null
-          pickup_address: Json
+          pickup_address: Address
           requested_date: string
           special_instructions?: string | null
           status?: Database["public"]["Enums"]["request_status"] | null
@@ -140,12 +151,12 @@ export type Database = {
         Update: {
           created_at?: string | null
           customer_id?: string
-          delivery_address?: Json
+          delivery_address?: Address
           estimated_size?: string | null
           estimated_value?: number | null
           id?: string
           inventory_list?: Json | null
-          pickup_address?: Json
+          pickup_address?: Address
           requested_date?: string
           special_instructions?: string | null
           status?: Database["public"]["Enums"]["request_status"] | null
@@ -158,12 +169,12 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "users"
             referencedColumns: ["id"]
-          },
+          }
         ]
       }
       users: {
         Row: {
-          address: Json | null
+          address: Address | null
           created_at: string | null
           email: string
           full_name: string
@@ -174,7 +185,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
-          address?: Json | null
+          address?: Address | null
           created_at?: string | null
           email: string
           full_name: string
@@ -185,7 +196,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
-          address?: Json | null
+          address?: Address | null
           created_at?: string | null
           email?: string
           full_name?: string
@@ -220,99 +231,6 @@ export type Database = {
   }
 }
 
-type PublicSchema = Database[Extract<keyof Database, "public">]
-
-export type Tables<
-  PublicTableNameOrOptions extends
-    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-        Database[PublicTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
-      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
-        PublicSchema["Views"])
-    ? (PublicSchema["Tables"] &
-        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
-
-export type TablesInsert<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
-
-export type TablesUpdate<
-  PublicTableNameOrOptions extends
-    | keyof PublicSchema["Tables"]
-    | { schema: keyof Database },
-  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = PublicTableNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
-    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
-
-export type Enums<
-  PublicEnumNameOrOptions extends
-    | keyof PublicSchema["Enums"]
-    | { schema: keyof Database },
-  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
-    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = PublicEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
-    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
-    : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof PublicSchema["CompositeTypes"]
-    | { schema: keyof Database },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
-  }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
-    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
+// Helper types
+export type Tables<T extends keyof Database["public"]["Tables"]> = Database["public"]["Tables"][T]["Row"]
+export type Enums<T extends keyof Database["public"]["Enums"]> = Database["public"]["Enums"][T]

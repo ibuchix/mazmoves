@@ -6,6 +6,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRealtimeAssignments } from "@/hooks/use-realtime-assignments";
 import { Truck, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Tables } from "@/integrations/supabase/types";
+
+type MoveAssignmentWithRequest = Tables<"move_assignments"> & {
+  move_requests: Tables<"move_requests">
+}
 
 export default function CompanyDashboard() {
   const { session } = useAuth();
@@ -53,7 +58,7 @@ export default function CompanyDashboard() {
   });
 
   // Fetch assignments
-  const { data: assignments } = useQuery({
+  const { data: assignments } = useQuery<MoveAssignmentWithRequest[]>({
     queryKey: ["assignments", company?.id],
     queryFn: async () => {
       const { data, error } = await supabase
