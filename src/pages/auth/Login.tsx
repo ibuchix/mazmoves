@@ -40,9 +40,10 @@ export default function Login() {
                     inputBorderHover: '#1f3dd2',
                     inputBorderFocus: '#1f3dd2',
                   },
-                  borderRadii: {
-                    button: '0.5rem',
-                    input: '0.5rem',
+                  radii: {
+                    borderRadius: '0.5rem',
+                    buttonBorderRadius: '0.5rem',
+                    inputBorderRadius: '0.5rem',
                   },
                 },
               },
