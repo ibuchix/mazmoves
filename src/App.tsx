@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AuthProvider } from "./components/AuthProvider";
 import Login from "./pages/auth/Login";
 import Index from "./pages/Index";
+import RequestMove from "./pages/RequestMove";
 import { useAuth } from "./components/AuthProvider";
 import "./App.css";
 
@@ -25,6 +26,7 @@ function App() {
       <AuthProvider>
         <Routes>
           <Route path="/login" element={<Login />} />
+          <Route path="/request-move" element={<RequestMove />} />
           <Route
             path="/"
             element={
