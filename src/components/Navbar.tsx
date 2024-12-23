@@ -8,21 +8,22 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-20">
           <div className="flex-shrink-0">
             <Link to="/">
-              <img src="/lovable-uploads/b700dde9-463e-4b6e-8523-ec9f718b3beb.png" alt="MAZ Moves" className="h-12" />
+              <img 
+                src="/lovable-uploads/b700dde9-463e-4b6e-8523-ec9f718b3beb.png" 
+                alt="MAZ Moves" 
+                className="h-16 transform hover:scale-105 transition-transform duration-200" 
+              />
             </Link>
           </div>
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/" className="text-[#040480] hover:text-[#1f3dd2] font-medium">Home</Link>
-            <Link to="/services" className="text-[#040480] hover:text-[#1f3dd2] font-medium">Services</Link>
-            <Link to="/about" className="text-[#040480] hover:text-[#1f3dd2] font-medium">About</Link>
-            <Link to="/contact" className="text-[#040480] hover:text-[#1f3dd2] font-medium">Contact</Link>
+            <Link to="/" className="text-[#040480] hover:text-[#1f3dd2] font-medium text-lg">Home</Link>
+            <Link to="/services" className="text-[#040480] hover:text-[#1f3dd2] font-medium text-lg">Services</Link>
+            <Link to="/about" className="text-[#040480] hover:text-[#1f3dd2] font-medium text-lg">About</Link>
+            <Link to="/contact" className="text-[#040480] hover:text-[#1f3dd2] font-medium text-lg">Contact</Link>
           </div>
-          <div className="flex items-center space-x-4">
-            <Button variant="outline" className="border-[#040480] text-[#040480] hover:bg-[#040480] hover:text-white">
-              Login
-            </Button>
-            <Button className="bg-[#d2491f] hover:bg-[#84d21f] text-white border-none">
-              Get a Quote
+          <div>
+            <Button className="bg-[#d2491f] hover:bg-[#84d21f] text-white border-none text-lg px-8 py-6 h-auto font-semibold">
+              Work with us
             </Button>
           </div>
         </div>

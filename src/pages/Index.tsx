@@ -1,17 +1,44 @@
 import { Button } from "@/components/ui/button";
+import { MoveTypeStep } from "@/components/move-request/MoveTypeStep";
+import { useState } from "react";
+import { MoveType } from "@/types/move-request";
 
 export default function Index() {
+  const [moveType, setMoveType] = useState<MoveType | null>(null);
+
   return (
     <div className="flex-1">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-[#040480] to-[#1f3dd2] text-white py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold mb-6">Professional Moving Services</h1>
-            <p className="text-xl mb-8">Making your move smooth and stress-free</p>
-            <Button className="bg-[#d2491f] hover:bg-[#84d21f] text-white text-lg px-8 py-6 h-auto">
-              Get Your Free Quote
-            </Button>
+      <section className="relative bg-gradient-to-r from-[#040480] to-[#1f3dd2] py-20">
+        <div className="absolute inset-0 bg-black opacity-10"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div className="text-white">
+              <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+                Professional Moving Solutions for Your Peace of Mind
+              </h1>
+              <p className="text-xl mb-8 text-gray-100">
+                Expert moving services tailored to your needs. Let us handle your move while you focus on what matters most.
+              </p>
+            </div>
+            <div className="bg-white p-8 rounded-lg shadow-xl">
+              <h2 className="text-2xl font-bold text-[#040480] mb-6">Start Your Move</h2>
+              <MoveTypeStep
+                value={moveType}
+                onChange={(value) => setMoveType(value)}
+              />
+              <Button 
+                className="w-full mt-6 bg-[#d2491f] hover:bg-[#84d21f] text-white text-lg px-8 py-6 h-auto"
+                onClick={() => {
+                  if (moveType) {
+                    window.location.href = '/request-move';
+                  }
+                }}
+                disabled={!moveType}
+              >
+                Continue
+              </Button>
+            </div>
           </div>
         </div>
       </section>
