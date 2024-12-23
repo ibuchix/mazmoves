@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Address } from "@/types/address";
+import { Address, addressToJson } from "@/types/address";
 import { Tables } from "@/types/database";
 
 type MoveType = "domestic" | "commercial" | "international";
@@ -45,8 +45,8 @@ export default function RequestMove() {
 
       const moveRequest: Tables["move_requests"]["Insert"] = {
         customer_id: user.data.user.id,
-        pickup_address: data.pickupAddress,
-        delivery_address: data.deliveryAddress,
+        pickup_address: addressToJson(data.pickupAddress),
+        delivery_address: addressToJson(data.deliveryAddress),
         requested_date: data.moveDate,
         estimated_size: data.propertySize,
         special_instructions: data.specialInstructions,
@@ -272,4 +272,4 @@ export default function RequestMove() {
       </Card>
     </div>
   );
-}
+};
