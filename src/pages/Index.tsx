@@ -4,6 +4,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Database } from "@/integrations/supabase/types";
+import { Loader2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 type MoveAssignmentWithRequest = Database['public']['Tables']['move_assignments']['Row'] & {
   move_requests: {
@@ -29,45 +31,56 @@ interface MoveAssignment {
 }
 
 export default function Index() {
-  useRealtimeAssignments(); // This handles the real-time notifications
+  useRealtimeAssignments();
   const [assignments, setAssignments] = useState<MoveAssignment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { session } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
-    // Fetch initial assignments
     const fetchAssignments = async () => {
-      const { data: assignmentsData, error } = await supabase
-        .from('move_assignments')
-        .select(`
-          *,
-          move_requests (
-            pickup_address
-          )
-        `)
-        .order('assigned_date', { ascending: false });
+      try {
+        setIsLoading(true);
+        const { data: assignmentsData, error } = await supabase
+          .from('move_assignments')
+          .select(`
+            *,
+            move_requests (
+              pickup_address
+            )
+          `)
+          .order('assigned_date', { ascending: false });
 
-      if (error) {
+        if (error) {
+          throw error;
+        }
+
+        if (!assignmentsData) return;
+
+        const formattedAssignments: MoveAssignment[] = assignmentsData.map((assignment: MoveAssignmentWithRequest) => ({
+          id: assignment.id,
+          request_id: assignment.request_id,
+          status: assignment.status,
+          assigned_date: assignment.assigned_date || '',
+          estimated_cost: assignment.estimated_cost,
+          pickup_address: assignment.move_requests.pickup_address
+        }));
+
+        setAssignments(formattedAssignments);
+      } catch (error) {
         console.error('Error fetching assignments:', error);
-        return;
+        toast({
+          title: "Error",
+          description: "Failed to load assignments. Please try again later.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
       }
-
-      if (!assignmentsData) return;
-
-      const formattedAssignments: MoveAssignment[] = assignmentsData.map((assignment: MoveAssignmentWithRequest) => ({
-        id: assignment.id,
-        request_id: assignment.request_id,
-        status: assignment.status,
-        assigned_date: assignment.assigned_date || '',
-        estimated_cost: assignment.estimated_cost,
-        pickup_address: assignment.move_requests.pickup_address
-      }));
-
-      setAssignments(formattedAssignments);
     };
 
     fetchAssignments();
 
-    // Subscribe to changes in assignments
     const channel = supabase
       .channel('assignments-changes')
       .on(
@@ -79,8 +92,16 @@ export default function Index() {
         },
         async (payload) => {
           console.log('Assignment change detected:', payload);
-          // Refresh the assignments list
-          await fetchAssignments();
+          try {
+            await fetchAssignments();
+          } catch (error) {
+            console.error('Error refreshing assignments:', error);
+            toast({
+              title: "Error",
+              description: "Failed to refresh assignments. Please reload the page.",
+              variant: "destructive",
+            });
+          }
         }
       )
       .subscribe();
@@ -88,36 +109,57 @@ export default function Index() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [session]);
+  }, [session, toast]);
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Move Assignments Dashboard</h1>
+    <div className="container mx-auto p-6 bg-gradient-to-r from-[#F2FCE2] to-[#E5DEFF]">
+      <h1 className="text-2xl font-bold mb-6 text-[#1A1F2C]">Move Assignments Dashboard</h1>
       
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Assignment ID</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Pickup Location</TableHead>
-            <TableHead>Assigned Date</TableHead>
-            <TableHead>Estimated Cost</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {assignments.map((assignment) => (
-            <TableRow key={assignment.id}>
-              <TableCell>{assignment.id}</TableCell>
-              <TableCell>{assignment.status}</TableCell>
-              <TableCell>
-                {assignment.pickup_address?.street}, {assignment.pickup_address?.city}, {assignment.pickup_address?.state}
-              </TableCell>
-              <TableCell>{new Date(assignment.assigned_date).toLocaleDateString()}</TableCell>
-              <TableCell>${assignment.estimated_cost || 'N/A'}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      {isLoading ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-[#9b87f5]" />
+        </div>
+      ) : assignments.length === 0 ? (
+        <div className="text-center py-8 bg-white rounded-lg shadow-sm">
+          <p className="text-[#8A898C]">No assignments found</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <Table>
+            <TableHeader className="bg-[#F1F0FB]">
+              <TableRow>
+                <TableHead className="text-[#403E43]">Assignment ID</TableHead>
+                <TableHead className="text-[#403E43]">Status</TableHead>
+                <TableHead className="text-[#403E43]">Pickup Location</TableHead>
+                <TableHead className="text-[#403E43]">Assigned Date</TableHead>
+                <TableHead className="text-[#403E43]">Estimated Cost</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {assignments.map((assignment) => (
+                <TableRow key={assignment.id} className="hover:bg-[#F1F0FB] transition-colors">
+                  <TableCell className="font-medium text-[#6E59A5]">{assignment.id}</TableCell>
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded-full text-sm ${
+                      assignment.status === 'completed' ? 'bg-[#F2FCE2] text-green-700' :
+                      assignment.status === 'in_progress' ? 'bg-[#FEF7CD] text-yellow-700' :
+                      assignment.status === 'cancelled' ? 'bg-[#FFDEE2] text-red-700' :
+                      'bg-[#D3E4FD] text-blue-700'
+                    }`}>
+                      {assignment.status}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-[#403E43]">
+                    {assignment.pickup_address?.street}, {assignment.pickup_address?.city}, {assignment.pickup_address?.state}
+                  </TableCell>
+                  <TableCell className="text-[#403E43]">{new Date(assignment.assigned_date).toLocaleDateString()}</TableCell>
+                  <TableCell className="text-[#403E43]">${assignment.estimated_cost || 'N/A'}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   );
 }
