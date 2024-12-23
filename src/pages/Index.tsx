@@ -1,8 +1,11 @@
-import { Button } from "@/components/ui/button";
-import { MoveTypeStep } from "@/components/move-request/MoveTypeStep";
 import { useState } from "react";
-import { MoveType } from "@/types/move-request";
 import { useNavigate } from "react-router-dom";
+import { MoveType } from "@/types/move-request";
+import { HeroSection } from "@/components/home/HeroSection";
+import { HowItWorksSection } from "@/components/home/HowItWorksSection";
+import { TestimonialsSection } from "@/components/home/TestimonialsSection";
+import { ServicesSection } from "@/components/home/ServicesSection";
+import { CallToAction } from "@/components/home/CallToAction";
 
 export default function Index() {
   const [moveType, setMoveType] = useState<MoveType | null>(null);
@@ -16,225 +19,15 @@ export default function Index() {
 
   return (
     <div className="flex-1">
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-r from-[#040480] to-[#1f3dd2] py-20">
-        <div className="absolute inset-0 bg-black opacity-5"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="grid md:grid-cols-2 gap-12 items-center">
-            {/* Form Section - Now on the left */}
-            <div className="bg-white/95 backdrop-blur-sm p-8 rounded-lg shadow-lg">
-              <h2 className="text-2xl font-bold text-[#040480] mb-6">Start Your Move</h2>
-              <MoveTypeStep
-                value={moveType}
-                onChange={(value) => setMoveType(value)}
-              />
-              <Button 
-                className="w-full mt-6 bg-[#d2491f] hover:bg-[#84d21f] text-white text-base px-6 py-2"
-                onClick={handleGetQuotes}
-                disabled={!moveType}
-              >
-                Get Free Quotes
-              </Button>
-            </div>
-            
-            {/* Content Section - Now on the right */}
-            <div className="text-white flex flex-col justify-center space-y-8 pl-8">
-              <p className="text-2xl text-gray-100 font-light mb-8">
-                Get instant quotes from trusted movers. Free to use, no obligations.
-              </p>
-              <div className="space-y-6">
-                <div className="flex items-center space-x-4">
-                  <svg className="w-8 h-8 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  <span className="text-xl">Verified Professional Movers</span>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <svg className="w-8 h-8 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  <span className="text-xl">Compare Multiple Quotes</span>
-                </div>
-                <div className="flex items-center space-x-4">
-                  <svg className="w-8 h-8 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                  <span className="text-xl">100% Free Service</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section className="py-20 bg-gradient-to-br from-[#040480]/5 to-[#1f3dd2]/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-[#040480] mb-16">How It Works</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {[
-              {
-                step: "1",
-                title: "Request a Quote",
-                description: "Fill out our simple form with your moving details",
-                icon: (
-                  <svg className="w-12 h-12 text-[#d2491f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                  </svg>
-                )
-              },
-              {
-                step: "2",
-                title: "Compare Movers",
-                description: "Review quotes from verified moving companies",
-                icon: (
-                  <svg className="w-12 h-12 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                  </svg>
-                )
-              },
-              {
-                step: "3",
-                title: "Book Your Move",
-                description: "Select your preferred mover and schedule the date",
-                icon: (
-                  <svg className="w-12 h-12 text-[#1f3dd2]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                  </svg>
-                )
-              },
-              {
-                step: "4",
-                title: "Move with Confidence",
-                description: "Enjoy a smooth, professional moving experience",
-                icon: (
-                  <svg className="w-12 h-12 text-[#d2491f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                )
-              }
-            ].map((item, index) => (
-              <div key={index} className="flex flex-col items-center text-center p-6 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                <div className="mb-4">{item.icon}</div>
-                <div className="w-8 h-8 mb-4 flex items-center justify-center bg-[#040480] text-white rounded-full">
-                  {item.step}
-                </div>
-                <h3 className="text-xl font-semibold text-[#040480] mb-2">{item.title}</h3>
-                <p className="text-gray-600">{item.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Service Areas Section */}
-      <section className="py-20 bg-gradient-to-bl from-[#84d21f]/5 to-[#d2491f]/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-[#040480] mb-16">Service Areas</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            <div className="space-y-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-xl font-semibold text-[#040480] mb-4">Areas We Cover</h3>
-                <ul className="space-y-4">
-                  {[
-                    "San Francisco Bay Area",
-                    "Los Angeles Metropolitan Area",
-                    "San Diego County",
-                    "Sacramento Region",
-                    "Central Valley"
-                  ].map((area, index) => (
-                    <li key={index} className="flex items-center space-x-3">
-                      <svg className="w-5 h-5 text-[#84d21f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                      </svg>
-                      <span>{area}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm">
-                <h3 className="text-xl font-semibold text-[#040480] mb-4">Service Coverage</h3>
-                <p className="text-gray-600 mb-4">
-                  We provide comprehensive moving services across California, specializing in both local and long-distance moves.
-                </p>
-                <Button 
-                  className="w-full bg-[#040480] hover:bg-[#1f3dd2] text-white"
-                  onClick={() => navigate('/contact')}
-                >
-                  Check Your Area
-                </Button>
-              </div>
-            </div>
-            <div className="bg-white p-6 rounded-lg shadow-sm aspect-square flex items-center justify-center">
-              <div className="text-6xl text-[#040480]">
-                <svg className="w-full h-full" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Our Services Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-[#040480] mb-12">Our Services</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                title: "Residential Moving",
-                description: "Professional home moving services tailored to your needs"
-              },
-              {
-                title: "Commercial Moving",
-                description: "Efficient business relocation with minimal disruption"
-              },
-              {
-                title: "Packing Services",
-                description: "Expert packing and unpacking for a worry-free move"
-              }
-            ].map((service, index) => (
-              <div key={index} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow">
-                <h3 className="text-xl font-semibold text-[#040480] mb-4">{service.title}</h3>
-                <p className="text-gray-600">{service.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose MAZ Moves Section */}
-      <section className="py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center text-[#040480] mb-12">Why Choose MAZ Moves</h2>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {[
-              { title: "Professional Team", description: "Experienced and trained movers" },
-              { title: "Reliable Service", description: "On-time and efficient moving" },
-              { title: "Affordable Rates", description: "Competitive pricing and free quotes" },
-              { title: "Full Insurance", description: "Your belongings are protected" }
-            ].map((feature, index) => (
-              <div key={index} className="text-center">
-                <h3 className="text-xl font-semibold text-[#040480] mb-4">{feature.title}</h3>
-                <p className="text-gray-600">{feature.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Ready to Move Section */}
-      <section className="bg-gradient-to-r from-[#d2491f] to-[#84d21f] text-white py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-6">Ready to Move?</h2>
-          <p className="text-xl mb-8">Contact us today for a free, no-obligation quote</p>
-          <Button className="bg-white text-[#040480] hover:bg-gray-100 text-lg px-8 py-6 h-auto">
-            Contact Us Now
-          </Button>
-        </div>
-      </section>
+      <HeroSection 
+        moveType={moveType}
+        setMoveType={setMoveType}
+        onGetQuotes={handleGetQuotes}
+      />
+      <HowItWorksSection />
+      <ServicesSection />
+      <TestimonialsSection />
+      <CallToAction />
     </div>
   );
 }
