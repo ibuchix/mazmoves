@@ -7,9 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRealtimeAssignments } from "@/hooks/use-realtime-assignments";
 import { Truck, Clock, CheckCircle, XCircle } from "lucide-react";
 import { Tables } from "@/integrations/supabase/types";
+import { Address } from "@/types/address";
 
 type MoveAssignmentWithRequest = Tables<"move_assignments"> & {
-  move_requests: Tables<"move_requests">
+  move_requests: Omit<Tables<"move_requests">, "pickup_address" | "delivery_address"> & {
+    pickup_address: Address;
+    delivery_address: Address;
+  }
 }
 
 export default function CompanyDashboard() {
@@ -72,7 +76,7 @@ export default function CompanyDashboard() {
         .eq("company_id", company?.id);
 
       if (error) throw error;
-      return data;
+      return data as MoveAssignmentWithRequest[];
     },
     enabled: !!company?.id,
   });
