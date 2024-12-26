@@ -45,17 +45,17 @@ export const HowItWorksSection = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {steps.map((item, index) => (
-            <div key={index} className="relative">
+            <div key={index} className="relative flex items-stretch">
               {/* Connector Line */}
               {index < steps.length - 1 && (
-                <div className="hidden md:block absolute top-1/2 right-0 w-full h-[2px] bg-gradient-to-r from-[#1f3dd2] to-[#84d21f] transform -translate-y-1/2 z-0">
-                  <ArrowRight className="absolute right-0 text-[#84d21f] -translate-y-1/2 translate-x-1/2" />
+                <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-[2px] bg-[#84d21f] transform -translate-y-1/2 z-0">
+                  <ArrowRight className="absolute right-0 text-[#84d21f] -translate-y-1/2 translate-x-1/2 animate-pulse" />
                 </div>
               )}
               
               {/* Card */}
-              <Card className="relative z-10 group hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border-none">
-                <CardContent className="flex flex-col items-center p-8">
+              <Card className="relative z-10 group hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border-none w-full">
+                <CardContent className="flex flex-col items-center p-8 h-full">
                   {/* Step Number */}
                   <div className="w-10 h-10 mb-6 flex items-center justify-center bg-gradient-to-r from-[#040480] to-[#1f3dd2] text-white rounded-full font-semibold group-hover:scale-110 transition-transform duration-300">
                     {item.step}
@@ -67,12 +67,14 @@ export const HowItWorksSection = () => {
                   </div>
                   
                   {/* Content */}
-                  <h3 className="text-xl font-semibold text-[#040480] mb-3 group-hover:text-[#1f3dd2] transition-colors">
-                    {item.title}
-                  </h3>
-                  <p className="text-gray-600 text-center">
-                    {item.description}
-                  </p>
+                  <div className="text-center flex-grow flex flex-col justify-between">
+                    <h3 className="text-xl font-semibold text-[#040480] mb-3 group-hover:text-[#1f3dd2] transition-colors">
+                      {item.title}
+                    </h3>
+                    <p className="text-gray-600">
+                      {item.description}
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
             </div>
