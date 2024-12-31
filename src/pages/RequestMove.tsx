@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
@@ -11,14 +11,12 @@ import { MoveTypeStep } from "@/components/move-request/MoveTypeStep";
 import { PropertySizeStep } from "@/components/move-request/PropertySizeStep";
 import { AddressStep } from "@/components/move-request/AddressStep";
 import { ContactStep } from "@/components/move-request/ContactStep";
-import { useAuth } from "@/components/AuthProvider";
 
 export default function RequestMove() {
   const location = useLocation();
   const [step, setStep] = useState(location.state?.moveType ? 2 : 1);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { session } = useAuth();
   const [moveType, setMoveType] = useState<MoveType | null>(location.state?.moveType || null);
   
   const { register, handleSubmit, watch, formState: { errors } } = useForm<MoveRequestForm>();
@@ -27,16 +25,6 @@ export default function RequestMove() {
 
   const onSubmit = async (data: MoveRequestForm) => {
     try {
-      if (!session) {
-        toast({
-          title: "Authentication Required",
-          description: "Please log in to submit a move request.",
-          variant: "destructive",
-        });
-        navigate("/login", { state: { from: location.pathname, formData: data } });
-        return;
-      }
-
       // Create move request
       const { data: moveRequest, error: moveRequestError } = await supabase
         .from("move_requests")
@@ -46,7 +34,7 @@ export default function RequestMove() {
           requested_date: data.moveDate,
           estimated_size: data.propertySize,
           special_instructions: data.specialInstructions,
-          customer_email: session.user.email,
+          customer_email: data.email,
           customer_name: data.fullName,
           customer_phone: data.phone
         })
@@ -60,7 +48,7 @@ export default function RequestMove() {
 
       toast({
         title: "Success!",
-        description: "Your move request has been submitted. Moving companies will contact you soon.",
+        description: "Your Move Request Has Been sent to verified movers nearby",
       });
 
       navigate("/");
