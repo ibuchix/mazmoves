@@ -1,6 +1,5 @@
 import { useAuth } from "./AuthProvider";
 import { Navigate } from "react-router-dom";
-import { useRoleGuard } from "@/hooks/use-role-guard";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -18,16 +17,25 @@ export default function ProtectedRoute({ children, allowedRoles = [] }: Protecte
     queryKey: ["user-role", session?.user?.id],
     queryFn: async () => {
       if (!session?.user?.id) return null;
+      
       const { data, error } = await supabase
         .from("users")
         .select("role")
         .eq("id", session.user.id)
-        .single();
+        .maybeSingle();
       
       if (error) {
-        toast.error("Error fetching user role");
-        throw error;
+        console.error("Error fetching user role:", error);
+        toast.error("Error checking user permissions");
+        return null;
       }
+
+      if (!data) {
+        console.error("No user found with ID:", session.user.id);
+        toast.error("User profile not found");
+        return null;
+      }
+
       return data;
     },
     enabled: !!session?.user?.id,
@@ -49,8 +57,8 @@ export default function ProtectedRoute({ children, allowedRoles = [] }: Protecte
   }
 
   // Check role access if roles are specified
-  if (allowedRoles.length > 0 && userData) {
-    if (!allowedRoles.includes(userData.role)) {
+  if (allowedRoles.length > 0) {
+    if (!userData || !allowedRoles.includes(userData.role)) {
       toast.error("You don't have permission to access this page");
       return <Navigate to="/" replace />;
     }

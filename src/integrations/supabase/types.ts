@@ -261,7 +261,7 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           phone?: string | null
-          role: Database["public"]["Enums"]["user_role"]
+          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string | null
         }
         Update: {
@@ -299,7 +299,12 @@ export type Database = {
       }
     }
     Functions: {
-      [_ in never]: never
+      is_valid_admin_creator: {
+        Args: {
+          email: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       assignment_status: "active" | "completed" | "cancelled"
