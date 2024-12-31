@@ -1,33 +1,32 @@
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Session } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
 
 interface AuthButtonProps {
   session: Session | null;
 }
 
 export default function AuthButton({ session }: AuthButtonProps) {
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
+  const navigate = useNavigate();
 
   if (session) {
     return (
       <Button 
-        onClick={handleLogout}
-        className="bg-[#d2491f] hover:bg-[#84d21f] text-white px-4 py-1 h-8 text-sm font-medium"
+        variant="outline" 
+        className="text-[#040480] border-[#040480] hover:bg-[#040480] hover:text-white"
+        onClick={() => navigate('/login')}
       >
-        Logout
+        Dashboard
       </Button>
     );
   }
 
   return (
-    <Link to="/login">
-      <Button className="bg-[#d2491f] hover:bg-[#84d21f] text-white px-4 py-1 h-8 text-sm font-medium">
-        Login
-      </Button>
-    </Link>
+    <Button 
+      className="bg-[#d2491f] hover:bg-[#84d21f] text-white transition-all duration-300"
+      onClick={() => navigate('/companies')}
+    >
+      Join Us
+    </Button>
   );
 }
