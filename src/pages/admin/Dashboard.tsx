@@ -23,7 +23,7 @@ export default function AdminDashboard() {
     totalCompanies: dashboardData?.length || 0,
     verifiedCompanies: dashboardData?.filter(c => c.is_verified).length || 0,
     totalAssignments: dashboardData?.reduce((sum, c) => sum + (c.total_assignments || 0), 0) || 0,
-    totalRevenue: dashboardData?.reduce((sum, c) => sum + (parseFloat(c.total_paid_amount) || 0), 0) || 0,
+    totalRevenue: dashboardData?.reduce((sum, c) => sum + (c.total_paid_amount || 0), 0) || 0,
   };
 
   return (
@@ -107,7 +107,7 @@ export default function AdminDashboard() {
                       </span>
                     }
                   </TableCell>
-                  <TableCell>${parseFloat(company.total_paid_amount).toFixed(2)}</TableCell>
+                  <TableCell>${company.total_paid_amount.toFixed(2)}</TableCell>
                   <TableCell>
                     {company.last_payment_date 
                       ? new Date(company.last_payment_date).toLocaleDateString()

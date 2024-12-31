@@ -11,5 +11,5 @@ export interface AdminDashboardData {
   active_assignments: number;
   completed_assignments: number;
   total_payments: number;
-  total_paid_amount: string;
+  total_paid_amount: number; // Changed from string to number to match database
 }
