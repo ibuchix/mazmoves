@@ -5,6 +5,7 @@ import RequestMove from "@/pages/RequestMove";
 import Services from "@/pages/Services";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
+import Companies from "@/pages/Companies";
 import Login from "@/pages/auth/Login";
 import CompanyDashboard from "@/pages/company/Dashboard";
 import { AuthProvider } from "@/components/AuthProvider";
@@ -27,6 +28,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/companies" element={<Companies />} />
               <Route 
                 path="/request-move" 
                 element={

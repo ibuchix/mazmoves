@@ -50,6 +50,7 @@ export default function Navbar() {
           <div className="hidden md:flex items-center space-x-8">
             <Link to="/" className="text-[#040480] hover:text-[#1f3dd2] font-medium">Home</Link>
             <Link to="/services" className="text-[#040480] hover:text-[#1f3dd2] font-medium">Services</Link>
+            <Link to="/companies" className="text-[#040480] hover:text-[#1f3dd2] font-medium">Companies</Link>
             <Link to="/about" className="text-[#040480] hover:text-[#1f3dd2] font-medium">About</Link>
             <Link to="/contact" className="text-[#040480] hover:text-[#1f3dd2] font-medium">Contact</Link>
             <RoleLinks role={userData?.role} />
