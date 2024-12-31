@@ -15,6 +15,8 @@ import CompanyRegister from "./pages/company/Register";
 import CompanyDashboard from "./pages/company/Dashboard";
 import AdminDashboard from "./pages/admin/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import TermsAndConditions from "./pages/TermsAndConditions";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +36,8 @@ function App() {
                 <Route path="/companies" element={<Companies />} />
                 <Route path="/request-move" element={<RequestMove />} />
                 <Route path="/login" element={<Login />} />
+                <Route path="/terms" element={<TermsAndConditions />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/company/register" element={<CompanyRegister />} />
                 <Route
                   path="/company/dashboard"

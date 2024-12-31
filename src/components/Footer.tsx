@@ -62,7 +62,7 @@ export default function Footer() {
         </div>
         
         <div className="border-t border-white/10 mt-6 pt-6 text-center text-sm">
-          <p>&copy; {new Date().getFullYear()} MAZ Moves Ltd. All Rights Reserved.</p>
+          <p>&copy; 2025 MAZ Moves Ltd. All Rights Reserved.</p>
         </div>
       </div>
     </footer>
