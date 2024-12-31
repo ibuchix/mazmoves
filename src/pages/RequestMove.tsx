@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { addressToJson } from "@/types/address";
 import { MoveRequestForm, MoveType } from "@/types/move-request";
@@ -16,8 +16,8 @@ export default function RequestMove() {
   const location = useLocation();
   const [step, setStep] = useState(location.state?.moveType ? 2 : 1);
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
   const [moveType, setMoveType] = useState<MoveType | null>(location.state?.moveType || null);
   
   const { register, handleSubmit, watch, formState: { errors } } = useForm<MoveRequestForm>();
@@ -29,7 +29,6 @@ export default function RequestMove() {
     setIsSubmitting(true);
 
     try {
-      // Create move request without requiring authentication
       const { data: moveRequest, error: moveRequestError } = await supabase
         .from("move_requests")
         .insert({
@@ -50,7 +49,6 @@ export default function RequestMove() {
         throw moveRequestError;
       }
 
-      // Call the notify-companies edge function to assign the request to companies
       const { error: notifyError } = await supabase.functions.invoke('notify-companies', {
         body: { requestId: moveRequest.id }
       });
@@ -60,24 +58,11 @@ export default function RequestMove() {
         throw notifyError;
       }
 
-      toast({
-        title: "Success!",
-        description: "Your Move Request Has Been sent to verified movers nearby",
-        variant: "default",
-      });
-
-      // Add a longer delay before navigation to ensure the toast is visible
-      setTimeout(() => {
-        navigate("/");
-      }, 3000); // Increased to 3 seconds to match the toast duration
+      setShowSuccess(true);
 
     } catch (error) {
       console.error("Error submitting request:", error);
-      toast({
-        title: "Error",
-        description: "There was a problem submitting your request. Please try again.",
-        variant: "destructive",
-      });
+      // Handle error state here
     } finally {
       setIsSubmitting(false);
     }
@@ -116,6 +101,7 @@ export default function RequestMove() {
                 title="Pickup Address"
                 type="pickup"
                 register={register}
+                isInternational={moveType === "international"}
               />
             )}
 
@@ -124,6 +110,7 @@ export default function RequestMove() {
                 title="Delivery Address"
                 type="delivery"
                 register={register}
+                isInternational={moveType === "international"}
               />
             )}
 
@@ -153,6 +140,29 @@ export default function RequestMove() {
           </form>
         </CardContent>
       </Card>
+
+      <Dialog open={showSuccess} onOpenChange={(open) => {
+        setShowSuccess(open);
+        if (!open) {
+          navigate("/");
+        }
+      }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl font-semibold text-[#040480]">
+              Success!
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              Your Move Request has been sent to verified movers nearby. You will be contacted shortly.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center mt-4">
+            <Button onClick={() => navigate("/")}>
+              Return to Home
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -8,9 +8,10 @@ interface AddressStepProps {
   title: string;
   type: "pickup" | "delivery";
   register: UseFormRegister<MoveRequestForm>;
+  isInternational?: boolean;
 }
 
-export function AddressStep({ title, type, register }: AddressStepProps) {
+export function AddressStep({ title, type, register, isInternational = false }: AddressStepProps) {
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">{title}</h3>
@@ -36,6 +37,15 @@ export function AddressStep({ title, type, register }: AddressStepProps) {
             {...register(`${type}Address.state` as any, { required: true })}
           />
         </div>
+        {isInternational && (
+          <div>
+            <Label htmlFor={`${type}-country`}>Country</Label>
+            <Input
+              id={`${type}-country`}
+              {...register(`${type}Address.country` as any, { required: true })}
+            />
+          </div>
+        )}
         <div>
           <Label htmlFor={`${type}-zipCode`}>Postal Code</Label>
           <Input

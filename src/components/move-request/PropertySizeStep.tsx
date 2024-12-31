@@ -34,6 +34,18 @@ export function PropertySizeStep({ moveType, value, onChange }: PropertySizeStep
           ))}
         </RadioGroup>
       )}
+      {moveType === "international" && (
+        <RadioGroup defaultValue={value} onValueChange={onChange}>
+          {["1", "2", "3", "4", "5+", "business"].map((size) => (
+            <div key={size} className="flex items-center space-x-2">
+              <RadioGroupItem value={size} id={`size-${size}`} />
+              <Label htmlFor={`size-${size}`}>
+                {size === "business" ? "Business Property" : `${size} Bedroom${size !== "1" ? "s" : ""}`}
+              </Label>
+            </div>
+          ))}
+        </RadioGroup>
+      )}
     </div>
   );
 }
