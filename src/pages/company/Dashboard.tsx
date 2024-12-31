@@ -65,7 +65,6 @@ export default function CompanyDashboard() {
 
       if (error) throw error;
       
-      // Transform the JSON fields into proper Address objects
       return data?.map(assignment => ({
         ...assignment,
         move_requests: {

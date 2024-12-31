@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { MoveTypeStep } from "@/components/move-request/MoveTypeStep";
 import { MoveType } from "@/types/move-request";
+import { Link } from "react-router-dom";
 
 interface HeroSectionProps {
   moveType: MoveType | null;
@@ -28,6 +29,14 @@ export const HeroSection = ({ moveType, setMoveType, onGetQuotes }: HeroSectionP
             >
               Get Free Quotes
             </Button>
+            <div className="mt-4 text-center">
+              <Link 
+                to="/company/register"
+                className="inline-block text-[#1f3dd2] hover:text-[#84d21f] font-semibold"
+              >
+                Are you a moving company? Join us →
+              </Link>
+            </div>
           </div>
           
           {/* Content Section */}
@@ -60,4 +69,4 @@ export const HeroSection = ({ moveType, setMoveType, onGetQuotes }: HeroSectionP
       </div>
     </section>
   );
-};
+}
