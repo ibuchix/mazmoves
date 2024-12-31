@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
-import { Button } from "./ui/button";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "./AuthProvider";
-import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import AuthButton from "./navbar/AuthButton";
+import RoleLinks from "./navbar/RoleLinks";
+import MobileMenu from "./navbar/MobileMenu";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -30,51 +32,6 @@ export default function Navbar() {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-  };
-
-  const renderAuthButton = () => {
-    if (session) {
-      return (
-        <Button 
-          onClick={handleLogout}
-          className="bg-[#d2491f] hover:bg-[#84d21f] text-white px-4 py-1 h-8 text-sm font-medium"
-        >
-          Logout
-        </Button>
-      );
-    }
-    return (
-      <Link to="/login">
-        <Button className="bg-[#d2491f] hover:bg-[#84d21f] text-white px-4 py-1 h-8 text-sm font-medium">
-          Login
-        </Button>
-      </Link>
-    );
-  };
-
-  const renderRoleSpecificLinks = () => {
-    if (!session || !userData) return null;
-
-    switch (userData.role) {
-      case "company":
-        return (
-          <Link to="/company/dashboard" className="text-[#040480] hover:text-[#1f3dd2] font-medium">
-            Dashboard
-          </Link>
-        );
-      case "customer":
-        return (
-          <Link to="/request-move" className="text-[#040480] hover:text-[#1f3dd2] font-medium">
-            Request Move
-          </Link>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <nav className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -95,11 +52,11 @@ export default function Navbar() {
             <Link to="/services" className="text-[#040480] hover:text-[#1f3dd2] font-medium">Services</Link>
             <Link to="/about" className="text-[#040480] hover:text-[#1f3dd2] font-medium">About</Link>
             <Link to="/contact" className="text-[#040480] hover:text-[#1f3dd2] font-medium">Contact</Link>
-            {renderRoleSpecificLinks()}
+            <RoleLinks role={userData?.role} />
           </div>
 
           <div className="hidden md:block">
-            {renderAuthButton()}
+            <AuthButton session={session} />
           </div>
 
           {/* Mobile Menu Button */}
@@ -119,44 +76,12 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1 bg-white rounded-lg shadow-lg border border-gray-100 mt-2">
-              <Link 
-                to="/" 
-                className="block px-4 py-3 rounded-md text-[#040480] hover:text-[#1f3dd2] hover:bg-gray-50 font-medium transition-colors duration-200"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Home
-              </Link>
-              <Link 
-                to="/services" 
-                className="block px-4 py-3 rounded-md text-[#040480] hover:text-[#1f3dd2] hover:bg-gray-50 font-medium transition-colors duration-200"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Services
-              </Link>
-              <Link 
-                to="/about" 
-                className="block px-4 py-3 rounded-md text-[#040480] hover:text-[#1f3dd2] hover:bg-gray-50 font-medium transition-colors duration-200"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                About
-              </Link>
-              <Link 
-                to="/contact" 
-                className="block px-4 py-3 rounded-md text-[#040480] hover:text-[#1f3dd2] hover:bg-gray-50 font-medium transition-colors duration-200"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Contact
-              </Link>
-              {renderRoleSpecificLinks()}
-              <div className="mt-4 px-4 pb-2">
-                {renderAuthButton()}
-              </div>
-            </div>
-          </div>
-        )}
+        <MobileMenu 
+          isOpen={isMenuOpen}
+          onClose={() => setIsMenuOpen(false)}
+          session={session}
+          userRole={userData?.role}
+        />
       </div>
     </nav>
   );
