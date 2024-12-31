@@ -36,23 +36,23 @@ export const HeroSection = ({ moveType, setMoveType, onGetQuotes }: HeroSectionP
               Get instant quotes from trusted movers. Free to use, no obligations.
             </p>
             <div className="space-y-4 md:space-y-6">
-              <div className="flex items-center space-x-3 md:space-x-4 bg-white/10 backdrop-blur-sm p-3 md:p-4 rounded-lg">
-                <svg className="w-6 h-6 md:w-8 md:h-8 text-[#84d21f] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-start space-x-3 md:space-x-4 bg-white/10 backdrop-blur-sm p-3 md:p-4 rounded-lg">
+                <svg className="w-6 h-6 md:w-8 md:h-8 text-[#84d21f] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                 </svg>
-                <span className="text-lg md:text-xl">Verified Professional Movers</span>
+                <span className="text-lg md:text-xl leading-tight">Verified Professional Movers</span>
               </div>
-              <div className="flex items-center space-x-3 md:space-x-4 bg-white/10 backdrop-blur-sm p-3 md:p-4 rounded-lg">
-                <svg className="w-6 h-6 md:w-8 md:h-8 text-[#84d21f] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-start space-x-3 md:space-x-4 bg-white/10 backdrop-blur-sm p-3 md:p-4 rounded-lg">
+                <svg className="w-6 h-6 md:w-8 md:h-8 text-[#84d21f] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                 </svg>
-                <span className="text-lg md:text-xl">Compare Multiple Quotes</span>
+                <span className="text-lg md:text-xl leading-tight">Compare Multiple Quotes</span>
               </div>
-              <div className="flex items-center space-x-3 md:space-x-4 bg-white/10 backdrop-blur-sm p-3 md:p-4 rounded-lg">
-                <svg className="w-6 h-6 md:w-8 md:h-8 text-[#84d21f] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex items-start space-x-3 md:space-x-4 bg-white/10 backdrop-blur-sm p-3 md:p-4 rounded-lg">
+                <svg className="w-6 h-6 md:w-8 md:h-8 text-[#84d21f] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                 </svg>
-                <span className="text-lg md:text-xl">100% Free Service</span>
+                <span className="text-lg md:text-xl leading-tight">100% Free Service</span>
               </div>
             </div>
           </div>
