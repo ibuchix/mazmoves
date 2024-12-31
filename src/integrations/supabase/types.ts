@@ -17,12 +17,16 @@ export type Database = {
           created_at: string | null
           description: string | null
           id: string
+          insurance_docs: Json | null
           is_active: boolean | null
           is_verified: boolean | null
+          manager_name: string | null
           name: string
           rating: number | null
+          registration_number: string | null
           service_areas: Json | null
           updated_at: string | null
+          vat_number: string | null
         }
         Insert: {
           business_address: Json
@@ -31,12 +35,16 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          insurance_docs?: Json | null
           is_active?: boolean | null
           is_verified?: boolean | null
+          manager_name?: string | null
           name: string
           rating?: number | null
+          registration_number?: string | null
           service_areas?: Json | null
           updated_at?: string | null
+          vat_number?: string | null
         }
         Update: {
           business_address?: Json
@@ -45,12 +53,16 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           id?: string
+          insurance_docs?: Json | null
           is_active?: boolean | null
           is_verified?: boolean | null
+          manager_name?: string | null
           name?: string
           rating?: number | null
+          registration_number?: string | null
           service_areas?: Json | null
           updated_at?: string | null
+          vat_number?: string | null
         }
         Relationships: []
       }
