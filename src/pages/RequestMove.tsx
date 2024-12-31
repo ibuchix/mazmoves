@@ -25,7 +25,7 @@ export default function RequestMove() {
 
   const onSubmit = async (data: MoveRequestForm) => {
     try {
-      // Create move request
+      // Create move request without requiring authentication
       const { data: moveRequest, error: moveRequestError } = await supabase
         .from("move_requests")
         .insert({
@@ -44,6 +44,16 @@ export default function RequestMove() {
       if (moveRequestError) {
         console.error("Error creating move request:", moveRequestError);
         throw moveRequestError;
+      }
+
+      // Call the notify-companies edge function to assign the request to companies
+      const { error: notifyError } = await supabase.functions.invoke('notify-companies', {
+        body: { requestId: moveRequest.id }
+      });
+
+      if (notifyError) {
+        console.error("Error notifying companies:", notifyError);
+        throw notifyError;
       }
 
       toast({
