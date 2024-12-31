@@ -42,7 +42,7 @@ export default function Navbar() {
           <div className="md:hidden">
             <button
               onClick={toggleMenu}
-              className="text-[#040480] hover:text-[#1f3dd2] p-2"
+              className="text-[#040480] hover:text-[#1f3dd2] p-2 rounded-md transition-colors duration-200"
               aria-label="Toggle menu"
             >
               {isMenuOpen ? (
@@ -57,37 +57,37 @@ export default function Navbar() {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden">
-            <div className="px-2 pt-2 pb-3 space-y-1">
+            <div className="px-2 pt-2 pb-3 space-y-1 bg-white rounded-lg shadow-lg border border-gray-100 mt-2">
               <Link 
                 to="/" 
-                className="block px-3 py-2 rounded-md text-[#040480] hover:text-[#1f3dd2] hover:bg-gray-50 font-medium"
+                className="block px-4 py-3 rounded-md text-[#040480] hover:text-[#1f3dd2] hover:bg-gray-50 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Home
               </Link>
               <Link 
                 to="/services" 
-                className="block px-3 py-2 rounded-md text-[#040480] hover:text-[#1f3dd2] hover:bg-gray-50 font-medium"
+                className="block px-4 py-3 rounded-md text-[#040480] hover:text-[#1f3dd2] hover:bg-gray-50 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Services
               </Link>
               <Link 
                 to="/about" 
-                className="block px-3 py-2 rounded-md text-[#040480] hover:text-[#1f3dd2] hover:bg-gray-50 font-medium"
+                className="block px-4 py-3 rounded-md text-[#040480] hover:text-[#1f3dd2] hover:bg-gray-50 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 About
               </Link>
               <Link 
                 to="/contact" 
-                className="block px-3 py-2 rounded-md text-[#040480] hover:text-[#1f3dd2] hover:bg-gray-50 font-medium"
+                className="block px-4 py-3 rounded-md text-[#040480] hover:text-[#1f3dd2] hover:bg-gray-50 font-medium transition-colors duration-200"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Contact
               </Link>
-              <div className="mt-4">
-                <Button className="w-full bg-[#d2491f] hover:bg-[#84d21f] text-white px-4 py-1 h-8 text-sm font-medium">
+              <div className="mt-4 px-4 pb-2">
+                <Button className="w-full bg-[#d2491f] hover:bg-[#84d21f] text-white px-6 py-3 h-auto text-sm font-medium transition-colors duration-200">
                   Work with us
                 </Button>
               </div>
