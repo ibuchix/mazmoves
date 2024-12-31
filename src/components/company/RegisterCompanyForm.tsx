@@ -101,13 +101,6 @@ export function RegisterCompanyForm() {
 
   return (
     <Card className="p-8 space-y-8 shadow-lg bg-white/50 backdrop-blur-sm">
-      <div className="space-y-2">
-        <h2 className="text-2xl font-bold text-[#040480]">Register Your Company</h2>
-        <p className="text-muted-foreground">
-          Please fill in your company details below to join our platform.
-        </p>
-      </div>
-      
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         <div className="space-y-8">
           <CompanyDetailsSection register={register} errors={errors} />

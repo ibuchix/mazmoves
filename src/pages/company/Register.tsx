@@ -16,9 +16,14 @@ export default function RegisterCompany() {
         </div>
       </div>
 
-      {/* Benefits Grid */}
       <div className="container mx-auto px-4 py-16">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+        {/* Registration Form Section - Moved up */}
+        <div className="max-w-2xl mx-auto mb-16">
+          <RegisterCompanyForm />
+        </div>
+
+        {/* Benefits Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300">
             <div className="flex items-center mb-4">
               <CheckCircle className="w-8 h-8 text-[#84d21f] mr-3" />
@@ -67,14 +72,6 @@ export default function RegisterCompany() {
             <p className="text-gray-600">
               Get personalized support and resources to help grow your business with us.
             </p>
-          </div>
-        </div>
-
-        {/* Registration Form Section */}
-        <div className="max-w-2xl mx-auto">
-          <div className="bg-white p-8 rounded-xl shadow-lg">
-            <h2 className="text-2xl font-bold text-[#040480] mb-6">Register Your Moving Company</h2>
-            <RegisterCompanyForm />
           </div>
         </div>
       </div>
