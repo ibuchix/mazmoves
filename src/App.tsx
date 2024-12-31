@@ -5,7 +5,10 @@ import RequestMove from "@/pages/RequestMove";
 import Services from "@/pages/Services";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
+import Login from "@/pages/auth/Login";
+import CompanyDashboard from "@/pages/company/Dashboard";
 import { AuthProvider } from "@/components/AuthProvider";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import "./App.css";
@@ -18,7 +21,23 @@ function App() {
           <Navbar />
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/request-move" element={<RequestMove />} />
+            <Route path="/login" element={<Login />} />
+            <Route 
+              path="/request-move" 
+              element={
+                <ProtectedRoute allowedRoles={["customer"]}>
+                  <RequestMove />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/company/dashboard" 
+              element={
+                <ProtectedRoute allowedRoles={["company"]}>
+                  <CompanyDashboard />
+                </ProtectedRoute>
+              } 
+            />
             <Route path="/services" element={<Services />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
