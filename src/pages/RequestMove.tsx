@@ -61,7 +61,11 @@ export default function RequestMove() {
         description: "Your Move Request Has Been sent to verified movers nearby",
       });
 
-      navigate("/");
+      // Add a slight delay before navigation to ensure the toast is visible
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
+
     } catch (error) {
       console.error("Error submitting request:", error);
       toast({
