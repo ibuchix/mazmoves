@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, Users, CheckCircle, AlertCircle } from "lucide-react";
+import { AdminDashboardData } from "@/types/admin";
 
 export default function AdminDashboard() {
   const { data: dashboardData } = useQuery({
@@ -14,7 +15,7 @@ export default function AdminDashboard() {
         .select('*');
       
       if (error) throw error;
-      return data;
+      return data as AdminDashboardData[];
     },
   });
 
@@ -36,7 +37,7 @@ export default function AdminDashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalCompanies}</div>
+            <div className="text-2xl font-bold">{stats.totalCompanies.toString()}</div>
           </CardContent>
         </Card>
 
@@ -46,7 +47,7 @@ export default function AdminDashboard() {
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.verifiedCompanies}</div>
+            <div className="text-2xl font-bold">{stats.verifiedCompanies.toString()}</div>
           </CardContent>
         </Card>
 
@@ -56,7 +57,7 @@ export default function AdminDashboard() {
             <AlertCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalAssignments}</div>
+            <div className="text-2xl font-bold">{stats.totalAssignments.toString()}</div>
           </CardContent>
         </Card>
 
@@ -92,14 +93,14 @@ export default function AdminDashboard() {
                   <TableCell className="font-medium">{company.company_name}</TableCell>
                   <TableCell>
                     <Badge 
-                      variant={company.is_verified ? "success" : "secondary"}
+                      variant={company.is_verified ? "default" : "secondary"}
                       className={company.is_verified ? "bg-[#84d21f]" : ""}
                     >
                       {company.registration_status}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {company.total_assignments} 
+                    {company.total_assignments.toString()} 
                     {company.active_assignments > 0 && 
                       <span className="text-[#84d21f] ml-1">
                         ({company.active_assignments} active)
