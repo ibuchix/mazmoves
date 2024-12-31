@@ -20,11 +20,15 @@ export type Database = {
           insurance_docs: Json | null
           is_active: boolean | null
           is_verified: boolean | null
+          last_payment_date: string | null
           manager_name: string | null
           name: string
           rating: number | null
+          registration_date: string | null
           registration_number: string | null
+          registration_status: string | null
           service_areas: Json | null
+          subscription_status: string | null
           updated_at: string | null
           vat_number: string | null
         }
@@ -38,11 +42,15 @@ export type Database = {
           insurance_docs?: Json | null
           is_active?: boolean | null
           is_verified?: boolean | null
+          last_payment_date?: string | null
           manager_name?: string | null
           name: string
           rating?: number | null
+          registration_date?: string | null
           registration_number?: string | null
+          registration_status?: string | null
           service_areas?: Json | null
+          subscription_status?: string | null
           updated_at?: string | null
           vat_number?: string | null
         }
@@ -56,15 +64,70 @@ export type Database = {
           insurance_docs?: Json | null
           is_active?: boolean | null
           is_verified?: boolean | null
+          last_payment_date?: string | null
           manager_name?: string | null
           name?: string
           rating?: number | null
+          registration_date?: string | null
           registration_number?: string | null
+          registration_status?: string | null
           service_areas?: Json | null
+          subscription_status?: string | null
           updated_at?: string | null
           vat_number?: string | null
         }
         Relationships: []
+      }
+      company_payments: {
+        Row: {
+          amount: number
+          company_id: string | null
+          created_at: string | null
+          id: string
+          invoice_number: string | null
+          payment_date: string | null
+          payment_status: string | null
+          payment_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          invoice_number?: string | null
+          payment_date?: string | null
+          payment_status?: string | null
+          payment_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          invoice_number?: string | null
+          payment_date?: string | null
+          payment_status?: string | null
+          payment_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_payments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_dashboard_mv"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "company_payments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       move_assignments: {
         Row: {
@@ -104,6 +167,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "move_assignments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_dashboard_mv"
+            referencedColumns: ["company_id"]
+          },
           {
             foreignKeyName: "move_assignments_company_id_fkey"
             columns: ["company_id"]
@@ -209,7 +279,24 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_dashboard_mv: {
+        Row: {
+          active_assignments: number | null
+          company_id: string | null
+          company_name: string | null
+          completed_assignments: number | null
+          contact_email: string | null
+          is_verified: boolean | null
+          last_payment_date: string | null
+          registration_date: string | null
+          registration_status: string | null
+          subscription_status: string | null
+          total_assignments: number | null
+          total_paid_amount: number | null
+          total_payments: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
