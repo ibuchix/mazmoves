@@ -9,6 +9,7 @@ import { CompanyDetailsSection } from "./form/CompanyDetailsSection";
 import { ContactDetailsSection } from "./form/ContactDetailsSection";
 import { AddressSection } from "./form/AddressSection";
 import { InsuranceSection } from "./form/InsuranceSection";
+import { Separator } from "@/components/ui/separator";
 
 interface CompanyRegistrationForm {
   name: string;
@@ -99,20 +100,34 @@ export function RegisterCompanyForm() {
   };
 
   return (
-    <Card className="p-6 space-y-8">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <CompanyDetailsSection register={register} errors={errors} />
-        <ContactDetailsSection register={register} errors={errors} />
-        <AddressSection register={register} errors={errors} />
-        <InsuranceSection errors={errors} />
+    <Card className="p-8 space-y-8 shadow-lg bg-white/50 backdrop-blur-sm">
+      <div className="space-y-2">
+        <h2 className="text-2xl font-bold text-[#040480]">Register Your Company</h2>
+        <p className="text-muted-foreground">
+          Please fill in your company details below to join our platform.
+        </p>
+      </div>
+      
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+        <div className="space-y-8">
+          <CompanyDetailsSection register={register} errors={errors} />
+          <Separator className="my-8" />
+          <ContactDetailsSection register={register} errors={errors} />
+          <Separator className="my-8" />
+          <AddressSection register={register} errors={errors} />
+          <Separator className="my-8" />
+          <InsuranceSection errors={errors} />
+        </div>
 
-        <Button 
-          type="submit" 
-          className="w-full bg-[#040480] hover:bg-[#1f3dd2] transition-colors duration-300"
-          disabled={uploading}
-        >
-          {uploading ? "Registering..." : "Register Company"}
-        </Button>
+        <div className="pt-4">
+          <Button 
+            type="submit" 
+            className="w-full bg-[#040480] hover:bg-[#1f3dd2] text-white font-semibold py-6 rounded-lg shadow-md transition-all duration-300 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={uploading}
+          >
+            {uploading ? "Registering..." : "Register Company"}
+          </Button>
+        </div>
       </form>
     </Card>
   );
