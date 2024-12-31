@@ -2,16 +2,18 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
+import { CompanyDetailsSection } from "./form/CompanyDetailsSection";
+import { ContactDetailsSection } from "./form/ContactDetailsSection";
+import { AddressSection } from "./form/AddressSection";
+import { InsuranceSection } from "./form/InsuranceSection";
 
 interface CompanyRegistrationForm {
   name: string;
   registrationNumber: string;
-  vatNumber: string;
+  vatNumber?: string;
   email: string;
   phone: string;
   address: {
@@ -66,7 +68,7 @@ export function RegisterCompanyForm() {
         .insert({
           name: data.name,
           registration_number: data.registrationNumber,
-          vat_number: data.vatNumber,
+          vat_number: data.vatNumber || null,
           contact_email: data.email,
           contact_phone: data.phone,
           business_address: data.address,
@@ -99,119 +101,10 @@ export function RegisterCompanyForm() {
   return (
     <Card className="p-6 space-y-8">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="name" className="text-sm font-medium text-[#040480]">Company Name</Label>
-            <Input
-              id="name"
-              {...register("name", { required: true })}
-              className="border-[#1f3dd2] focus:ring-[#84d21f]"
-              placeholder="Enter company name"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="registrationNumber" className="text-sm font-medium text-[#040480]">Registration Number</Label>
-            <Input
-              id="registrationNumber"
-              {...register("registrationNumber", { required: true })}
-              className="border-[#1f3dd2] focus:ring-[#84d21f]"
-              placeholder="Enter registration number"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="vatNumber" className="text-sm font-medium text-[#040480]">VAT Registration Number</Label>
-            <Input
-              id="vatNumber"
-              {...register("vatNumber", { required: true })}
-              className="border-[#1f3dd2] focus:ring-[#84d21f]"
-              placeholder="Enter VAT number"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-medium text-[#040480]">Email Address</Label>
-            <Input
-              id="email"
-              type="email"
-              {...register("email", { required: true })}
-              className="border-[#1f3dd2] focus:ring-[#84d21f]"
-              placeholder="Enter email address"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="phone" className="text-sm font-medium text-[#040480]">Phone Number</Label>
-            <Input
-              id="phone"
-              type="tel"
-              {...register("phone", { required: true })}
-              className="border-[#1f3dd2] focus:ring-[#84d21f]"
-              placeholder="Enter phone number"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="managerName" className="text-sm font-medium text-[#040480]">Account Manager Name</Label>
-            <Input
-              id="managerName"
-              {...register("managerName", { required: true })}
-              className="border-[#1f3dd2] focus:ring-[#84d21f]"
-              placeholder="Enter manager's name"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <Label className="text-sm font-medium text-[#040480]">Company Address</Label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Input
-              placeholder="Street Address"
-              {...register("address.street", { required: true })}
-              className="border-[#1f3dd2] focus:ring-[#84d21f]"
-            />
-            <Input
-              placeholder="City"
-              {...register("address.city", { required: true })}
-              className="border-[#1f3dd2] focus:ring-[#84d21f]"
-            />
-            <Input
-              placeholder="State/Province"
-              {...register("address.state", { required: true })}
-              className="border-[#1f3dd2] focus:ring-[#84d21f]"
-            />
-            <Input
-              placeholder="Postal Code"
-              {...register("address.zipCode", { required: true })}
-              className="border-[#1f3dd2] focus:ring-[#84d21f]"
-            />
-          </div>
-        </div>
-
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="transitInsurance" className="text-sm font-medium text-[#040480]">Goods in Transit Insurance</Label>
-            <Input
-              id="transitInsurance"
-              type="file"
-              accept=".pdf,.doc,.docx"
-              required
-              className="border-[#1f3dd2] focus:ring-[#84d21f]"
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="liabilityInsurance" className="text-sm font-medium text-[#040480]">Public Liability Insurance</Label>
-            <Input
-              id="liabilityInsurance"
-              type="file"
-              accept=".pdf,.doc,.docx"
-              required
-              className="border-[#1f3dd2] focus:ring-[#84d21f]"
-            />
-          </div>
-        </div>
+        <CompanyDetailsSection register={register} errors={errors} />
+        <ContactDetailsSection register={register} errors={errors} />
+        <AddressSection register={register} errors={errors} />
+        <InsuranceSection errors={errors} />
 
         <Button 
           type="submit" 
