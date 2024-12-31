@@ -17,6 +17,7 @@ export default function RequestMove() {
   const [step, setStep] = useState(location.state?.moveType ? 2 : 1);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [moveType, setMoveType] = useState<MoveType | null>(location.state?.moveType || null);
   
   const { register, handleSubmit, watch, formState: { errors } } = useForm<MoveRequestForm>();
@@ -24,6 +25,9 @@ export default function RequestMove() {
   const totalSteps = 5;
 
   const onSubmit = async (data: MoveRequestForm) => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
     try {
       // Create move request without requiring authentication
       const { data: moveRequest, error: moveRequestError } = await supabase
@@ -59,12 +63,13 @@ export default function RequestMove() {
       toast({
         title: "Success!",
         description: "Your Move Request Has Been sent to verified movers nearby",
+        variant: "default",
       });
 
-      // Add a slight delay before navigation to ensure the toast is visible
+      // Add a longer delay before navigation to ensure the toast is visible
       setTimeout(() => {
         navigate("/");
-      }, 2000);
+      }, 3000); // Increased to 3 seconds to match the toast duration
 
     } catch (error) {
       console.error("Error submitting request:", error);
@@ -73,6 +78,8 @@ export default function RequestMove() {
         description: "There was a problem submitting your request. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -135,7 +142,12 @@ export default function RequestMove() {
                   Next
                 </Button>
               ) : (
-                <Button type="submit">Submit Request</Button>
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Submitting..." : "Submit Request"}
+                </Button>
               )}
             </div>
           </form>
