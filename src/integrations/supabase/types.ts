@@ -123,7 +123,9 @@ export type Database = {
       move_requests: {
         Row: {
           created_at: string | null
-          customer_id: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
           delivery_address: Json
           estimated_size: string | null
           estimated_value: number | null
@@ -137,7 +139,9 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
-          customer_id: string
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
           delivery_address: Json
           estimated_size?: string | null
           estimated_value?: number | null
@@ -151,7 +155,9 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
-          customer_id?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
           delivery_address?: Json
           estimated_size?: string | null
           estimated_value?: number | null
@@ -163,15 +169,7 @@ export type Database = {
           status?: Database["public"]["Enums"]["request_status"] | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "move_requests_customer_id_fkey"
-            columns: ["customer_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       users: {
         Row: {

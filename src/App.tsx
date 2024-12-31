@@ -31,14 +31,7 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/companies" element={<Companies />} />
               <Route path="/company/register" element={<RegisterCompany />} />
-              <Route 
-                path="/request-move" 
-                element={
-                  <ProtectedRoute allowedRoles={["customer"]}>
-                    <RequestMove />
-                  </ProtectedRoute>
-                } 
-              />
+              <Route path="/request-move" element={<RequestMove />} />
               <Route 
                 path="/company/dashboard" 
                 element={

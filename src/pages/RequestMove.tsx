@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { addressToJson } from "@/types/address";
-import { Tables } from "@/types/database";
 import { MoveRequestForm, MoveType } from "@/types/move-request";
 import { MoveTypeStep } from "@/components/move-request/MoveTypeStep";
 import { PropertySizeStep } from "@/components/move-request/PropertySizeStep";
@@ -15,11 +14,9 @@ import { ContactStep } from "@/components/move-request/ContactStep";
 
 export default function RequestMove() {
   const [step, setStep] = useState(1);
-  const location = useLocation();
-  const initialMoveType = location.state?.moveType || null;
-  const [moveType, setMoveType] = useState<MoveType | null>(initialMoveType);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [moveType, setMoveType] = useState<MoveType | null>(null);
   
   const { register, handleSubmit, watch, formState: { errors } } = useForm<MoveRequestForm>();
 
@@ -27,25 +24,30 @@ export default function RequestMove() {
 
   const onSubmit = async (data: MoveRequestForm) => {
     try {
-      const user = await supabase.auth.getUser();
-      if (!user.data.user) {
-        throw new Error("User not authenticated");
-      }
-
-      const moveRequest: Tables["move_requests"]["Insert"] = {
-        customer_id: user.data.user.id,
-        pickup_address: addressToJson(data.pickupAddress),
-        delivery_address: addressToJson(data.deliveryAddress),
-        requested_date: data.moveDate,
-        estimated_size: data.propertySize,
-        special_instructions: data.specialInstructions,
-      };
-
-      const { error } = await supabase
+      // Create move request
+      const { data: moveRequest, error: moveRequestError } = await supabase
         .from("move_requests")
-        .insert(moveRequest);
+        .insert({
+          pickup_address: addressToJson(data.pickupAddress),
+          delivery_address: addressToJson(data.deliveryAddress),
+          requested_date: data.moveDate,
+          estimated_size: data.propertySize,
+          special_instructions: data.specialInstructions,
+          customer_email: data.email,
+          customer_name: data.fullName,
+          customer_phone: data.phone
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (moveRequestError) throw moveRequestError;
+
+      // Notify companies about the new request
+      const { error: notifyError } = await supabase.functions.invoke('notify-companies', {
+        body: { requestId: moveRequest.id }
+      });
+
+      if (notifyError) throw notifyError;
 
       toast({
         title: "Success!",

@@ -147,6 +147,9 @@ export default function CompanyDashboard() {
                     {assignment.move_requests.delivery_address.city}
                   </h3>
                   <p className="text-sm text-muted-foreground">
+                    Customer: {assignment.move_requests.customer_name}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
                     Requested for: {new Date(assignment.move_requests.requested_date).toLocaleDateString()}
                   </p>
                 </div>
