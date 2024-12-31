@@ -8,6 +8,7 @@ import Contact from "@/pages/Contact";
 import Companies from "@/pages/Companies";
 import Login from "@/pages/auth/Login";
 import CompanyDashboard from "@/pages/company/Dashboard";
+import RegisterCompany from "@/pages/company/Register";
 import { AuthProvider } from "@/components/AuthProvider";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Navbar from "@/components/Navbar";
@@ -29,6 +30,7 @@ function App() {
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/companies" element={<Companies />} />
+              <Route path="/company/register" element={<RegisterCompany />} />
               <Route 
                 path="/request-move" 
                 element={
