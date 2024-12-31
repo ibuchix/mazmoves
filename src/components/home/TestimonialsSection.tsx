@@ -5,19 +5,19 @@ export const TestimonialsSection = () => {
   const testimonials = [
     {
       name: "Sarah Johnson",
-      location: "San Francisco",
+      location: "Stevington",
       rating: 5,
       text: "The most stress-free moving experience I've ever had. The team was professional, efficient, and careful with all my belongings.",
     },
     {
       name: "Michael Chen",
-      location: "Los Angeles",
+      location: "Cambridge",
       rating: 5,
       text: "Excellent service from start to finish. The online quote system was easy to use, and the movers were punctual and professional.",
     },
     {
       name: "Emily Rodriguez",
-      location: "San Diego",
+      location: "Warwick",
       rating: 5,
       text: "I was impressed by how smooth the entire process was. The pricing was transparent, and the moving crew was fantastic.",
     }
