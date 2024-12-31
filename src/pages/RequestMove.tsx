@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,10 +13,11 @@ import { AddressStep } from "@/components/move-request/AddressStep";
 import { ContactStep } from "@/components/move-request/ContactStep";
 
 export default function RequestMove() {
-  const [step, setStep] = useState(1);
+  const location = useLocation();
+  const [step, setStep] = useState(location.state?.moveType ? 2 : 1);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [moveType, setMoveType] = useState<MoveType | null>(null);
+  const [moveType, setMoveType] = useState<MoveType | null>(location.state?.moveType || null);
   
   const { register, handleSubmit, watch, formState: { errors } } = useForm<MoveRequestForm>();
 
@@ -72,7 +73,7 @@ export default function RequestMove() {
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl font-bold text-center">
-            Request a Move - Step {step} of {totalSteps}
+            Step {step} of {totalSteps}
           </CardTitle>
         </CardHeader>
         <CardContent>
