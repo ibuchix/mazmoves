@@ -18,7 +18,8 @@ export default function Navbar() {
         .from("users")
         .select("role")
         .eq("id", session.user.id)
-        .single();
+        .maybeSingle();
+      
       if (error) throw error;
       return data;
     },
