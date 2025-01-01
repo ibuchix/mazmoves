@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { uploadCompanyDocument } from "@/utils/fileUpload";
 import { toast } from "sonner";
 import { CompanyRegistrationForm } from "@/types/company";
+import { geocodeAddress } from "@/utils/geocoding";
 
 export function useCompanyRegistration() {
   const [uploading, setUploading] = useState(false);
@@ -25,6 +26,9 @@ export function useCompanyRegistration() {
         'liability'
       );
 
+      // Geocode the company's address
+      const coordinates = await geocodeAddress(data.address);
+
       const { error: insertError } = await supabase
         .from('companies')
         .insert({
@@ -38,12 +42,15 @@ export function useCompanyRegistration() {
           insurance_docs: [
             { type: 'transit', path: transitInsurancePath },
             { type: 'liability', path: liabilityInsurancePath }
-          ]
+          ],
+          latitude: coordinates.latitude,
+          longitude: coordinates.longitude
         });
 
       if (insertError) throw insertError;
 
       setShowSuccessDialog(true);
+      toast.success("Company registered successfully!");
     } catch (error) {
       console.error("Registration error:", error);
       toast.error("Registration failed. Please try again.");

@@ -21,6 +21,8 @@ export type Database = {
           is_active: boolean | null
           is_verified: boolean | null
           last_payment_date: string | null
+          latitude: number | null
+          longitude: number | null
           manager_name: string | null
           name: string
           public_access_token: string
@@ -44,6 +46,8 @@ export type Database = {
           is_active?: boolean | null
           is_verified?: boolean | null
           last_payment_date?: string | null
+          latitude?: number | null
+          longitude?: number | null
           manager_name?: string | null
           name: string
           public_access_token?: string
@@ -67,6 +71,8 @@ export type Database = {
           is_active?: boolean | null
           is_verified?: boolean | null
           last_payment_date?: string | null
+          latitude?: number | null
+          longitude?: number | null
           manager_name?: string | null
           name?: string
           public_access_token?: string
@@ -200,11 +206,15 @@ export type Database = {
           customer_name: string
           customer_phone: string | null
           delivery_address: Json
+          delivery_latitude: number | null
+          delivery_longitude: number | null
           estimated_size: string | null
           estimated_value: number | null
           id: string
           inventory_list: Json | null
           pickup_address: Json
+          pickup_latitude: number | null
+          pickup_longitude: number | null
           requested_date: string
           special_instructions: string | null
           status: Database["public"]["Enums"]["request_status"] | null
@@ -216,11 +226,15 @@ export type Database = {
           customer_name: string
           customer_phone?: string | null
           delivery_address: Json
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
           estimated_size?: string | null
           estimated_value?: number | null
           id?: string
           inventory_list?: Json | null
           pickup_address: Json
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
           requested_date: string
           special_instructions?: string | null
           status?: Database["public"]["Enums"]["request_status"] | null
@@ -232,11 +246,15 @@ export type Database = {
           customer_name?: string
           customer_phone?: string | null
           delivery_address?: Json
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
           estimated_size?: string | null
           estimated_value?: number | null
           id?: string
           inventory_list?: Json | null
           pickup_address?: Json
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
           requested_date?: string
           special_instructions?: string | null
           status?: Database["public"]["Enums"]["request_status"] | null

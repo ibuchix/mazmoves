@@ -11,6 +11,8 @@ import { MoveTypeStep } from "@/components/move-request/MoveTypeStep";
 import { PropertySizeStep } from "@/components/move-request/PropertySizeStep";
 import { AddressStep } from "@/components/move-request/AddressStep";
 import { ContactStep } from "@/components/move-request/ContactStep";
+import { geocodeAddress } from "@/utils/geocoding";
+import { toast } from "sonner";
 
 export default function RequestMove() {
   const location = useLocation();
@@ -29,6 +31,12 @@ export default function RequestMove() {
     setIsSubmitting(true);
 
     try {
+      // Geocode both addresses
+      const [pickupCoords, deliveryCoords] = await Promise.all([
+        geocodeAddress(data.pickupAddress),
+        geocodeAddress(data.deliveryAddress)
+      ]);
+
       const { data: moveRequest, error: moveRequestError } = await supabase
         .from("move_requests")
         .insert({
@@ -39,7 +47,11 @@ export default function RequestMove() {
           special_instructions: data.specialInstructions,
           customer_email: data.email,
           customer_name: data.fullName,
-          customer_phone: data.phone
+          customer_phone: data.phone,
+          pickup_latitude: pickupCoords.latitude,
+          pickup_longitude: pickupCoords.longitude,
+          delivery_latitude: deliveryCoords.latitude,
+          delivery_longitude: deliveryCoords.longitude
         })
         .select()
         .single();
@@ -59,10 +71,11 @@ export default function RequestMove() {
       }
 
       setShowSuccess(true);
+      toast.success("Move request submitted successfully!");
 
     } catch (error) {
       console.error("Error submitting request:", error);
-      // Handle error state here
+      toast.error("Failed to submit request. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

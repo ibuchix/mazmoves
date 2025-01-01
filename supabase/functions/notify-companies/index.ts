@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-  const R = 6371; // Earth's radius in km
+  const R = 3959; // Earth's radius in miles
   const dLat = (lat2 - lat1) * Math.PI / 180;
   const dLon = (lon2 - lon1) * Math.PI / 180;
   const a = 
@@ -31,44 +31,83 @@ serve(async (req) => {
 
     const { requestId } = await req.json();
 
-    // Get the move request details
+    // Get the move request details with coordinates
     const { data: request, error: requestError } = await supabase
       .from('move_requests')
-      .select('*')
+      .select('*, pickup_latitude, pickup_longitude')
       .eq('id', requestId)
       .single();
 
     if (requestError) throw requestError;
 
-    // Get all verified companies
+    // Get all verified companies with coordinates
     const { data: companies, error: companiesError } = await supabase
       .from('companies')
-      .select('*')
+      .select('*, latitude, longitude')
       .eq('is_verified', true)
       .eq('is_active', true);
 
     if (companiesError) throw companiesError;
 
-    // Create assignments for companies within 30km
+    // Create assignments only for companies within 25 miles
     const assignments = [];
     for (const company of companies) {
-      // Create assignment
-      const { data: assignment, error: assignmentError } = await supabase
-        .from('move_assignments')
-        .insert({
-          request_id: requestId,
-          company_id: company.id,
-          status: 'active'
-        })
-        .select()
-        .single();
-
-      if (assignmentError) {
-        console.error('Error creating assignment:', assignmentError);
+      if (!company.latitude || !company.longitude || !request.pickup_latitude || !request.pickup_longitude) {
+        console.warn('Missing coordinates for company or request');
         continue;
       }
 
-      assignments.push(assignment);
+      const distance = calculateDistance(
+        request.pickup_latitude,
+        request.pickup_longitude,
+        company.latitude,
+        company.longitude
+      );
+
+      // Only create assignment if company is within 25 miles
+      if (distance <= 25) {
+        const { data: assignment, error: assignmentError } = await supabase
+          .from('move_assignments')
+          .insert({
+            request_id: requestId,
+            company_id: company.id,
+            status: 'active'
+          })
+          .select()
+          .single();
+
+        if (assignmentError) {
+          console.error('Error creating assignment:', assignmentError);
+          continue;
+        }
+
+        // Send email notification to company
+        const emailResponse = await fetch(
+          `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-email`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
+            },
+            body: JSON.stringify({
+              to: [company.contact_email],
+              subject: 'New Move Request Available',
+              html: `
+                <h2>New Move Request in Your Area</h2>
+                <p>A new moving request has been submitted ${Math.round(distance)} miles from your location.</p>
+                <p>Please check your dashboard for more details.</p>
+              `
+            }),
+          }
+        );
+
+        if (!emailResponse.ok) {
+          console.error('Error sending email notification');
+        }
+
+        assignments.push({ ...assignment, distance });
+      }
     }
 
     return new Response(
