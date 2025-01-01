@@ -14,9 +14,14 @@ serve(async (req) => {
   }
 
   try {
+    if (!RESEND_API_KEY) {
+      console.error('RESEND_API_KEY is not set');
+      throw new Error('RESEND_API_KEY is not configured');
+    }
+
     const { customerEmail, customerName } = await req.json();
     
-    console.log('Sending confirmation email to:', customerEmail);
+    console.log('Attempting to send confirmation email to:', customerEmail);
 
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -29,15 +34,21 @@ serve(async (req) => {
         to: [customerEmail],
         subject: 'Move Request Confirmation',
         html: `
-          <h2>Thank you for your move request, ${customerName}!</h2>
-          <p>We have received your move request and our verified moving companies in your area will be notified.</p>
-          <p>You will be contacted directly by the moving companies to discuss your requirements in detail.</p>
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #040480;">Thank you for your move request, ${customerName}!</h2>
+            <p>We have received your move request and our verified moving companies in your area will be notified.</p>
+            <p>You will be contacted directly by the moving companies to discuss your requirements in detail.</p>
+            <p style="margin-top: 20px;">Best regards,<br>MAZ Moves Team</p>
+          </div>
         `
       }),
     });
 
+    const responseText = await emailResponse.text();
+    console.log('Resend API response:', responseText);
+
     if (!emailResponse.ok) {
-      throw new Error(`Resend API error: ${await emailResponse.text()}`);
+      throw new Error(`Resend API error: ${responseText}`);
     }
 
     return new Response(JSON.stringify({ success: true }), {
