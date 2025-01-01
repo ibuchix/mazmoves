@@ -1,8 +1,6 @@
 import { opencage } from 'opencage-api-client';
 import { Address } from '@/types/address';
 
-const OPENCAGE_API_KEY = 'YOUR_API_KEY'; // We'll move this to Supabase secrets
-
 export interface Coordinates {
   latitude: number;
   longitude: number;
@@ -12,16 +10,18 @@ export async function geocodeAddress(address: Address): Promise<Coordinates> {
   const addressString = `${address.street}, ${address.city}, ${address.state} ${address.zipCode}`;
   
   try {
-    const response = await opencage.geocode({ q: addressString, key: OPENCAGE_API_KEY });
+    const { data } = await supabase.functions.invoke('geocode-address', {
+      body: { address: addressString }
+    });
     
-    if (response.results.length > 0) {
-      const { lat, lng } = response.results[0].geometry;
-      return {
-        latitude: lat,
-        longitude: lng
-      };
+    if (!data || !data.latitude || !data.longitude) {
+      throw new Error('No coordinates found for address');
     }
-    throw new Error('No results found for address');
+
+    return {
+      latitude: data.latitude,
+      longitude: data.longitude
+    };
   } catch (error) {
     console.error('Geocoding error:', error);
     throw error;

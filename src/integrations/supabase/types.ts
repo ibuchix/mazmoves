@@ -262,6 +262,24 @@ export type Database = {
         }
         Relationships: []
       }
+      secrets: {
+        Row: {
+          id: number
+          name: string
+          secret: string
+        }
+        Insert: {
+          id?: number
+          name: string
+          secret: string
+        }
+        Update: {
+          id?: number
+          name?: string
+          secret?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           address: Json | null
