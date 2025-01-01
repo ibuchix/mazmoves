@@ -1,5 +1,5 @@
-import { opencage } from 'opencage-api-client';
 import { Address } from '@/types/address';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface Coordinates {
   latitude: number;
