@@ -7,14 +7,18 @@ export interface Coordinates {
 }
 
 export async function geocodeAddress(address: Address): Promise<Coordinates> {
-  const addressString = `${address.street}, ${address.city}, ${address.state} ${address.zipCode}`;
+  const addressString = `${address.street}, ${address.city}, ${address.state} ${address.zipCode}${address.country ? `, ${address.country}` : ''}`;
   
   try {
     const { data, error } = await supabase.functions.invoke('geocode-address', {
       body: { address: addressString }
     });
     
-    if (error) throw error;
+    if (error) {
+      console.error('Geocoding error:', error);
+      throw error;
+    }
+    
     if (!data || !data.latitude || !data.longitude) {
       throw new Error('No coordinates found for address');
     }
@@ -29,10 +33,7 @@ export async function geocodeAddress(address: Address): Promise<Coordinates> {
   }
 }
 
-export function calculateDistance(
-  point1: Coordinates,
-  point2: Coordinates
-): number {
+export function calculateDistance(point1: Coordinates, point2: Coordinates): number {
   const R = 3959; // Earth's radius in miles
   const lat1 = toRadians(point1.latitude);
   const lat2 = toRadians(point2.latitude);

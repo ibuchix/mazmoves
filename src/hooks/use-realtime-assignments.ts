@@ -2,9 +2,9 @@ import { useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
+import { toast } from "sonner";
 
 export function useRealtimeAssignments() {
-  const { toast } = useToast();
   const { session } = useAuth();
 
   useEffect(() => {
@@ -22,27 +22,35 @@ export function useRealtimeAssignments() {
         },
         async (payload) => {
           try {
-            // Call the Edge Function to check distance
-            const response = await supabase.functions.invoke('check-move-distance', {
-              body: { record: payload.new }
-            });
+            // Get the move request details
+            const { data: moveRequest } = await supabase
+              .from('move_requests')
+              .select('*')
+              .eq('id', payload.new.request_id)
+              .single();
 
-            if (response.error) {
-              console.error('Distance check failed:', response.error);
+            if (!moveRequest) {
+              console.error('Move request not found');
               return;
             }
 
-            // Only show notification if the assignment wasn't deleted (i.e., was within range)
-            if (!response.data?.message?.includes('deleted')) {
-              const distance = Math.round(response.data?.distance || 0);
-              toast({
-                title: "New Move Assignment",
-                description: `You have been assigned a new moving request ${distance} miles away.`,
-              });
-              console.log('New assignment:', payload);
-            }
+            // Format the distance message
+            const distance = Math.round(moveRequest.distance || 0);
+            const locationText = moveRequest.location_used === 'pickup' ? 'pickup location' : 'delivery location';
+
+            toast({
+              title: "New Move Assignment",
+              description: `You have been assigned a new moving request ${distance} miles away from your ${locationText}.`,
+            });
+
+            console.log('New assignment received:', {
+              assignmentId: payload.new.id,
+              requestId: payload.new.request_id,
+              distance,
+              locationUsed: moveRequest.location_used
+            });
           } catch (error) {
-            console.error('Error checking distance:', error);
+            console.error('Error processing new assignment:', error);
           }
         }
       )
