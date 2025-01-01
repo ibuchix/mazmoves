@@ -30,7 +30,7 @@ serve(async (req) => {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'onboarding@resend.dev', // Using Resend's testing domain
+        from: 'MAZ Moves <notifications@mazmoves.com>',
         to: [customerEmail],
         subject: 'Move Request Confirmation',
         html: `
