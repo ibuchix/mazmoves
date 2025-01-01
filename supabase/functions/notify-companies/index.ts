@@ -23,6 +23,7 @@ serve(async (req) => {
     );
 
     const { requestId } = await req.json();
+    console.log(`Processing move request ${requestId}`);
 
     // Get the move request details
     const { data: request, error: requestError } = await supabase
@@ -42,20 +43,20 @@ serve(async (req) => {
 
     if (companiesError) throw companiesError;
 
-    console.log(`Processing move request ${requestId} with ${companies.length} potential companies`);
+    console.log(`Found ${companies.length} potential companies`);
 
     // First try pickup location
-    let { assignments, locationUsed } = findNearbyCompanies(companies, request);
+    let { assignments, locationUsed } = await findNearbyCompanies(supabase, request, false);
 
     // If no companies found near pickup, try delivery location
     if (assignments.length === 0) {
       console.log('No companies found near pickup location, trying delivery location');
-      const deliveryResults = findNearbyCompanies(companies, request, true);
+      const deliveryResults = await findNearbyCompanies(supabase, request, true);
       assignments = deliveryResults.assignments;
       locationUsed = deliveryResults.locationUsed;
     }
 
-    // Create assignments and send notifications for found companies
+    // Create assignments and send notifications
     const createdAssignments = [];
     for (const { company, distance } of assignments) {
       const { data: assignment, error: assignmentError } = await supabase
