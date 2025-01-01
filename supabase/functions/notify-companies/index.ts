@@ -1,23 +1,12 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { findNearbyCompanies } from './company-finder.ts';
+import { Company, MoveRequest, Assignment } from './types.ts';
+import { RADIUS_MILES } from './distance.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-const RADIUS_MILES = 25;
-
-const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
-  const R = 3959; // Earth's radius in miles
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-    Math.sin(dLon/2) * Math.sin(dLon/2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return R * c;
 };
 
 serve(async (req) => {
@@ -33,19 +22,19 @@ serve(async (req) => {
 
     const { requestId } = await req.json();
 
-    // Get the move request details with coordinates for both pickup and delivery
+    // Get the move request details
     const { data: request, error: requestError } = await supabase
       .from('move_requests')
-      .select('*, pickup_latitude, pickup_longitude, delivery_latitude, delivery_longitude, customer_email')
+      .select('*')
       .eq('id', requestId)
       .single();
 
     if (requestError) throw requestError;
 
-    // Get all verified companies with coordinates
+    // Get all verified companies
     const { data: companies, error: companiesError } = await supabase
       .from('companies')
-      .select('*, latitude, longitude')
+      .select('*')
       .eq('is_verified', true)
       .eq('is_active', true);
 
@@ -53,56 +42,15 @@ serve(async (req) => {
 
     console.log(`Processing move request ${requestId} with ${companies.length} potential companies`);
 
-    // First try to find companies near pickup location
-    let assignments = [];
-    let locationUsed = 'pickup';
-    
-    for (const company of companies) {
-      if (!company.latitude || !company.longitude || !request.pickup_latitude || !request.pickup_longitude) {
-        console.warn('Missing coordinates for company or request pickup location');
-        continue;
-      }
-
-      const distance = calculateDistance(
-        request.pickup_latitude,
-        request.pickup_longitude,
-        company.latitude,
-        company.longitude
-      );
-
-      console.log(`Company ${company.name} is ${Math.round(distance)} miles away from pickup location`);
-
-      if (distance <= RADIUS_MILES) {
-        console.log(`Creating assignment for company ${company.name} based on pickup location`);
-        assignments.push({ company, distance });
-      }
-    }
+    // First try pickup location
+    let { assignments, locationUsed } = findNearbyCompanies(companies, request);
 
     // If no companies found near pickup, try delivery location
-    if (assignments.length === 0 && request.delivery_latitude && request.delivery_longitude) {
+    if (assignments.length === 0) {
       console.log('No companies found near pickup location, trying delivery location');
-      locationUsed = 'delivery';
-      
-      for (const company of companies) {
-        if (!company.latitude || !company.longitude) {
-          console.warn('Missing coordinates for company');
-          continue;
-        }
-
-        const distance = calculateDistance(
-          request.delivery_latitude,
-          request.delivery_longitude,
-          company.latitude,
-          company.longitude
-        );
-
-        console.log(`Company ${company.name} is ${Math.round(distance)} miles away from delivery location`);
-
-        if (distance <= RADIUS_MILES) {
-          console.log(`Creating assignment for company ${company.name} based on delivery location`);
-          assignments.push({ company, distance });
-        }
-      }
+      const deliveryResults = findNearbyCompanies(companies, request, true);
+      assignments = deliveryResults.assignments;
+      locationUsed = deliveryResults.locationUsed;
     }
 
     // Create assignments for found companies
@@ -146,7 +94,7 @@ serve(async (req) => {
       );
 
       if (!emailResponse.ok) {
-        console.error('Error sending email notification');
+        console.error('Error sending email notification to company');
       }
 
       createdAssignments.push({ ...assignment, distance });
@@ -164,37 +112,6 @@ serve(async (req) => {
 
       if (updateError) {
         console.error('Error updating move request status:', updateError);
-      }
-
-      // Notify customer that no companies were found
-      const customerEmailResponse = await fetch(
-        `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-email`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
-          },
-          body: JSON.stringify({
-            to: [request.customer_email],
-            subject: 'Update on Your Move Request',
-            html: `
-              <h2>No Moving Companies Found Nearby</h2>
-              <p>We apologize, but we couldn't find any verified moving companies within ${RADIUS_MILES} miles of either your pickup or delivery location.</p>
-              <p>We recommend:</p>
-              <ul>
-                <li>Checking back in a few days as new companies may become available</li>
-                <li>Considering extending your search radius (contact support)</li>
-                <li>Looking for companies in nearby cities</li>
-              </ul>
-              <p>If you need assistance, please don't hesitate to contact our support team.</p>
-            `
-          }),
-        }
-      );
-
-      if (!customerEmailResponse.ok) {
-        console.error('Error sending customer notification email');
       }
     }
 
