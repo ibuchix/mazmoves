@@ -23,6 +23,7 @@ export type Database = {
           last_payment_date: string | null
           manager_name: string | null
           name: string
+          public_access_token: string
           rating: number | null
           registration_date: string | null
           registration_number: string | null
@@ -45,6 +46,7 @@ export type Database = {
           last_payment_date?: string | null
           manager_name?: string | null
           name: string
+          public_access_token?: string
           rating?: number | null
           registration_date?: string | null
           registration_number?: string | null
@@ -67,6 +69,7 @@ export type Database = {
           last_payment_date?: string | null
           manager_name?: string | null
           name?: string
+          public_access_token?: string
           rating?: number | null
           registration_date?: string | null
           registration_number?: string | null

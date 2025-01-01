@@ -13,6 +13,7 @@ import RequestMove from "./pages/RequestMove";
 import Login from "./pages/auth/Login";
 import CompanyRegister from "./pages/company/Register";
 import CompanyDashboard from "./pages/company/Dashboard";
+import PublicDashboard from "./pages/company/PublicDashboard";
 import AdminDashboard from "./pages/admin/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import TermsAndConditions from "./pages/TermsAndConditions";
@@ -39,6 +40,7 @@ function App() {
                 <Route path="/terms" element={<TermsAndConditions />} />
                 <Route path="/privacy" element={<PrivacyPolicy />} />
                 <Route path="/company/register" element={<CompanyRegister />} />
+                <Route path="/company/public-dashboard/:token" element={<PublicDashboard />} />
                 <Route
                   path="/company/dashboard"
                   element={

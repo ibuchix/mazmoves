@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 interface RegistrationSuccessDialogProps {
   isOpen: boolean;
@@ -20,9 +21,22 @@ export function RegistrationSuccessDialog({
 }: RegistrationSuccessDialogProps) {
   const navigate = useNavigate();
 
-  const handleGotoDashboard = () => {
-    onClose();
-    navigate('/company/dashboard');
+  const handleGotoDashboard = async () => {
+    try {
+      const { data: company } = await supabase
+        .from('companies')
+        .select('public_access_token')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+
+      if (company?.public_access_token) {
+        onClose();
+        navigate(`/company/public-dashboard/${company.public_access_token}`);
+      }
+    } catch (error) {
+      console.error('Error fetching company token:', error);
+    }
   };
 
   return (
