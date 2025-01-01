@@ -36,7 +36,7 @@ serve(async (req) => {
     // Get the move request details with coordinates
     const { data: request, error: requestError } = await supabase
       .from('move_requests')
-      .select('*, pickup_latitude, pickup_longitude')
+      .select('*, pickup_latitude, pickup_longitude, customer_email')
       .eq('id', requestId)
       .single();
 
@@ -122,11 +122,57 @@ serve(async (req) => {
 
     console.log(`Created ${assignments.length} assignments within ${RADIUS_MILES} mile radius`);
 
+    // If no companies were found within range, update the move request status and notify customer
+    if (assignments.length === 0) {
+      // Update move request status to indicate no companies found
+      const { error: updateError } = await supabase
+        .from('move_requests')
+        .update({ status: 'no_companies_found' })
+        .eq('id', requestId);
+
+      if (updateError) {
+        console.error('Error updating move request status:', updateError);
+      }
+
+      // Notify customer that no companies were found
+      const customerEmailResponse = await fetch(
+        `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-email`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
+          },
+          body: JSON.stringify({
+            to: [request.customer_email],
+            subject: 'Update on Your Move Request',
+            html: `
+              <h2>No Moving Companies Found Nearby</h2>
+              <p>We apologize, but we couldn't find any verified moving companies within ${RADIUS_MILES} miles of your pickup location.</p>
+              <p>We recommend:</p>
+              <ul>
+                <li>Checking back in a few days as new companies may become available</li>
+                <li>Considering extending your search radius (contact support)</li>
+                <li>Looking for companies in nearby cities</li>
+              </ul>
+              <p>If you need assistance, please don't hesitate to contact our support team.</p>
+            `
+          }),
+        }
+      );
+
+      if (!customerEmailResponse.ok) {
+        console.error('Error sending customer notification email');
+      }
+    }
+
     return new Response(
       JSON.stringify({ 
         success: true, 
         assignmentCount: assignments.length,
-        message: `Created ${assignments.length} assignments within ${RADIUS_MILES} mile radius`
+        message: assignments.length > 0 
+          ? `Created ${assignments.length} assignments within ${RADIUS_MILES} mile radius`
+          : `No companies found within ${RADIUS_MILES} miles of the pickup location`
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
