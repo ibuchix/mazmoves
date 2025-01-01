@@ -1,8 +1,14 @@
 import { useEffect } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/components/AuthProvider";
 import { toast } from "sonner";
+import { Tables } from "@/types/database";
+
+// Define an interface for the extended move request data
+interface ExtendedMoveRequest extends Tables['move_requests']['Row'] {
+  distance?: number;
+  location_used?: 'pickup' | 'delivery';
+}
 
 export function useRealtimeAssignments() {
   const { session } = useAuth();
@@ -34,20 +40,22 @@ export function useRealtimeAssignments() {
               return;
             }
 
+            // Cast the move request to our extended type
+            const extendedMoveRequest = moveRequest as ExtendedMoveRequest;
+            
             // Format the distance message
-            const distance = Math.round(moveRequest.distance || 0);
-            const locationText = moveRequest.location_used === 'pickup' ? 'pickup location' : 'delivery location';
+            const distance = Math.round(extendedMoveRequest.distance || 0);
+            const locationText = extendedMoveRequest.location_used === 'pickup' ? 'pickup location' : 'delivery location';
 
             toast({
-              title: "New Move Assignment",
-              description: `You have been assigned a new moving request ${distance} miles away from your ${locationText}.`,
+              description: `You have been assigned a new moving request ${distance} miles away from your ${locationText}.`
             });
 
             console.log('New assignment received:', {
               assignmentId: payload.new.id,
               requestId: payload.new.request_id,
               distance,
-              locationUsed: moveRequest.location_used
+              locationUsed: extendedMoveRequest.location_used
             });
           } catch (error) {
             console.error('Error processing new assignment:', error);
