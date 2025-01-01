@@ -6,6 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const RADIUS_MILES = 25;
+
 const calculateDistance = (lat1: number, lon1: number, lat2: number, lon2: number) => {
   const R = 3959; // Earth's radius in miles
   const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -49,6 +51,8 @@ serve(async (req) => {
 
     if (companiesError) throw companiesError;
 
+    console.log(`Processing move request ${requestId} with ${companies.length} potential companies`);
+
     // Create assignments only for companies within 25 miles
     const assignments = [];
     for (const company of companies) {
@@ -64,8 +68,12 @@ serve(async (req) => {
         company.longitude
       );
 
-      // Only create assignment if company is within 25 miles
-      if (distance <= 25) {
+      console.log(`Company ${company.name} is ${Math.round(distance)} miles away from pickup location`);
+
+      // Only create assignment if company is within radius
+      if (distance <= RADIUS_MILES) {
+        console.log(`Creating assignment for company ${company.name}`);
+        
         const { data: assignment, error: assignmentError } = await supabase
           .from('move_assignments')
           .insert({
@@ -107,11 +115,19 @@ serve(async (req) => {
         }
 
         assignments.push({ ...assignment, distance });
+      } else {
+        console.log(`Company ${company.name} is too far (${Math.round(distance)} miles)`);
       }
     }
 
+    console.log(`Created ${assignments.length} assignments within ${RADIUS_MILES} mile radius`);
+
     return new Response(
-      JSON.stringify({ success: true, assignmentCount: assignments.length }),
+      JSON.stringify({ 
+        success: true, 
+        assignmentCount: assignments.length,
+        message: `Created ${assignments.length} assignments within ${RADIUS_MILES} mile radius`
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
