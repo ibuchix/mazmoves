@@ -5,7 +5,8 @@ import { toast } from "sonner";
 import { Tables } from "@/types/database";
 
 // Define an interface for the extended move request data
-interface ExtendedMoveRequest extends Tables['move_requests']['Row'] {
+type MoveRequestRow = Tables["move_requests"]["Row"];
+interface ExtendedMoveRequest extends MoveRequestRow {
   distance?: number;
   location_used?: 'pickup' | 'delivery';
 }
@@ -47,9 +48,8 @@ export function useRealtimeAssignments() {
             const distance = Math.round(extendedMoveRequest.distance || 0);
             const locationText = extendedMoveRequest.location_used === 'pickup' ? 'pickup location' : 'delivery location';
 
-            toast({
-              description: `You have been assigned a new moving request ${distance} miles away from your ${locationText}.`
-            });
+            // Use toast from sonner which accepts description directly
+            toast(`You have been assigned a new moving request ${distance} miles away from your ${locationText}.`);
 
             console.log('New assignment received:', {
               assignmentId: payload.new.id,
