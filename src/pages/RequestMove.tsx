@@ -27,32 +27,44 @@ export default function RequestMove() {
   const totalSteps = 5;
 
   const onSubmit = async (data: MoveRequestForm) => {
-    if (isSubmitting) return;
+    console.log("Starting form submission with data:", data);
+    if (isSubmitting) {
+      console.log("Submission already in progress, returning");
+      return;
+    }
+    
     setIsSubmitting(true);
 
     try {
+      console.log("Geocoding addresses...");
       // Geocode both addresses
       const [pickupCoords, deliveryCoords] = await Promise.all([
         geocodeAddress(data.pickupAddress),
         geocodeAddress(data.deliveryAddress)
       ]);
 
+      console.log("Geocoding results:", { pickupCoords, deliveryCoords });
+
+      const moveRequestData = {
+        pickup_address: addressToJson(data.pickupAddress),
+        delivery_address: addressToJson(data.deliveryAddress),
+        requested_date: data.moveDate,
+        estimated_size: data.propertySize,
+        special_instructions: data.specialInstructions,
+        customer_email: data.email,
+        customer_name: data.fullName,
+        customer_phone: data.phone,
+        pickup_latitude: pickupCoords.latitude,
+        pickup_longitude: pickupCoords.longitude,
+        delivery_latitude: deliveryCoords.latitude,
+        delivery_longitude: deliveryCoords.longitude
+      };
+
+      console.log("Inserting move request with data:", moveRequestData);
+
       const { data: moveRequest, error: moveRequestError } = await supabase
         .from("move_requests")
-        .insert({
-          pickup_address: addressToJson(data.pickupAddress),
-          delivery_address: addressToJson(data.deliveryAddress),
-          requested_date: data.moveDate,
-          estimated_size: data.propertySize,
-          special_instructions: data.specialInstructions,
-          customer_email: data.email,
-          customer_name: data.fullName,
-          customer_phone: data.phone,
-          pickup_latitude: pickupCoords.latitude,
-          pickup_longitude: pickupCoords.longitude,
-          delivery_latitude: deliveryCoords.latitude,
-          delivery_longitude: deliveryCoords.longitude
-        })
+        .insert(moveRequestData)
         .select()
         .single();
 
@@ -60,6 +72,8 @@ export default function RequestMove() {
         console.error("Error creating move request:", moveRequestError);
         throw moveRequestError;
       }
+
+      console.log("Move request created successfully:", moveRequest);
 
       // Send confirmation email to customer
       const { error: confirmationError } = await supabase.functions.invoke('send-confirmation-email', {
@@ -84,11 +98,12 @@ export default function RequestMove() {
         throw notifyError;
       }
 
+      console.log("All operations completed successfully");
       setShowSuccess(true);
       toast.success("Move request submitted successfully!");
 
     } catch (error) {
-      console.error("Error submitting request:", error);
+      console.error("Detailed error in submission:", error);
       toast.error("Failed to submit request. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -159,6 +174,7 @@ export default function RequestMove() {
                 <Button 
                   type="submit" 
                   disabled={isSubmitting}
+                  className="bg-[#040480] hover:bg-[#1f3dd2] text-white"
                 >
                   {isSubmitting ? "Submitting..." : "Submit Request"}
                 </Button>
@@ -184,7 +200,9 @@ export default function RequestMove() {
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center mt-4">
-            <Button onClick={() => navigate("/")}>
+            <Button onClick={() => navigate("/")}
+              className="bg-[#040480] hover:bg-[#1f3dd2] text-white"
+            >
               Return to Home
             </Button>
           </div>
