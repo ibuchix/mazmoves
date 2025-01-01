@@ -4,6 +4,8 @@ import { findNearbyCompanies } from './company-finder.ts';
 import { Company, MoveRequest, Assignment } from './types.ts';
 import { RADIUS_MILES } from './distance.ts';
 
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -53,7 +55,7 @@ serve(async (req) => {
       locationUsed = deliveryResults.locationUsed;
     }
 
-    // Create assignments for found companies
+    // Create assignments and send notifications for found companies
     const createdAssignments = [];
     for (const { company, distance } of assignments) {
       const { data: assignment, error: assignmentError } = await supabase
@@ -75,16 +77,16 @@ serve(async (req) => {
       const pickupAddress = Object.values(request.pickup_address).join(', ');
       const deliveryAddress = Object.values(request.delivery_address).join(', ');
 
-      // Send detailed email notification to company
-      const emailResponse = await fetch(
-        `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-email`,
-        {
+      // Send email notification to company
+      try {
+        const emailResponse = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${Deno.env.get('SUPABASE_ANON_KEY')}`,
+            'Authorization': `Bearer ${RESEND_API_KEY}`,
           },
           body: JSON.stringify({
+            from: 'MAZ Moves <notifications@mazmoves.com>',
             to: [company.contact_email],
             subject: 'New Move Request Available',
             html: `
@@ -101,14 +103,16 @@ serve(async (req) => {
                 ${request.special_instructions ? `<li><strong>Special Instructions:</strong> ${request.special_instructions}</li>` : ''}
               </ul>
               
-              <p>Please check your dashboard for more details and to respond to this request.</p>
+              <p>Please check your dashboard at <a href="https://mazmoves.com/company/dashboard">https://mazmoves.com/company/dashboard</a> for more details and to respond to this request.</p>
             `
           }),
-        }
-      );
+        });
 
-      if (!emailResponse.ok) {
-        console.error('Error sending email notification to company');
+        if (!emailResponse.ok) {
+          console.error('Error sending email notification to company:', await emailResponse.text());
+        }
+      } catch (emailError) {
+        console.error('Error sending email:', emailError);
       }
 
       createdAssignments.push({ ...assignment, distance });
