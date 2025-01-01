@@ -1,6 +1,5 @@
 import { RegisterCompanyForm } from "@/components/company/RegisterCompanyForm";
 import { CheckCircle, DollarSign, Users, Truck, Heart } from "lucide-react";
-import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function RegisterCompany() {
   return (
@@ -18,11 +17,9 @@ export default function RegisterCompany() {
       </div>
 
       <div className="container mx-auto px-4 py-16">
-        {/* Registration Form Section - Wrapped in ProtectedRoute */}
+        {/* Registration Form Section */}
         <div className="max-w-2xl mx-auto mb-16">
-          <ProtectedRoute>
-            <RegisterCompanyForm />
-          </ProtectedRoute>
+          <RegisterCompanyForm />
         </div>
 
         {/* Benefits Grid */}

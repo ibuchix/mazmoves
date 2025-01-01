@@ -11,7 +11,6 @@ import { AddressSection } from "./form/AddressSection";
 import { InsuranceSection } from "./form/InsuranceSection";
 import { Separator } from "@/components/ui/separator";
 import { RegistrationSuccessDialog } from "./RegistrationSuccessDialog";
-import { useAuth } from "../AuthProvider";
 
 interface CompanyRegistrationForm {
   name: string;
@@ -33,13 +32,8 @@ export function RegisterCompanyForm() {
   const [uploading, setUploading] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const navigate = useNavigate();
-  const { session } = useAuth();
 
   const handleFileUpload = async (file: File, prefix: string) => {
-    if (!session?.user?.id) {
-      throw new Error("User must be authenticated to upload files");
-    }
-
     const fileExt = file.name.split('.').pop();
     const filePath = `${prefix}_${crypto.randomUUID()}.${fileExt}`;
     
@@ -56,11 +50,6 @@ export function RegisterCompanyForm() {
   };
 
   const onSubmit = async (data: CompanyRegistrationForm) => {
-    if (!session?.user?.id) {
-      toast.error("You must be logged in to register a company");
-      return;
-    }
-
     try {
       setUploading(true);
       
@@ -83,7 +72,7 @@ export function RegisterCompanyForm() {
           name: data.name,
           registration_number: data.registrationNumber,
           vat_number: data.vatNumber || null,
-          contact_email: session.user.email, // Use authenticated user's email
+          contact_email: data.email,
           contact_phone: data.phone,
           business_address: data.address,
           manager_name: data.managerName,
