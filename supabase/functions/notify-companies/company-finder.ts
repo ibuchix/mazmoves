@@ -1,41 +1,47 @@
-import { calculateDistance, RADIUS_MILES } from './distance.ts';
 import { Company, MoveRequest, Assignment } from './types.ts';
 
-export const findNearbyCompanies = (
-  companies: Company[],
+export const findNearbyCompanies = async (
+  supabase: any,
   request: MoveRequest,
   useDeliveryLocation = false
-): { assignments: Assignment[]; locationUsed: 'pickup' | 'delivery' } => {
+): Promise<{ assignments: Assignment[]; locationUsed: 'pickup' | 'delivery' }> => {
   const assignments: Assignment[] = [];
   const locationUsed = useDeliveryLocation ? 'delivery' : 'pickup';
   
-  const baseLat = useDeliveryLocation ? request.delivery_latitude : request.pickup_latitude;
-  const baseLon = useDeliveryLocation ? request.delivery_longitude : request.pickup_longitude;
-
-  if (!baseLat || !baseLon) {
-    console.warn(`Missing coordinates for ${locationUsed} location`);
+  const point = useDeliveryLocation ? request.delivery_location : request.pickup_location;
+  
+  if (!point) {
+    console.warn(`Missing location for ${locationUsed}`);
     return { assignments: [], locationUsed };
   }
 
-  for (const company of companies) {
-    if (!company.latitude || !company.longitude) {
-      console.warn('Missing coordinates for company:', company.name);
+  const { data: nearbyCompanies, error } = await supabase
+    .rpc('find_companies_within_radius', {
+      point: point,
+      radius_miles: 25
+    });
+
+  if (error) {
+    console.error('Error finding nearby companies:', error);
+    return { assignments: [], locationUsed };
+  }
+
+  for (const result of nearbyCompanies) {
+    const { data: company, error: companyError } = await supabase
+      .from('companies')
+      .select('*')
+      .eq('id', result.id)
+      .single();
+
+    if (companyError) {
+      console.error('Error fetching company details:', companyError);
       continue;
     }
 
-    const distance = calculateDistance(
-      baseLat,
-      baseLon,
-      company.latitude,
-      company.longitude
-    );
-
-    console.log(`Company ${company.name} is ${Math.round(distance)} miles away from ${locationUsed} location`);
-
-    if (distance <= RADIUS_MILES) {
-      console.log(`Creating assignment for company ${company.name} based on ${locationUsed} location`);
-      assignments.push({ company, distance });
-    }
+    assignments.push({ 
+      company, 
+      distance: result.distance 
+    });
   }
 
   return { assignments, locationUsed };
