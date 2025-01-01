@@ -10,10 +10,11 @@ export async function geocodeAddress(address: Address): Promise<Coordinates> {
   const addressString = `${address.street}, ${address.city}, ${address.state} ${address.zipCode}`;
   
   try {
-    const { data } = await supabase.functions.invoke('geocode-address', {
+    const { data, error } = await supabase.functions.invoke('geocode-address', {
       body: { address: addressString }
     });
     
+    if (error) throw error;
     if (!data || !data.latitude || !data.longitude) {
       throw new Error('No coordinates found for address');
     }
