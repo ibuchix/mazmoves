@@ -71,7 +71,11 @@ serve(async (req) => {
         continue;
       }
 
-      // Send email notification to company
+      // Format addresses for email
+      const pickupAddress = Object.values(request.pickup_address).join(', ');
+      const deliveryAddress = Object.values(request.delivery_address).join(', ');
+
+      // Send detailed email notification to company
       const emailResponse = await fetch(
         `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-email`,
         {
@@ -84,10 +88,20 @@ serve(async (req) => {
             to: [company.contact_email],
             subject: 'New Move Request Available',
             html: `
-              <h2>New Move Request in Your Area</h2>
+              <h2>New Move Request Details</h2>
               <p>A new moving request has been submitted ${Math.round(distance)} miles from your location 
               (based on the ${locationUsed} address).</p>
-              <p>Please check your dashboard for more details.</p>
+              
+              <h3>Move Details:</h3>
+              <ul>
+                <li><strong>Pickup Address:</strong> ${pickupAddress}</li>
+                <li><strong>Delivery Address:</strong> ${deliveryAddress}</li>
+                <li><strong>Requested Date:</strong> ${new Date(request.requested_date).toLocaleDateString()}</li>
+                <li><strong>Property Size:</strong> ${request.estimated_size}</li>
+                ${request.special_instructions ? `<li><strong>Special Instructions:</strong> ${request.special_instructions}</li>` : ''}
+              </ul>
+              
+              <p>Please check your dashboard for more details and to respond to this request.</p>
             `
           }),
         }

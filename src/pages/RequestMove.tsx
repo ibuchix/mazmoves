@@ -61,6 +61,20 @@ export default function RequestMove() {
         throw moveRequestError;
       }
 
+      // Send confirmation email to customer
+      const { error: confirmationError } = await supabase.functions.invoke('send-confirmation-email', {
+        body: { 
+          customerEmail: data.email,
+          customerName: data.fullName
+        }
+      });
+
+      if (confirmationError) {
+        console.error("Error sending confirmation email:", confirmationError);
+        // Don't throw here, as the move request was created successfully
+      }
+
+      // Notify companies about the new request
       const { error: notifyError } = await supabase.functions.invoke('notify-companies', {
         body: { requestId: moveRequest.id }
       });
@@ -166,7 +180,7 @@ export default function RequestMove() {
               Success!
             </DialogTitle>
             <DialogDescription className="text-center">
-              Your Move Request has been sent to verified movers nearby. You will be contacted shortly.
+              Your Move Request has been submitted successfully. You will receive a confirmation email shortly.
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center mt-4">
