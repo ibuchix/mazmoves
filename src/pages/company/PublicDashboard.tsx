@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Truck, Clock, CheckCircle, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { MoveAssignmentWithRequest } from "@/types/move";
+import { MoveAssignmentWithRequest, transformMoveAssignment } from "@/types/move";
 import { toast } from "sonner";
 
 export default function PublicDashboard() {
@@ -39,7 +39,9 @@ export default function PublicDashboard() {
 
         if (assignmentsError) throw assignmentsError;
         
-        setAssignments(assignmentsData as MoveAssignmentWithRequest[]);
+        // Transform the data to match our types
+        const transformedAssignments = assignmentsData.map(transformMoveAssignment);
+        setAssignments(transformedAssignments);
       } catch (error) {
         console.error("Error fetching company data:", error);
         toast.error("Error loading company dashboard");
