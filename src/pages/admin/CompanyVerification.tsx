@@ -32,23 +32,50 @@ export default function CompanyVerification() {
   });
 
   const handleVerification = async (companyId: string, approve: boolean) => {
-    const { error } = await supabase
-      .from('companies')
-      .update({ 
-        is_verified: approve,
-        verification_date: new Date().toISOString(),
-        registration_status: approve ? 'approved' : 'rejected',
-        verification_notes: approve ? 'Approved by admin' : 'Rejected by admin'
-      })
-      .eq('id', companyId);
+    try {
+      const { data: company } = await supabase
+        .from('companies')
+        .select('name, contact_email')
+        .eq('id', companyId)
+        .single();
 
-    if (error) {
-      toast.error("Failed to update verification status");
-      return;
+      const { error } = await supabase
+        .from('companies')
+        .update({ 
+          is_verified: approve,
+          verification_date: new Date().toISOString(),
+          registration_status: approve ? 'approved' : 'rejected',
+          verification_notes: approve ? 'Approved by admin' : 'Rejected by admin'
+        })
+        .eq('id', companyId);
+
+      if (error) {
+        toast.error("Failed to update verification status");
+        return;
+      }
+
+      if (approve && company) {
+        // Send verification email
+        const { error: emailError } = await supabase.functions.invoke('send-verification-email', {
+          body: { 
+            companyName: company.name,
+            email: company.contact_email
+          }
+        });
+
+        if (emailError) {
+          console.error("Error sending verification email:", emailError);
+          toast.error("Company verified but failed to send notification email");
+          return;
+        }
+      }
+
+      toast.success(`Company ${approve ? 'approved' : 'rejected'} successfully`);
+      refetch();
+    } catch (error) {
+      console.error("Error during verification:", error);
+      toast.error("An error occurred during verification");
     }
-
-    toast.success(`Company ${approve ? 'approved' : 'rejected'} successfully`);
-    refetch();
   };
 
   return (

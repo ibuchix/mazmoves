@@ -5,8 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRealtimeAssignments } from "@/hooks/use-realtime-assignments";
-import { Truck, Clock, CheckCircle, XCircle } from "lucide-react";
+import { Truck, Clock, CheckCircle, XCircle, ShieldCheck } from "lucide-react";
 import { MoveAssignmentWithRequest } from "@/types/move";
+import { Badge } from "@/components/ui/badge";
 
 export default function CompanyDashboard() {
   const { session } = useAuth();
@@ -86,7 +87,17 @@ export default function CompanyDashboard() {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">Company Dashboard</h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="text-3xl font-bold">Company Dashboard</h1>
+        {company?.is_verified && (
+          <Badge 
+            className="flex items-center gap-1 bg-[#84d21f] hover:bg-[#84d21f] text-white px-3 py-1"
+          >
+            <ShieldCheck className="h-4 w-4" />
+            Verified Company
+          </Badge>
+        )}
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <Card>
