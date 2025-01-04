@@ -1,53 +1,49 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "./components/AuthProvider";
-import { Toaster } from "./components/ui/sonner";
-import Navbar from "./components/Navbar";
-import Footer from "./components/Footer";
-import Index from "./pages/Index";
-import About from "./pages/About";
-import Services from "./pages/Services";
-import Contact from "./pages/Contact";
-import Companies from "./pages/Companies";
-import RequestMove from "./pages/RequestMove";
-import Login from "./pages/auth/Login";
-import CompanyRegister from "./pages/company/Register";
-import CompanyDashboard from "./pages/company/Dashboard";
-import PublicDashboard from "./pages/company/PublicDashboard";
-import AdminDashboard from "./pages/admin/Dashboard";
-import ProtectedRoute from "./components/ProtectedRoute";
-import TermsAndConditions from "./pages/TermsAndConditions";
-import PrivacyPolicy from "./pages/PrivacyPolicy";
+import { Toaster } from "@/components/ui/toaster";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import Index from "@/pages/Index";
+import About from "@/pages/About";
+import Contact from "@/pages/Contact";
+import Services from "@/pages/Services";
+import Companies from "@/pages/Companies";
+import PrivacyPolicy from "@/pages/PrivacyPolicy";
+import TermsAndConditions from "@/pages/TermsAndConditions";
+import Login from "@/pages/auth/Login";
+import Register from "@/pages/company/Register";
+import CompanyDashboard from "@/pages/company/Dashboard";
+import AdminDashboard from "@/pages/admin/Dashboard";
+import CompanyVerification from "@/pages/admin/CompanyVerification";
+import PublicDashboard from "@/pages/company/PublicDashboard";
+import RequestMove from "@/pages/RequestMove";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import AuthProvider from "@/components/AuthProvider";
+import "./App.css";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <Router basename="/">
+      <Router>
+        <AuthProvider>
           <div className="flex flex-col min-h-screen">
             <Navbar />
             <main className="flex-grow">
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
-                <Route path="/services" element={<Services />} />
                 <Route path="/contact" element={<Contact />} />
+                <Route path="/services" element={<Services />} />
                 <Route path="/companies" element={<Companies />} />
-                <Route path="/request-move" element={<RequestMove />} />
+                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
                 <Route path="/login" element={<Login />} />
-                <Route path="/terms" element={<TermsAndConditions />} />
-                <Route path="/privacy" element={<PrivacyPolicy />} />
-                <Route path="/company/register" element={<CompanyRegister />} />
-                <Route path="/company/public-dashboard/:token" element={<PublicDashboard />} />
+                <Route path="/company/register" element={<Register />} />
+                <Route path="/request-move" element={<RequestMove />} />
+                <Route path="/company/:id" element={<PublicDashboard />} />
+                
                 <Route
                   path="/company/dashboard"
                   element={
@@ -56,6 +52,7 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+                
                 <Route
                   path="/admin/dashboard"
                   element={
@@ -64,13 +61,22 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+
+                <Route
+                  path="/admin/verification"
+                  element={
+                    <ProtectedRoute allowedRoles={["admin"]}>
+                      <CompanyVerification />
+                    </ProtectedRoute>
+                  }
+                />
               </Routes>
             </main>
             <Footer />
           </div>
           <Toaster />
-        </Router>
-      </AuthProvider>
+        </AuthProvider>
+      </Router>
     </QueryClientProvider>
   );
 }

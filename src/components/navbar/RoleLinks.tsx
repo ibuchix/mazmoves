@@ -1,26 +1,53 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import { Shield } from "lucide-react";
 
 interface RoleLinksProps {
-  role?: string | null;
+  role: string;
 }
 
 export default function RoleLinks({ role }: RoleLinksProps) {
-  if (!role) return null;
-
-  switch (role) {
-    case "company":
-      return (
-        <Link to="/company/dashboard" className="text-[#040480] hover:text-[#1f3dd2] font-medium">
+  if (role === 'admin') {
+    return (
+      <>
+        <NavLink 
+          to="/admin/dashboard"
+          className={({ isActive }) => 
+            `text-sm font-medium transition-colors hover:text-primary ${
+              isActive ? 'text-[#040480]' : 'text-muted-foreground'
+            }`
+          }
+        >
           Dashboard
-        </Link>
-      );
-    case "customer":
-      return (
-        <Link to="/request-move" className="text-[#040480] hover:text-[#1f3dd2] font-medium">
-          Request Move
-        </Link>
-      );
-    default:
-      return null;
+        </NavLink>
+        <NavLink 
+          to="/admin/verification"
+          className={({ isActive }) => 
+            `text-sm font-medium transition-colors hover:text-primary flex items-center gap-1 ${
+              isActive ? 'text-[#040480]' : 'text-muted-foreground'
+            }`
+          }
+        >
+          <Shield className="h-4 w-4" />
+          Verification
+        </NavLink>
+      </>
+    );
   }
+
+  if (role === 'company') {
+    return (
+      <NavLink 
+        to="/company/dashboard"
+        className={({ isActive }) => 
+          `text-sm font-medium transition-colors hover:text-primary ${
+            isActive ? 'text-[#040480]' : 'text-muted-foreground'
+          }`
+        }
+      >
+        Dashboard
+      </NavLink>
+    );
+  }
+
+  return null;
 }
