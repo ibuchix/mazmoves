@@ -6,7 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Mail } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface RegistrationSuccessDialogProps {
@@ -33,9 +33,18 @@ export function RegistrationSuccessDialog({
             <CheckCircle className="h-6 w-6 text-[#84d21f]" />
             Registration Successful
           </DialogTitle>
-          <DialogDescription className="text-center pt-4">
-            Thank you for registering with MAZ Moves! Please check your email to confirm your address. 
-            Our team will review your application and verify your details shortly.
+          <DialogDescription className="space-y-4 pt-4 text-center">
+            <div className="flex flex-col items-center gap-2">
+              <Mail className="h-12 w-12 text-[#d2491f]" />
+              <p>
+                Please check your email to confirm your address. We've sent you a confirmation link.
+              </p>
+            </div>
+            <div className="rounded-lg bg-blue-50 p-4 text-sm text-[#040480]">
+              <p>
+                After confirming your email, you can log in to your dashboard. Our team will review your application and verify your details shortly.
+              </p>
+            </div>
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col gap-4 mt-4">
