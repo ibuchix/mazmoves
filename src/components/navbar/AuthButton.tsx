@@ -3,6 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { Session } from "@supabase/supabase-js";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { LogOut } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
 
 interface AuthButtonProps {
   session: Session | null;
@@ -46,15 +54,43 @@ export default function AuthButton({ session }: AuthButtonProps) {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast.success("Logged out successfully");
+      navigate('/');
+    } catch (error) {
+      console.error('Error logging out:', error);
+      toast.error("Error logging out");
+    }
+  };
+
   if (session) {
     return (
-      <Button 
-        variant="outline" 
-        className="text-[#040480] border-[#040480] hover:bg-[#040480] hover:text-white"
-        onClick={handleDashboardClick}
-      >
-        Dashboard
-      </Button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button 
+            variant="outline" 
+            className="text-[#040480] border-[#040480] hover:bg-[#040480] hover:text-white"
+          >
+            Dashboard
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem onClick={handleDashboardClick}>
+            View Dashboard
+          </DropdownMenuItem>
+          <DropdownMenuItem 
+            onClick={handleLogout}
+            className="text-red-600 focus:text-red-600 cursor-pointer"
+          >
+            <LogOut className="mr-2 h-4 w-4" />
+            Logout
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   }
 
