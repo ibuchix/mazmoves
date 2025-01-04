@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, Users, CheckCircle, AlertCircle } from "lucide-react";
 import { AdminDashboardData } from "@/types/admin";
+import { Tables } from "@/types/database";
 
 export default function AdminDashboard() {
   const { data: dashboardData, isLoading, error } = useQuery({
@@ -20,13 +21,40 @@ export default function AdminDashboard() {
         // Fallback to direct companies query if mv fails
         const { data: companiesData, error: companiesError } = await supabase
           .from('companies')
-          .select('*');
+          .select(`
+            *,
+            move_assignments (
+              id,
+              status
+            ),
+            company_payments (
+              amount
+            )
+          `);
         
         if (companiesError) {
           throw companiesError;
         }
         
-        return companiesData;
+        // Transform companies data to match dashboard view structure
+        return companiesData.map((company: Tables['companies']['Row'] & {
+          move_assignments: { id: string; status: string }[];
+          company_payments: { amount: number }[];
+        }) => ({
+          company_id: company.id,
+          company_name: company.name,
+          contact_email: company.contact_email,
+          registration_status: company.registration_status,
+          registration_date: company.registration_date,
+          is_verified: company.is_verified,
+          subscription_status: company.subscription_status,
+          last_payment_date: company.last_payment_date,
+          total_assignments: company.move_assignments?.length || 0,
+          active_assignments: company.move_assignments?.filter(a => a.status === 'active').length || 0,
+          completed_assignments: company.move_assignments?.filter(a => a.status === 'completed').length || 0,
+          total_payments: company.company_payments?.length || 0,
+          total_paid_amount: company.company_payments?.reduce((sum, p) => sum + (p.amount || 0), 0) || 0
+        }));
       }
       
       return mvData;
