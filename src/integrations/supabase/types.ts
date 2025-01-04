@@ -11,11 +11,13 @@ export type Database = {
     Tables: {
       companies: {
         Row: {
+          auth_user_id: string | null
           business_address: Json
           contact_email: string
           contact_phone: string | null
           created_at: string | null
           description: string | null
+          email_verified: boolean | null
           id: string
           insurance_docs: Json | null
           is_active: boolean | null
@@ -35,13 +37,17 @@ export type Database = {
           subscription_status: string | null
           updated_at: string | null
           vat_number: string | null
+          verification_date: string | null
+          verification_notes: string | null
         }
         Insert: {
+          auth_user_id?: string | null
           business_address: Json
           contact_email: string
           contact_phone?: string | null
           created_at?: string | null
           description?: string | null
+          email_verified?: boolean | null
           id?: string
           insurance_docs?: Json | null
           is_active?: boolean | null
@@ -61,13 +67,17 @@ export type Database = {
           subscription_status?: string | null
           updated_at?: string | null
           vat_number?: string | null
+          verification_date?: string | null
+          verification_notes?: string | null
         }
         Update: {
+          auth_user_id?: string | null
           business_address?: Json
           contact_email?: string
           contact_phone?: string | null
           created_at?: string | null
           description?: string | null
+          email_verified?: boolean | null
           id?: string
           insurance_docs?: Json | null
           is_active?: boolean | null
@@ -87,6 +97,8 @@ export type Database = {
           subscription_status?: string | null
           updated_at?: string | null
           vat_number?: string | null
+          verification_date?: string | null
+          verification_notes?: string | null
         }
         Relationships: []
       }
@@ -140,6 +152,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      email_templates: {
+        Row: {
+          created_at: string | null
+          html_content: string
+          id: string
+          name: string
+          subject: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          html_content: string
+          id?: string
+          name: string
+          subject: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          html_content?: string
+          id?: string
+          name?: string
+          subject?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       move_assignments: {
         Row: {

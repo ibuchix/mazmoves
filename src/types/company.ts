@@ -3,6 +3,7 @@ export interface CompanyRegistrationForm {
   registrationNumber: string;
   vatNumber?: string;
   email: string;
+  password: string;
   phone: string;
   address: {
     street: string;

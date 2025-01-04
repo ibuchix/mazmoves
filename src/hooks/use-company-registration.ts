@@ -13,6 +13,19 @@ export function useCompanyRegistration() {
     try {
       setUploading(true);
       
+      // First create the auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            role: 'company'
+          }
+        }
+      });
+
+      if (authError) throw authError;
+
       const transitInsuranceInput = document.getElementById('transitInsurance') as HTMLInputElement;
       const liabilityInsuranceInput = document.getElementById('liabilityInsurance') as HTMLInputElement;
       
@@ -44,13 +57,38 @@ export function useCompanyRegistration() {
             { type: 'liability', path: liabilityInsurancePath }
           ],
           latitude: coordinates.latitude,
-          longitude: coordinates.longitude
+          longitude: coordinates.longitude,
+          auth_user_id: authData.user?.id
         });
 
       if (insertError) throw insertError;
 
+      // Create user record
+      const { error: userError } = await supabase
+        .from('users')
+        .insert({
+          id: authData.user?.id,
+          email: data.email,
+          role: 'company',
+          full_name: data.managerName
+        });
+
+      if (userError) throw userError;
+
+      // Send welcome email
+      const { error: emailError } = await supabase.functions.invoke('send-welcome-email', {
+        body: { 
+          email: data.email,
+          companyName: data.name
+        }
+      });
+
+      if (emailError) {
+        console.error("Error sending welcome email:", emailError);
+      }
+
       setShowSuccessDialog(true);
-      toast.success("Company registered successfully!");
+      toast.success("Registration successful! Please check your email to confirm your address.");
     } catch (error) {
       console.error("Registration error:", error);
       toast.error("Registration failed. Please try again.");

@@ -24,6 +24,24 @@ export function ContactDetailsSection({ register, errors }: ContactDetailsSectio
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="password" className="text-sm font-medium text-[#040480]">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            {...register("password", { 
+              required: "Password is required",
+              minLength: {
+                value: 8,
+                message: "Password must be at least 8 characters"
+              }
+            })}
+            className="h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300"
+            placeholder="Create a secure password"
+          />
+          {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>}
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="phone" className="text-sm font-medium text-[#040480]">Business Phone</Label>
           <Input
             id="phone"
