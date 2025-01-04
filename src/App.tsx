@@ -18,7 +18,7 @@ import CompanyVerification from "@/pages/admin/CompanyVerification";
 import PublicDashboard from "@/pages/company/PublicDashboard";
 import RequestMove from "@/pages/RequestMove";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import AuthProvider from "@/components/AuthProvider";
+import { AuthProvider } from "@/components/AuthProvider";
 import "./App.css";
 
 const queryClient = new QueryClient();
