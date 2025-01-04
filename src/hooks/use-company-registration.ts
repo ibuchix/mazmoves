@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { uploadCompanyDocument } from "@/utils/fileUpload";
 import { toast } from "sonner";
 import { CompanyRegistrationForm } from "@/types/company";
-import { geocodeAddress } from "@/utils/geocoding";
+import { createAuthUser } from "@/utils/auth";
+import { createCompanyRecord, sendWelcomeEmail } from "@/utils/company";
 
 export function useCompanyRegistration() {
   const [uploading, setUploading] = useState(false);
@@ -13,81 +12,14 @@ export function useCompanyRegistration() {
     try {
       setUploading(true);
       
-      // First create the auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: {
-            role: 'company'
-          }
-        }
-      });
+      // Create auth user and verify creation
+      const authData = await createAuthUser(data.email, data.password);
 
-      if (authError) throw authError;
-
-      // Wait a moment for the user record to be fully created
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Verify the user was created
-      const { data: userData, error: userCheckError } = await supabase
-        .from('users')
-        .select('id')
-        .eq('email', data.email)
-        .single();
-
-      if (userCheckError || !userData) {
-        throw new Error('Failed to verify user creation');
-      }
-
-      const transitInsuranceInput = document.getElementById('transitInsurance') as HTMLInputElement;
-      const liabilityInsuranceInput = document.getElementById('liabilityInsurance') as HTMLInputElement;
-      
-      const transitInsurancePath = await uploadCompanyDocument(
-        transitInsuranceInput.files![0],
-        'transit'
-      );
-      
-      const liabilityInsurancePath = await uploadCompanyDocument(
-        liabilityInsuranceInput.files![0],
-        'liability'
-      );
-
-      // Geocode the company's address
-      const coordinates = await geocodeAddress(data.address);
-
-      const { error: insertError } = await supabase
-        .from('companies')
-        .insert({
-          name: data.name,
-          registration_number: data.registrationNumber,
-          vat_number: data.vatNumber || null,
-          contact_email: data.email,
-          contact_phone: data.phone,
-          business_address: data.address,
-          manager_name: data.managerName,
-          insurance_docs: [
-            { type: 'transit', path: transitInsurancePath },
-            { type: 'liability', path: liabilityInsurancePath }
-          ],
-          latitude: coordinates.latitude,
-          longitude: coordinates.longitude,
-          auth_user_id: authData.user?.id
-        });
-
-      if (insertError) throw insertError;
+      // Create company record
+      await createCompanyRecord(data, authData.user!.id);
 
       // Send welcome email
-      const { error: emailError } = await supabase.functions.invoke('send-welcome-email', {
-        body: { 
-          email: data.email,
-          companyName: data.name
-        }
-      });
-
-      if (emailError) {
-        console.error("Error sending welcome email:", emailError);
-      }
+      await sendWelcomeEmail(data.email, data.name);
 
       setShowSuccessDialog(true);
       toast.success("Registration successful! Please check your email to confirm your address.");
