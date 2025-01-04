@@ -26,6 +26,20 @@ export function useCompanyRegistration() {
 
       if (authError) throw authError;
 
+      // Wait a moment for the user record to be fully created
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // Verify the user was created
+      const { data: userData, error: userCheckError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('email', data.email)
+        .single();
+
+      if (userCheckError || !userData) {
+        throw new Error('Failed to verify user creation');
+      }
+
       const transitInsuranceInput = document.getElementById('transitInsurance') as HTMLInputElement;
       const liabilityInsuranceInput = document.getElementById('liabilityInsurance') as HTMLInputElement;
       
@@ -62,18 +76,6 @@ export function useCompanyRegistration() {
         });
 
       if (insertError) throw insertError;
-
-      // Create user record
-      const { error: userError } = await supabase
-        .from('users')
-        .insert({
-          id: authData.user?.id,
-          email: data.email,
-          role: 'company',
-          full_name: data.managerName
-        });
-
-      if (userError) throw userError;
 
       // Send welcome email
       const { error: emailError } = await supabase.functions.invoke('send-welcome-email', {
