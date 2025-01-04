@@ -13,7 +13,10 @@ export default function Index() {
 
   const handleGetQuotes = () => {
     if (moveType) {
-      navigate('/request-move', { state: { moveType } });
+      navigate('/request-move', { 
+        state: { moveType },
+        replace: true 
+      });
     }
   };
 
