@@ -7,17 +7,40 @@ import { DollarSign, Users, CheckCircle, AlertCircle } from "lucide-react";
 import { AdminDashboardData } from "@/types/admin";
 
 export default function AdminDashboard() {
-  const { data: dashboardData } = useQuery({
+  const { data: dashboardData, isLoading, error } = useQuery({
     queryKey: ["admin-dashboard"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First try to fetch from the materialized view
+      const { data: mvData, error: mvError } = await supabase
         .from('admin_dashboard_mv')
         .select('*');
       
-      if (error) throw error;
-      return data as AdminDashboardData[];
+      if (mvError) {
+        console.error("Error fetching from materialized view:", mvError);
+        // Fallback to direct companies query if mv fails
+        const { data: companiesData, error: companiesError } = await supabase
+          .from('companies')
+          .select('*');
+        
+        if (companiesError) {
+          throw companiesError;
+        }
+        
+        return companiesData;
+      }
+      
+      return mvData;
     },
   });
+
+  if (isLoading) {
+    return <div className="container mx-auto p-6">Loading dashboard data...</div>;
+  }
+
+  if (error) {
+    console.error("Dashboard error:", error);
+    return <div className="container mx-auto p-6">Error loading dashboard data. Please try again.</div>;
+  }
 
   const stats = {
     totalCompanies: dashboardData?.length || 0,
