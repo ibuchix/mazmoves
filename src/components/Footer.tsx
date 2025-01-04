@@ -5,9 +5,13 @@ export default function Footer() {
   return (
     <footer className="bg-[#040480] text-white py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <img src="/lovable-uploads/b700dde9-463e-4b6e-8523-ec9f718b3beb.png" alt="MAZ Moves" className="h-10 bg-white p-2 rounded" />
+            <img 
+              src="/lovable-uploads/b700dde9-463e-4b6e-8523-ec9f718b3beb.png" 
+              alt="MAZ Moves" 
+              className="h-10 bg-white p-2 rounded" 
+            />
             <p className="mt-2 text-sm">Professional moving services for homes and businesses.</p>
             <div className="flex space-x-4 mt-4">
               <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="hover:text-[#84d21f]">
@@ -25,26 +29,26 @@ export default function Footer() {
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold mb-3">Quick Links</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
+            <ul className="space-y-3">
               <li><Link to="/" className="hover:text-[#84d21f]">Home</Link></li>
               <li><Link to="/services" className="hover:text-[#84d21f]">Services</Link></li>
               <li><Link to="/about" className="hover:text-[#84d21f]">About Us</Link></li>
-              <li><Link to="/contact" className="hover:text-[#84d21f]">Contact</Link></li>
+              <li><Link to="/companies" className="hover:text-[#84d21f]">Partner With Us</Link></li>
             </ul>
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold mb-3">Legal</h3>
-            <ul className="space-y-2 text-sm">
-              <li><Link to="/terms" className="hover:text-[#84d21f]">Terms & Conditions</Link></li>
-              <li><Link to="/privacy" className="hover:text-[#84d21f]">Privacy Policy</Link></li>
+            <h3 className="text-lg font-semibold mb-4">Legal</h3>
+            <ul className="space-y-3">
+              <li><Link to="/terms-and-conditions" className="hover:text-[#84d21f]">Terms & Conditions</Link></li>
+              <li><Link to="/privacy-policy" className="hover:text-[#84d21f]">Privacy Policy</Link></li>
             </ul>
           </div>
           
           <div>
-            <h3 className="text-lg font-semibold mb-3">Contact Us</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
+            <ul className="space-y-3">
               <li className="flex items-center gap-2">
                 <Mail size={16} />
                 <a href="mailto:ask@mazmoves.com" className="hover:text-[#84d21f]">ask@mazmoves.com</a>
@@ -61,8 +65,8 @@ export default function Footer() {
           </div>
         </div>
         
-        <div className="border-t border-white/10 mt-6 pt-6 text-center text-sm">
-          <p>&copy; 2025 MAZ Moves Ltd. All Rights Reserved.</p>
+        <div className="border-t border-white/10 mt-8 pt-6 text-center text-sm">
+          <p>&copy; {new Date().getFullYear()} MAZ Moves Ltd. All Rights Reserved.</p>
         </div>
       </div>
     </footer>

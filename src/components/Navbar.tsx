@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import AuthButton from "./navbar/AuthButton";
 import RoleLinks from "./navbar/RoleLinks";
 import MobileMenu from "./navbar/MobileMenu";
+import { Button } from "./ui/button";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -32,6 +33,9 @@ export default function Navbar() {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  // Check if user is registered company
+  const isRegisteredCompany = userData?.role === 'company';
+
   return (
     <nav className="bg-white border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -52,12 +56,21 @@ export default function Navbar() {
             <Link to="/services" className="text-[#040480] hover:text-[#1f3dd2] font-medium">Services</Link>
             <Link to="/companies" className="text-[#040480] hover:text-[#1f3dd2] font-medium">Companies</Link>
             <Link to="/about" className="text-[#040480] hover:text-[#1f3dd2] font-medium">About</Link>
-            <Link to="/contact" className="text-[#040480] hover:text-[#1f3dd2] font-medium">Contact</Link>
-            <RoleLinks role={userData?.role} />
+            
+            {/* Only show role-specific links if user is logged in and registered */}
+            {session && isRegisteredCompany && <RoleLinks role={userData?.role} />}
           </div>
 
-          <div className="hidden md:block">
-            <AuthButton session={session} />
+          <div className="hidden md:flex items-center">
+            {!session && (
+              <Button 
+                className="bg-[#d2491f] hover:bg-[#84d21f] text-white transition-all duration-300"
+                onClick={() => window.location.href = '/companies'}
+              >
+                Partner With Us
+              </Button>
+            )}
+            {session && <AuthButton session={session} />}
           </div>
 
           {/* Mobile Menu Button */}

@@ -5,7 +5,6 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Index from "@/pages/Index";
 import About from "@/pages/About";
-import Contact from "@/pages/Contact";
 import Services from "@/pages/Services";
 import Companies from "@/pages/Companies";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
@@ -34,7 +33,6 @@ function App() {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/about" element={<About />} />
-                <Route path="/contact" element={<Contact />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/companies" element={<Companies />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />
