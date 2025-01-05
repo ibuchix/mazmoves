@@ -33,7 +33,10 @@ serve(async (req) => {
     // Validate required fields
     if (!email || !password || !companyName || !registrationNumber || !phone || !managerName || !address) {
       return new Response(
-        JSON.stringify({ error: 'Missing required fields' }),
+        JSON.stringify({ 
+          error: 'Missing required fields',
+          status: 400
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       )
     }
@@ -46,14 +49,36 @@ serve(async (req) => {
 
     console.log('Checking if user already exists')
     // Check if user already exists
-    const { data: existingUser } = await supabase.auth.admin.listUsers()
-    const userExists = existingUser.users.some(user => user.email === email)
+    const { data: { users }, error: getUserError } = await supabase.auth.admin.listUsers()
+    const userExists = users.some(user => user.email === email)
 
     if (userExists) {
       return new Response(
         JSON.stringify({ 
           error: 'Registration failed', 
-          details: 'An account with this email already exists' 
+          details: 'An account with this email already exists',
+          status: 400
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
+          status: 400 
+        }
+      )
+    }
+
+    // Check if company already exists with this registration number
+    const { data: existingCompany } = await supabase
+      .from('companies')
+      .select('id')
+      .eq('registration_number', registrationNumber)
+      .single()
+
+    if (existingCompany) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Registration failed', 
+          details: 'A company with this registration number already exists',
+          status: 400
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
@@ -71,10 +96,25 @@ serve(async (req) => {
       user_metadata: { role: 'company' }
     })
 
-    if (authError || !authData.user) {
+    if (authError) {
       console.error('Auth user creation error:', authError)
       return new Response(
-        JSON.stringify({ error: 'Failed to create user account', details: authError }),
+        JSON.stringify({ 
+          error: 'Failed to create user account', 
+          details: authError,
+          status: 400
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      )
+    }
+
+    if (!authData.user) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to create user account',
+          details: 'No user data returned',
+          status: 500
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       )
     }
@@ -116,7 +156,11 @@ serve(async (req) => {
     if (userError) {
       console.error('User record creation error:', userError)
       return new Response(
-        JSON.stringify({ error: 'Failed to create user record', details: userError }),
+        JSON.stringify({ 
+          error: 'Failed to create user record', 
+          details: userError,
+          status: 500 
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       )
     }
@@ -166,7 +210,11 @@ serve(async (req) => {
     if (companyError) {
       console.error('Company creation error:', companyError)
       return new Response(
-        JSON.stringify({ error: 'Failed to create company record', details: companyError }),
+        JSON.stringify({ 
+          error: 'Failed to create company record', 
+          details: companyError,
+          status: 500
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       )
     }
@@ -193,7 +241,11 @@ serve(async (req) => {
   } catch (error) {
     console.error('Registration error:', error)
     return new Response(
-      JSON.stringify({ error: 'Registration failed', details: error.message }),
+      JSON.stringify({ 
+        error: 'Registration failed', 
+        details: error.message,
+        status: 500
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     )
   }
