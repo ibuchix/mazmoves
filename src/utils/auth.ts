@@ -23,9 +23,9 @@ export async function createAuthUser(email: string, password: string) {
     throw new Error('Failed to create user account - no user data returned');
   }
 
-  // Wait for user record creation...
+  // Wait longer for initial user record creation
   console.log('Waiting for user record creation...');
-  await new Promise(resolve => setTimeout(resolve, 5000));
+  await new Promise(resolve => setTimeout(resolve, 8000));
 
   // Multiple attempts to verify user creation with exponential backoff
   console.log('Verifying user creation...');
@@ -37,13 +37,14 @@ export async function createAuthUser(email: string, password: string) {
       .maybeSingle();
 
     if (userCheckError) {
-      console.error(`Attempt ${i + 1} failed with error:`, userCheckError);
+      console.error(`Database query failed on attempt ${i + 1}:`, userCheckError);
       if (i < 4) {
-        console.log(`Retrying in ${Math.pow(2, i)} seconds...`);
-        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+        const delay = Math.pow(2, i) * 1000;
+        console.log(`Retrying in ${delay/1000} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
         continue;
       }
-      throw new Error('Failed to verify user creation. Please try logging in after a few minutes.');
+      throw new Error('Database error while verifying user creation. Please try again.');
     }
 
     if (userData) {
@@ -52,10 +53,11 @@ export async function createAuthUser(email: string, password: string) {
     }
 
     if (i < 4) {
-      console.log(`Attempt ${i + 1} failed, retrying in ${Math.pow(2, i)} seconds...`);
-      await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+      const delay = Math.pow(2, i) * 1000;
+      console.log(`User record not found, attempt ${i + 1}. Retrying in ${delay/1000} seconds...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
     }
   }
 
-  throw new Error('User record not found after creation. This could be due to a temporary delay - please try logging in after a few minutes.');
+  throw new Error('Registration incomplete - please try logging in after a few minutes. If issues persist, contact support.');
 }
