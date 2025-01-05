@@ -23,6 +23,20 @@ export async function createAuthUser(email: string, password: string) {
     throw new Error('Failed to create user account - no user data returned');
   }
 
-  // Return immediately after user creation
+  // Create user record in public.users table
+  const { error: userError } = await supabase
+    .from('users')
+    .insert({
+      id: data.user.id,
+      email: data.user.email,
+      role: 'company',
+      full_name: data.user.email // Using email as full_name temporarily
+    });
+
+  if (userError) {
+    console.error('User record creation error:', userError);
+    throw userError;
+  }
+
   return data;
 }

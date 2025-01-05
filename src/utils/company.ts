@@ -44,7 +44,8 @@ export async function createCompanyRecord(data: CompanyRegistrationForm, authUse
       ],
       latitude: coordinates.latitude,
       longitude: coordinates.longitude,
-      auth_user_id: authUserId
+      auth_user_id: authUserId,
+      registration_status: 'pending'
     });
 
   if (insertError) {
