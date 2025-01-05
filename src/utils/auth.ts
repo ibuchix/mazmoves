@@ -34,18 +34,28 @@ export async function createAuthUser(email: string, password: string) {
       .from('users')
       .select('id')
       .eq('email', email)
-      .single();
+      .maybeSingle();
 
-    if (!userCheckError && userData) {
+    if (userCheckError) {
+      console.error(`Attempt ${i + 1} failed with error:`, userCheckError);
+      if (i < 4) {
+        console.log(`Retrying in ${Math.pow(2, i)} seconds...`);
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+        continue;
+      }
+      throw new Error('Failed to verify user creation. Please try logging in after a few minutes.');
+    }
+
+    if (userData) {
       console.log('User verified successfully:', userData);
       return data;
     }
 
-    if (i < 4) { // Don't log on last attempt
+    if (i < 4) {
       console.log(`Attempt ${i + 1} failed, retrying in ${Math.pow(2, i)} seconds...`);
       await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
     }
   }
 
-  throw new Error('User record not found after creation. This could be due to a temporary delay - please try logging in.');
+  throw new Error('User record not found after creation. This could be due to a temporary delay - please try logging in after a few minutes.');
 }
