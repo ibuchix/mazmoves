@@ -132,6 +132,7 @@ serve(async (req) => {
     })
 
     if (companyError) {
+      console.error('Company creation error:', companyError);
       throw companyError;
     }
 
