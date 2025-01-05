@@ -55,9 +55,9 @@ serve(async (req) => {
           JSON.stringify({ 
             error: 'Registration failed', 
             details: 'A company is already registered with this account',
-            status: 400
+            status: 422
           }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 422 }
         )
       }
     } else {
