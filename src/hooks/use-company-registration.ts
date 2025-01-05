@@ -13,7 +13,7 @@ export function useCompanyRegistration() {
       setUploading(true);
       console.log('Starting registration process with data:', data);
       
-      // Create auth user and verify creation
+      // Create auth user
       console.log('Creating auth user...');
       const authData = await createAuthUser(data.email, data.password);
       if (!authData?.user) {
@@ -26,27 +26,27 @@ export function useCompanyRegistration() {
       await createCompanyRecord(data, authData.user.id);
       console.log('Company record created successfully');
 
-      // Send welcome email
-      console.log('Sending welcome email...');
-      const emailResult = await sendWelcomeEmail(data.email, data.name);
-      if (!emailResult.success) {
-        // Don't throw error but notify user about email issue
-        toast.error("Registration successful but there was an issue sending the welcome email. Please contact support if you don't receive it.", {
-          duration: 6000
-        });
-      } else {
-        console.log('Welcome email sent successfully');
-      }
-
+      // Show success immediately
       setShowSuccessDialog(true);
       toast.success("Registration successful! Please check your email to confirm your address.", {
         duration: 6000
       });
+
+      // Send welcome email in background
+      sendWelcomeEmail(data.email, data.name)
+        .then(result => {
+          if (!result.success) {
+            toast.error("There was an issue sending the welcome email. Our team will reach out shortly.", {
+              duration: 6000
+            });
+          }
+        })
+        .catch(console.error); // Non-blocking
+
     } catch (error: any) {
       console.error("Registration error:", error);
       let errorMessage = "Registration failed. ";
       
-      // Provide more specific error messages
       if (error.message.includes('auth')) {
         errorMessage += "There was an issue creating your account. ";
       } else if (error.message.includes('already exists')) {

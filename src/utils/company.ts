@@ -14,19 +14,13 @@ export async function createCompanyRecord(data: CompanyRegistrationForm, authUse
     throw new Error('Insurance documents are required');
   }
 
-  console.log('Uploading transit insurance document...');
-  const transitInsurancePath = await uploadCompanyDocument(
-    transitInsuranceInput.files[0],
-    'transit'
-  );
-  console.log('Transit insurance uploaded:', transitInsurancePath);
-  
-  console.log('Uploading liability insurance document...');
-  const liabilityInsurancePath = await uploadCompanyDocument(
-    liabilityInsuranceInput.files[0],
-    'liability'
-  );
-  console.log('Liability insurance uploaded:', liabilityInsurancePath);
+  // Upload documents in parallel
+  const [transitInsurancePath, liabilityInsurancePath] = await Promise.all([
+    uploadCompanyDocument(transitInsuranceInput.files[0], 'transit'),
+    uploadCompanyDocument(liabilityInsuranceInput.files[0], 'liability')
+  ]);
+
+  console.log('Insurance documents uploaded');
 
   // Geocode the company's address
   console.log('Geocoding company address...');
@@ -62,7 +56,6 @@ export async function createCompanyRecord(data: CompanyRegistrationForm, authUse
 }
 
 export async function sendWelcomeEmail(email: string, companyName: string): Promise<{ success: boolean }> {
-  console.log('Sending welcome email to:', email);
   try {
     const { error } = await supabase.functions.invoke('send-welcome-email', {
       body: { 
