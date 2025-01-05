@@ -778,6 +778,12 @@ export type Database = {
             }
             Returns: string
           }
+      create_company_bypass_rls: {
+        Args: {
+          company_data: Json
+        }
+        Returns: undefined
+      }
       disablelongtransactions: {
         Args: Record<PropertyKey, never>
         Returns: string

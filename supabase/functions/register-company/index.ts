@@ -65,7 +65,7 @@ serve(async (req) => {
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: registrationData.email,
         password: registrationData.password,
-        email_confirm: true,
+        email_confirm: false, // Changed to false to require confirmation
         user_metadata: { role: 'company' }
       })
 
