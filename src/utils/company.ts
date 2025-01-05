@@ -1,7 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 import { CompanyRegistrationForm } from "@/types/company";
-import { geocodeAddress } from "./geocoding";
-import { uploadCompanyDocument } from "./fileUpload";
+import { createAuthUser } from "@/utils/auth";
+import { geocodeAddress } from "@/utils/geocoding";
+import { uploadCompanyDocument } from "@/utils/fileUpload";
 
 export async function createCompanyRecord(data: CompanyRegistrationForm, authUserId: string) {
   console.log('Starting company record creation for auth user:', authUserId);
@@ -22,38 +23,21 @@ export async function createCompanyRecord(data: CompanyRegistrationForm, authUse
 
   console.log('Insurance documents uploaded');
 
-  // Wait for user record to be available
-  console.log('Waiting for user record to be created...');
-  let retries = 0;
-  const maxRetries = 10; // Increased from 5 to 10 for more patience
-  let userData = null;
-  
-  while (retries < maxRetries) {
-    const { data: result, error: userError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('id', authUserId)
-      .maybeSingle(); // Changed from single() to maybeSingle()
+  // Create user record first
+  const { error: userError } = await supabase
+    .from('users')
+    .insert({
+      id: authUserId,
+      email: data.email,
+      full_name: data.managerName,
+      role: 'company',
+      phone: data.phone,
+      address: data.address
+    });
 
-    if (userError) {
-      console.error('Error checking user record:', userError);
-      // Continue trying despite errors
-    }
-
-    if (result) {
-      console.log('User record found:', result);
-      userData = result;
-      break;
-    }
-
-    console.log(`User record not found, attempt ${retries + 1} of ${maxRetries}`);
-    retries++;
-    // Increased wait time between retries
-    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds between retries
-  }
-
-  if (!userData) {
-    throw new Error('Failed to verify user record creation after multiple attempts');
+  if (userError) {
+    console.error('Error creating user record:', userError);
+    throw new Error('Failed to create user record');
   }
 
   // Geocode the company's address
