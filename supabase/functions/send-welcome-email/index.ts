@@ -1,6 +1,9 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,13 +18,31 @@ serve(async (req) => {
 
   try {
     if (!RESEND_API_KEY) {
-      console.error('RESEND_API_KEY is not set');
       throw new Error('RESEND_API_KEY is not configured');
     }
 
     const { email, companyName } = await req.json();
-    
-    console.log('Attempting to send welcome email to:', email);
+    console.log('Sending welcome email to:', email);
+
+    // Initialize Supabase client with service role key
+    const supabase = createClient(
+      SUPABASE_URL ?? '',
+      SUPABASE_SERVICE_ROLE_KEY ?? ''
+    );
+
+    // Generate email confirmation link
+    const { data: { user }, error: userError } = await supabase.auth.admin.generateLink({
+      type: 'signup',
+      email: email,
+    });
+
+    if (userError) {
+      throw userError;
+    }
+
+    const confirmationLink = user?.confirmation_sent_at 
+      ? `${SUPABASE_URL}/auth/v1/verify?token=${user.confirmation_token}&type=signup&redirect_to=/login`
+      : null;
 
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -38,7 +59,20 @@ serve(async (req) => {
             <h1 style="color: #040480;">Welcome to MAZ Moves, ${companyName}!</h1>
             <p>Thank you for registering with MAZ Moves. We're excited to have you on board!</p>
             <p>Your application is currently under review by our team. We'll verify your details and get back to you shortly.</p>
-            <p>Please check your email for a confirmation link to verify your email address.</p>
+            ${confirmationLink ? `
+              <p>Please confirm your email address by clicking the link below:</p>
+              <p>
+                <a href="${confirmationLink}" 
+                   style="background-color: #040480; 
+                          color: white; 
+                          padding: 10px 20px; 
+                          text-decoration: none; 
+                          border-radius: 5px; 
+                          display: inline-block;">
+                  Confirm Email Address
+                </a>
+              </p>
+            ` : ''}
             <p style="margin-top: 20px;">Best regards,<br>MAZ Moves Team</p>
           </div>
         `
