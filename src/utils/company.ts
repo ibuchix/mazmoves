@@ -7,13 +7,17 @@ export async function createCompanyRecord(data: CompanyRegistrationForm, authUse
   const transitInsuranceInput = document.getElementById('transitInsurance') as HTMLInputElement;
   const liabilityInsuranceInput = document.getElementById('liabilityInsurance') as HTMLInputElement;
   
+  if (!transitInsuranceInput?.files?.length || !liabilityInsuranceInput?.files?.length) {
+    throw new Error('Insurance documents are required');
+  }
+
   const transitInsurancePath = await uploadCompanyDocument(
-    transitInsuranceInput.files![0],
+    transitInsuranceInput.files[0],
     'transit'
   );
   
   const liabilityInsurancePath = await uploadCompanyDocument(
-    liabilityInsuranceInput.files![0],
+    liabilityInsuranceInput.files[0],
     'liability'
   );
 
@@ -39,7 +43,10 @@ export async function createCompanyRecord(data: CompanyRegistrationForm, authUse
       auth_user_id: authUserId
     });
 
-  if (insertError) throw insertError;
+  if (insertError) {
+    console.error('Company creation error:', insertError);
+    throw insertError;
+  }
 }
 
 export async function sendWelcomeEmail(email: string, companyName: string) {
