@@ -14,18 +14,21 @@ export function useCompanyRegistration() {
       
       // Create auth user and verify creation
       const authData = await createAuthUser(data.email, data.password);
+      if (!authData.user) {
+        throw new Error('Failed to create user account');
+      }
 
       // Create company record
-      await createCompanyRecord(data, authData.user!.id);
+      await createCompanyRecord(data, authData.user.id);
 
       // Send welcome email
       await sendWelcomeEmail(data.email, data.name);
 
       setShowSuccessDialog(true);
       toast.success("Registration successful! Please check your email to confirm your address.");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Registration error:", error);
-      toast.error("Registration failed. Please try again.");
+      toast.error(error.message || "Registration failed. Please try again.");
     } finally {
       setUploading(false);
     }

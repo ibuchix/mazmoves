@@ -21,10 +21,14 @@ export async function createAuthUser(email: string, password: string) {
     .from('users')
     .select('id')
     .eq('email', email)
-    .single();
+    .maybeSingle();
 
-  if (userCheckError || !userData) {
+  if (userCheckError) {
     throw new Error('Failed to verify user creation');
+  }
+
+  if (!userData) {
+    throw new Error('User record not found after creation. Please try again or contact support.');
   }
 
   return data;
