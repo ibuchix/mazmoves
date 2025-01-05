@@ -66,18 +66,25 @@ serve(async (req) => {
             <p>Thank you for registering with MAZ Moves. We're excited to have you on board!</p>
             <p>Your application is currently under review by our team. We'll verify your details and get back to you shortly.</p>
             ${confirmationLink ? `
-              <p>Please confirm your email address by clicking the link below:</p>
-              <p>
+              <div style="margin: 30px 0; text-align: center;">
+                <p style="margin-bottom: 20px; font-weight: bold;">Please confirm your email address by clicking the button below:</p>
                 <a href="${confirmationLink}" 
                    style="background-color: #040480; 
                           color: white; 
-                          padding: 10px 20px; 
+                          padding: 15px 30px; 
                           text-decoration: none; 
                           border-radius: 5px; 
-                          display: inline-block;">
+                          display: inline-block;
+                          font-weight: bold;
+                          font-size: 16px;
+                          margin: 20px 0;">
                   Confirm Email Address
                 </a>
-              </p>
+                <p style="font-size: 12px; color: #666; margin-top: 20px;">
+                  If the button doesn't work, copy and paste this link into your browser:<br>
+                  <span style="color: #1f3dd2;">${confirmationLink}</span>
+                </p>
+              </div>
             ` : ''}
             <p style="margin-top: 20px;">Best regards,<br>MAZ Moves Team</p>
           </div>
