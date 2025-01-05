@@ -22,6 +22,31 @@ export async function createCompanyRecord(data: CompanyRegistrationForm, authUse
 
   console.log('Insurance documents uploaded');
 
+  // Wait for user record to be available
+  console.log('Waiting for user record to be created...');
+  let retries = 0;
+  const maxRetries = 5;
+  
+  while (retries < maxRetries) {
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('id', authUserId)
+      .single();
+
+    if (userData) {
+      console.log('User record found');
+      break;
+    }
+
+    if (retries === maxRetries - 1) {
+      throw new Error('Failed to verify user record creation');
+    }
+
+    retries++;
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between retries
+  }
+
   // Geocode the company's address
   console.log('Geocoding company address...');
   const coordinates = await geocodeAddress(data.address);
