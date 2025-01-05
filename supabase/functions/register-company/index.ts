@@ -33,56 +33,51 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Check if user exists
-    const { data: { users }, error: getUserError } = await supabase.auth.admin.listUsers()
-    if (getUserError) {
-      throw getUserError;
-    }
+    // First check if user exists
+    const { data: existingUsers } = await supabase.auth.admin.listUsers();
+    const existingUser = existingUsers?.users.find(u => u.email === registrationData.email);
+    
+    let userId;
+    
+    if (existingUser) {
+      console.log('User already exists, using existing ID:', existingUser.id);
+      userId = existingUser.id;
+      
+      // Check if company already exists for this user
+      const { data: existingCompany } = await supabase
+        .from('companies')
+        .select('id')
+        .eq('auth_user_id', userId)
+        .single();
+        
+      if (existingCompany) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'Registration failed', 
+            details: 'A company is already registered with this account',
+            status: 400
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        )
+      }
+    } else {
+      // Create new auth user
+      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+        email: registrationData.email,
+        password: registrationData.password,
+        email_confirm: true,
+        user_metadata: { role: 'company' }
+      })
 
-    const userExists = users.some(user => user.email === registrationData.email)
-    if (userExists) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Registration failed', 
-          details: 'An account with this email already exists',
-          status: 400
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-      )
-    }
+      if (authError) {
+        throw authError;
+      }
 
-    // Check for duplicate registration number
-    const { data: existingCompany } = await supabase
-      .from('companies')
-      .select('id')
-      .eq('registration_number', registrationData.registrationNumber)
-      .single()
-
-    if (existingCompany) {
-      return new Response(
-        JSON.stringify({ 
-          error: 'Registration failed', 
-          details: 'A company with this registration number already exists',
-          status: 400
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-      )
-    }
-
-    // Create auth user
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email: registrationData.email,
-      password: registrationData.password,
-      email_confirm: true,
-      user_metadata: { role: 'company' }
-    })
-
-    if (authError) {
-      throw authError;
-    }
-
-    if (!authData.user) {
-      throw new Error('No user data returned');
+      if (!authData.user) {
+        throw new Error('No user data returned');
+      }
+      
+      userId = authData.user.id;
     }
 
     // Upload insurance documents
@@ -92,11 +87,11 @@ serve(async (req) => {
       registrationData.liabilityInsurance
     );
 
-    // Create user record
+    // Create user record if it doesn't exist
     const { error: userError } = await supabase
       .from('users')
-      .insert({
-        id: authData.user.id,
+      .upsert({
+        id: userId,
         email: registrationData.email,
         full_name: registrationData.managerName,
         role: 'company',
@@ -105,6 +100,7 @@ serve(async (req) => {
       })
 
     if (userError) {
+      console.error('Error creating/updating user record:', userError);
       throw userError;
     }
 
@@ -126,7 +122,7 @@ serve(async (req) => {
         ],
         latitude: coordinates?.latitude,
         longitude: coordinates?.longitude,
-        auth_user_id: authData.user.id,
+        auth_user_id: userId,
         registration_status: 'pending'
       }
     })
@@ -150,7 +146,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         message: 'Company registered successfully',
-        userId: authData.user.id 
+        userId: userId 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )
