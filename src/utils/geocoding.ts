@@ -1,4 +1,5 @@
 import { Address } from "@/types/address";
+import { supabase } from "@/integrations/supabase/client";
 
 export interface Coordinates {
   latitude: number;
@@ -11,19 +12,15 @@ export async function geocodeAddress(address: Address): Promise<Coordinates> {
     const addressString = `${address.street}, ${address.city}, ${address.state} ${address.zipCode}`;
     console.log('Geocoding address:', addressString);
 
-    const response = await fetch('/functions/v1/geocode-address', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ address: addressString }),
+    const { data, error } = await supabase.functions.invoke('geocode-address', {
+      body: { address: addressString }
     });
 
-    if (!response.ok) {
-      throw new Error(`Geocoding failed with status: ${response.status}`);
+    if (error) {
+      console.error('Geocoding error:', error);
+      throw new Error('Failed to geocode address. Please check the address and try again.');
     }
 
-    const data = await response.json();
     console.log('Geocoding response:', data);
 
     if (!data.latitude || !data.longitude) {
