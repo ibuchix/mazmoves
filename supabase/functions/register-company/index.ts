@@ -111,10 +111,9 @@ serve(async (req) => {
     // Geocode address
     const coordinates = await geocodeAddress(registrationData.address);
 
-    // Create company record
-    const { error: companyError } = await supabase
-      .from('companies')
-      .insert({
+    // Create company record with RLS temporarily disabled
+    const { error: companyError } = await supabase.rpc('create_company_bypass_rls', {
+      company_data: {
         name: registrationData.companyName,
         registration_number: registrationData.registrationNumber,
         contact_email: registrationData.email,
@@ -129,7 +128,8 @@ serve(async (req) => {
         longitude: coordinates?.longitude,
         auth_user_id: authData.user.id,
         registration_status: 'pending'
-      })
+      }
+    })
 
     if (companyError) {
       throw companyError;
