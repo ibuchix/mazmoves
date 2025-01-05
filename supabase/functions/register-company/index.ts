@@ -44,6 +44,24 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
+    console.log('Checking if user already exists')
+    // Check if user already exists
+    const { data: existingUser } = await supabase.auth.admin.listUsers()
+    const userExists = existingUser.users.some(user => user.email === email)
+
+    if (userExists) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Registration failed', 
+          details: 'An account with this email already exists' 
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }, 
+          status: 400 
+        }
+      )
+    }
+
     console.log('Creating auth user')
     // Create auth user
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
