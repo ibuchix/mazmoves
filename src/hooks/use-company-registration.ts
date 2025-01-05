@@ -38,7 +38,16 @@ export function useCompanyRegistration() {
         body: formData,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Check if the error is about existing email
+        if (error.message.includes('already exists')) {
+          toast.error("This email is already registered. Please use a different email or login to your existing account.", {
+            duration: 6000
+          });
+          return;
+        }
+        throw error;
+      }
 
       // Show success immediately
       setShowSuccessDialog(true);
@@ -53,7 +62,7 @@ export function useCompanyRegistration() {
       if (error.message.includes('auth')) {
         errorMessage += "There was an issue creating your account. ";
       } else if (error.message.includes('already exists')) {
-        errorMessage += "An account with this email already exists. ";
+        errorMessage += "An account with this email already exists. Please use a different email or login. ";
       } else if (error.message.includes('Insurance')) {
         errorMessage += "Please ensure all required insurance documents are uploaded. ";
       } else {

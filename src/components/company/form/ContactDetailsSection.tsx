@@ -16,11 +16,25 @@ export function ContactDetailsSection({ register, errors }: ContactDetailsSectio
           <Input
             id="email"
             type="email"
-            {...register("email", { required: "Email is required" })}
+            {...register("email", { 
+              required: "Email is required",
+              validate: {
+                validEmail: (value: string) => {
+                  const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+                  return emailRegex.test(value) || "Please enter a valid email address";
+                }
+              }
+            })}
             className="h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300"
             placeholder="Enter business email address"
           />
-          {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
+          {errors.email && (
+            <p className="text-red-500 text-sm mt-1">
+              {errors.email.type === 'exists' 
+                ? "This email is already registered. Please use a different email or login to your existing account."
+                : errors.email.message}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
