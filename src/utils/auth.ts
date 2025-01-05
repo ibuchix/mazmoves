@@ -24,26 +24,9 @@ export async function createAuthUser(email: string, password: string) {
     throw new Error('Failed to create user account - no user data returned');
   }
 
-  console.log('Auth user created, now creating user record...');
+  console.log('Auth user created successfully:', data.user.id);
 
-  // Create user record in public.users table
-  const { error: userError } = await supabase
-    .from('users')
-    .upsert({
-      id: data.user.id,
-      email: data.user.email,
-      role: 'company',
-      full_name: email // Using email as full_name temporarily
-    }, {
-      onConflict: 'email',
-      ignoreDuplicates: true
-    });
-
-  if (userError) {
-    console.error('User record creation error:', userError);
-    throw userError;
-  }
-
-  console.log('User record created successfully');
+  // The users table insert will be handled by a trigger in Supabase
+  // that creates the user record when a new auth user is created
   return data;
 }
