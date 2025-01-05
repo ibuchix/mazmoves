@@ -18,28 +18,28 @@ export async function createAuthUser(email: string, password: string) {
     throw error;
   }
 
-  // Wait for user record to be fully created
+  // Wait longer for user record to be fully created in the database
   console.log('Waiting for user record creation...');
-  await new Promise(resolve => setTimeout(resolve, 1000));
+  await new Promise(resolve => setTimeout(resolve, 2000));
 
-  // Verify the user was created
+  // Multiple attempts to verify user creation
   console.log('Verifying user creation...');
-  const { data: userData, error: userCheckError } = await supabase
-    .from('users')
-    .select('id')
-    .eq('email', email)
-    .maybeSingle();
+  for (let i = 0; i < 3; i++) {
+    const { data: userData, error: userCheckError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', email)
+      .maybeSingle();
 
-  if (userCheckError) {
-    console.error('User verification error:', userCheckError);
-    throw new Error('Failed to verify user creation');
+    if (!userCheckError && userData) {
+      console.log('User verified successfully:', userData);
+      return data;
+    }
+
+    // If not found, wait and try again
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
-  if (!userData) {
-    console.error('User record not found after creation');
-    throw new Error('User record not found after creation. Please try again or contact support.');
-  }
-
-  console.log('User verified successfully:', userData);
-  return data;
+  console.error('User record not found after multiple attempts');
+  throw new Error('User record not found after creation. Please try again or contact support.');
 }
