@@ -16,7 +16,7 @@ export function useCompanyRegistration() {
       // Create auth user and verify creation
       console.log('Creating auth user...');
       const authData = await createAuthUser(data.email, data.password);
-      if (!authData.user) {
+      if (!authData?.user) {
         throw new Error('Failed to create user account');
       }
       console.log('Auth user created successfully:', authData.user.id);
@@ -36,6 +36,7 @@ export function useCompanyRegistration() {
     } catch (error: any) {
       console.error("Registration error:", error);
       toast.error(error.message || "Registration failed. Please try again.");
+      setShowSuccessDialog(false);
     } finally {
       setUploading(false);
     }
