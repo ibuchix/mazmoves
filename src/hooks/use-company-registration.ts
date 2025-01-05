@@ -60,7 +60,6 @@ export function useCompanyRegistration() {
       toast.error(errorMessage, {
         duration: 6000
       });
-      setShowSuccessDialog(false);
     } finally {
       setUploading(false);
     }
