@@ -26,20 +26,21 @@ export async function createAuthUser(email: string, password: string) {
 
   console.log('Auth user created, now creating user record...');
 
-  // Create user record in public.users table using service role client
+  // Create user record in public.users table
   const { error: userError } = await supabase
     .from('users')
-    .insert({
+    .upsert({
       id: data.user.id,
       email: data.user.email,
       role: 'company',
       full_name: email // Using email as full_name temporarily
+    }, {
+      onConflict: 'email',
+      ignoreDuplicates: true
     });
 
   if (userError) {
     console.error('User record creation error:', userError);
-    // If user record creation fails, we should clean up the auth user
-    await supabase.auth.admin.deleteUser(data.user.id);
     throw userError;
   }
 
