@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 export interface Coordinates {
   latitude: number;
   longitude: number;
+  location?: any; // PostGIS geometry type
 }
 
 export async function geocodeAddress(address: Address): Promise<Coordinates> {
@@ -25,7 +26,8 @@ export async function geocodeAddress(address: Address): Promise<Coordinates> {
 
     return {
       latitude: data.latitude,
-      longitude: data.longitude
+      longitude: data.longitude,
+      location: data.location
     };
   } catch (error) {
     console.error('Geocoding error:', error);
