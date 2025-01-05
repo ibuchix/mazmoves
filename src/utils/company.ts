@@ -25,26 +25,35 @@ export async function createCompanyRecord(data: CompanyRegistrationForm, authUse
   // Wait for user record to be available
   console.log('Waiting for user record to be created...');
   let retries = 0;
-  const maxRetries = 5;
+  const maxRetries = 10; // Increased from 5 to 10 for more patience
+  let userData = null;
   
   while (retries < maxRetries) {
-    const { data: userData, error: userError } = await supabase
+    const { data: result, error: userError } = await supabase
       .from('users')
       .select('id')
       .eq('id', authUserId)
-      .single();
+      .maybeSingle(); // Changed from single() to maybeSingle()
 
-    if (userData) {
-      console.log('User record found');
+    if (userError) {
+      console.error('Error checking user record:', userError);
+      // Continue trying despite errors
+    }
+
+    if (result) {
+      console.log('User record found:', result);
+      userData = result;
       break;
     }
 
-    if (retries === maxRetries - 1) {
-      throw new Error('Failed to verify user record creation');
-    }
-
+    console.log(`User record not found, attempt ${retries + 1} of ${maxRetries}`);
     retries++;
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Wait 1 second between retries
+    // Increased wait time between retries
+    await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds between retries
+  }
+
+  if (!userData) {
+    throw new Error('Failed to verify user record creation after multiple attempts');
   }
 
   // Geocode the company's address
