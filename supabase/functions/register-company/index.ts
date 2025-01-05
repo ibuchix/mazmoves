@@ -33,39 +33,52 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // First check if user exists
+    // First check if user exists and their status
     const { data: existingUsers } = await supabase.auth.admin.listUsers();
     const existingUser = existingUsers?.users.find(u => u.email === registrationData.email);
     
     let userId;
     
     if (existingUser) {
-      console.log('User already exists, using existing ID:', existingUser.id);
-      userId = existingUser.id;
-      
-      // Check if company already exists for this user
-      const { data: existingCompany } = await supabase
-        .from('companies')
-        .select('id')
-        .eq('auth_user_id', userId)
-        .single();
-        
-      if (existingCompany) {
-        return new Response(
-          JSON.stringify({ 
-            error: 'Registration failed', 
-            details: 'A company is already registered with this account',
-            status: 422
-          }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 422 }
-        )
+      // Check if the user is soft-deleted
+      if (!existingUser.banned_until && !existingUser.deleted_at) {
+        // Check if company already exists for this user
+        const { data: existingCompany } = await supabase
+          .from('companies')
+          .select('id')
+          .eq('auth_user_id', existingUser.id)
+          .single();
+          
+        if (existingCompany) {
+          return new Response(
+            JSON.stringify({ 
+              error: 'Registration failed', 
+              details: 'A company is already registered with this account',
+              status: 422
+            }),
+            { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 422 }
+          )
+        }
+        userId = existingUser.id;
+      } else {
+        // If user is soft-deleted, we'll create a new user
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+          email: registrationData.email,
+          password: registrationData.password,
+          email_confirm: false,
+          user_metadata: { role: 'company' }
+        });
+
+        if (authError) throw authError;
+        if (!authData.user) throw new Error('No user data returned');
+        userId = authData.user.id;
       }
     } else {
       // Create new auth user
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: registrationData.email,
         password: registrationData.password,
-        email_confirm: false, // Changed to false to require confirmation
+        email_confirm: false,
         user_metadata: { role: 'company' }
       })
 
