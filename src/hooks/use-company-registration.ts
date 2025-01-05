@@ -32,10 +32,14 @@ export function useCompanyRegistration() {
       console.log('Welcome email sent successfully');
 
       setShowSuccessDialog(true);
-      toast.success("Registration successful! Please check your email to confirm your address.");
+      toast.success("Registration successful! Please check your email to confirm your address.", {
+        duration: 6000
+      });
     } catch (error: any) {
       console.error("Registration error:", error);
-      toast.error(error.message || "Registration failed. Please try again.");
+      toast.error(error.message || "Registration failed. Please try again.", {
+        duration: 6000
+      });
       setShowSuccessDialog(false);
     } finally {
       setUploading(false);
