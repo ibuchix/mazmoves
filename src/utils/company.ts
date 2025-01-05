@@ -50,6 +50,7 @@ export async function createCompanyRecord(data: CompanyRegistrationForm, authUse
       ],
       latitude: coordinates.latitude,
       longitude: coordinates.longitude,
+      location: coordinates.location,
       auth_user_id: authUserId
     });
 
@@ -61,16 +62,24 @@ export async function createCompanyRecord(data: CompanyRegistrationForm, authUse
   console.log('Company record created successfully');
 }
 
-export async function sendWelcomeEmail(email: string, companyName: string) {
+export async function sendWelcomeEmail(email: string, companyName: string): Promise<{ success: boolean }> {
   console.log('Sending welcome email to:', email);
-  const { error } = await supabase.functions.invoke('send-welcome-email', {
-    body: { 
-      email,
-      companyName
-    }
-  });
+  try {
+    const { error } = await supabase.functions.invoke('send-welcome-email', {
+      body: { 
+        email,
+        companyName
+      }
+    });
 
-  if (error) {
+    if (error) {
+      console.error("Error sending welcome email:", error);
+      return { success: false };
+    }
+
+    return { success: true };
+  } catch (error) {
     console.error("Error sending welcome email:", error);
+    return { success: false };
   }
 }
