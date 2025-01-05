@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { CompanyRegistrationForm } from "@/types/company";
-import { createAuthUser } from "@/utils/auth";
-import { createCompanyRecord, sendWelcomeEmail } from "@/utils/company";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useCompanyRegistration() {
   const [uploading, setUploading] = useState(false);
@@ -13,35 +12,39 @@ export function useCompanyRegistration() {
       setUploading(true);
       console.log('Starting registration process with data:', data);
       
-      // Create auth user
-      console.log('Creating auth user...');
-      const authData = await createAuthUser(data.email, data.password);
-      if (!authData?.user) {
-        throw new Error('Failed to create user account. Please try again.');
+      // Get file inputs
+      const transitInsuranceInput = document.getElementById('transitInsurance') as HTMLInputElement;
+      const liabilityInsuranceInput = document.getElementById('liabilityInsurance') as HTMLInputElement;
+      
+      if (!transitInsuranceInput?.files?.length || !liabilityInsuranceInput?.files?.length) {
+        throw new Error('Insurance documents are required');
       }
-      console.log('Auth user created successfully:', authData.user.id);
 
-      // Create company record
-      console.log('Creating company record...');
-      await createCompanyRecord(data, authData.user.id);
-      console.log('Company record created successfully');
+      // Create form data
+      const formData = new FormData();
+      formData.append('email', data.email);
+      formData.append('password', data.password);
+      formData.append('name', data.name);
+      formData.append('registrationNumber', data.registrationNumber);
+      formData.append('vatNumber', data.vatNumber || '');
+      formData.append('phone', data.phone);
+      formData.append('managerName', data.managerName);
+      formData.append('address', JSON.stringify(data.address));
+      formData.append('transitInsurance', transitInsuranceInput.files[0]);
+      formData.append('liabilityInsurance', liabilityInsuranceInput.files[0]);
+
+      // Call the registration edge function
+      const { data: response, error } = await supabase.functions.invoke('register-company', {
+        body: formData,
+      });
+
+      if (error) throw error;
 
       // Show success immediately
       setShowSuccessDialog(true);
       toast.success("Registration successful! Please check your email to confirm your address.", {
         duration: 6000
       });
-
-      // Send welcome email in background
-      sendWelcomeEmail(data.email, data.name)
-        .then(result => {
-          if (!result.success) {
-            toast.error("There was an issue sending the welcome email. Our team will reach out shortly.", {
-              duration: 6000
-            });
-          }
-        })
-        .catch(console.error); // Non-blocking
 
     } catch (error: any) {
       console.error("Registration error:", error);
