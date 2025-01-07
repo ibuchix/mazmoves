@@ -35,7 +35,8 @@ serve(async (req) => {
       type: 'signup',
       email: email,
       options: {
-        redirectTo: `${SUPABASE_URL}/auth/v1/verify?redirect_to=/login`
+        // Use the SUPABASE_URL directly for the redirect
+        redirectTo: `${SUPABASE_URL}/auth/v1/verify`
       }
     })
 
