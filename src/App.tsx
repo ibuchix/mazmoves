@@ -12,8 +12,6 @@ import TermsAndConditions from "@/pages/TermsAndConditions";
 import Login from "@/pages/auth/Login";
 import Register from "@/pages/company/Register";
 import CompanyDashboard from "@/pages/company/Dashboard";
-import AdminDashboard from "@/pages/admin/Dashboard";
-import CompanyVerification from "@/pages/admin/CompanyVerification";
 import PublicDashboard from "@/pages/company/PublicDashboard";
 import RequestMove from "@/pages/RequestMove";
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -47,24 +45,6 @@ function App() {
                   element={
                     <ProtectedRoute allowedRoles={["company"]}>
                       <CompanyDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-                
-                <Route
-                  path="/admin/dashboard"
-                  element={
-                    <ProtectedRoute allowedRoles={["admin"]}>
-                      <AdminDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-
-                <Route
-                  path="/admin/verification"
-                  element={
-                    <ProtectedRoute allowedRoles={["admin"]}>
-                      <CompanyVerification />
                     </ProtectedRoute>
                   }
                 />
