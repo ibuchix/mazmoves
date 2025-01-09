@@ -151,6 +151,13 @@ export type Database = {
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "company_payments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_documents_view"
+            referencedColumns: ["company_id"]
+          },
         ]
       }
       email_templates: {
@@ -231,6 +238,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "move_assignments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_documents_view"
+            referencedColumns: ["company_id"]
           },
           {
             foreignKeyName: "move_assignments_request_id_fkey"
@@ -408,6 +422,39 @@ export type Database = {
         }
         Relationships: []
       }
+      company_documents_view: {
+        Row: {
+          company_id: string | null
+          company_name: string | null
+          contact_email: string | null
+          insurance_docs: Json | null
+          is_verified: boolean | null
+          registration_status: string | null
+          verification_date: string | null
+          verification_notes: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          company_name?: string | null
+          contact_email?: string | null
+          insurance_docs?: Json | null
+          is_verified?: boolean | null
+          registration_status?: string | null
+          verification_date?: string | null
+          verification_notes?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          company_name?: string | null
+          contact_email?: string | null
+          insurance_docs?: Json | null
+          is_verified?: boolean | null
+          registration_status?: string | null
+          verification_date?: string | null
+          verification_notes?: string | null
+        }
+        Relationships: []
+      }
       geography_columns: {
         Row: {
           coord_dimension: number | null
@@ -449,6 +496,53 @@ export type Database = {
           type?: string | null
         }
         Relationships: []
+      }
+      scheduled_moves_view: {
+        Row: {
+          assigned_date: string | null
+          assignment_id: string | null
+          company_id: string | null
+          company_name: string | null
+          customer_email: string | null
+          customer_name: string | null
+          delivery_address: Json | null
+          distance_to_pickup_km: number | null
+          estimated_cost: number | null
+          pickup_address: Json | null
+          request_id: string | null
+          requested_date: string | null
+          status: Database["public"]["Enums"]["assignment_status"] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "move_assignments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_dashboard_mv"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "move_assignments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "move_assignments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_documents_view"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "move_assignments_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "move_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {
@@ -845,6 +939,20 @@ export type Database = {
           geom2: unknown
         }
         Returns: boolean
+      }
+      find_nearby_companies: {
+        Args: {
+          pickup_lat: number
+          pickup_lng: number
+          delivery_lat: number
+          delivery_lng: number
+          radius_km?: number
+        }
+        Returns: {
+          company_id: string
+          company_name: string
+          distance_km: number
+        }[]
       }
       geography:
         | {
