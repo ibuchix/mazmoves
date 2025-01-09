@@ -8,6 +8,7 @@ import { useRealtimeAssignments } from "@/hooks/use-realtime-assignments";
 import { Truck, Clock, CheckCircle, XCircle, ShieldCheck } from "lucide-react";
 import { MoveAssignmentWithRequest } from "@/types/move";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 export default function CompanyDashboard() {
   const { session } = useAuth();
@@ -43,9 +44,18 @@ export default function CompanyDashboard() {
         .from("companies")
         .select("*")
         .eq("contact_email", session?.user?.email)
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        toast.error("Error fetching company data");
+        throw error;
+      }
+      
+      if (!data) {
+        toast.error("Company profile not found");
+        return null;
+      }
+
       return data;
     },
     enabled: !!session?.user?.email,
