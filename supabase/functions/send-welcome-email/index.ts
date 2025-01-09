@@ -21,7 +21,7 @@ serve(async (req) => {
       throw new Error('RESEND_API_KEY is not configured')
     }
 
-    const { email, companyName } = await req.json()
+    const { email, companyName, confirmationLink } = await req.json()
     console.log('Sending welcome email to:', email)
 
     // Initialize Supabase client with service role key
@@ -29,27 +29,6 @@ serve(async (req) => {
       SUPABASE_URL ?? '',
       SUPABASE_SERVICE_ROLE_KEY ?? ''
     )
-
-    // Generate email confirmation link
-    const { data: { user }, error: userError } = await supabase.auth.admin.generateLink({
-      type: 'signup',
-      email: email,
-      options: {
-        // Use the SUPABASE_URL directly for the redirect
-        redirectTo: `${SUPABASE_URL}/auth/v1/verify`
-      }
-    })
-
-    if (userError) {
-      console.error('Error generating confirmation link:', userError)
-      throw userError
-    }
-
-    const confirmationLink = user?.confirmation_token 
-      ? `${SUPABASE_URL}/auth/v1/verify?token=${user.confirmation_token}&type=signup&redirect_to=/login`
-      : null
-
-    console.log('Generated confirmation link:', confirmationLink)
 
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',

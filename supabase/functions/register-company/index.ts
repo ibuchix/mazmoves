@@ -74,11 +74,11 @@ serve(async (req) => {
         userId = authData.user.id;
       }
     } else {
-      // Create new auth user
+      // Create new auth user with email confirmation required
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: registrationData.email,
         password: registrationData.password,
-        email_confirm: false,
+        email_confirm: false, // This ensures a confirmation email is sent
         user_metadata: { role: 'company' }
       })
 
@@ -145,10 +145,28 @@ serve(async (req) => {
       throw companyError;
     }
 
-    // Send welcome email
+    // Generate email confirmation link
+    const { data: confirmData, error: confirmError } = await supabase.auth.admin.generateLink({
+      type: 'signup',
+      email: registrationData.email,
+      options: {
+        redirectTo: `${Deno.env.get('SUPABASE_URL')}/auth/v1/verify`
+      }
+    });
+
+    if (confirmError) {
+      console.error('Error generating confirmation link:', confirmError);
+      throw confirmError;
+    }
+
+    // Send welcome email with confirmation link
     try {
       await supabase.functions.invoke('send-welcome-email', {
-        body: { email: registrationData.email, companyName: registrationData.companyName }
+        body: { 
+          email: registrationData.email, 
+          companyName: registrationData.companyName,
+          confirmationLink: confirmData.properties.action_link
+        }
       })
     } catch (emailError) {
       console.error('Welcome email error:', emailError)
