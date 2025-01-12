@@ -7,13 +7,13 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo and Description */}
-          <div>
+          <div className="flex flex-col items-start">
             <img 
               src="/lovable-uploads/b700dde9-463e-4b6e-8523-ec9f718b3beb.png" 
               alt="MAZ Moves" 
               className="h-10 bg-white p-1.5 rounded" 
             />
-            <p className="text-sm mt-3">
+            <p className="mt-3 text-sm">
               Professional moving services for homes and businesses.
             </p>
             <div className="flex space-x-4 mt-4">
