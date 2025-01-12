@@ -3578,6 +3578,7 @@ export type Database = {
         | "in_progress"
         | "completed"
         | "cancelled"
+        | "no_companies_found"
       user_role: "customer" | "company" | "admin"
     }
     CompositeTypes: {
