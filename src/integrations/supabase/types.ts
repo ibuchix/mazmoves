@@ -141,13 +141,6 @@ export type Database = {
             foreignKeyName: "company_payments_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
-            referencedRelation: "admin_dashboard_mv"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "company_payments_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -225,13 +218,6 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "move_assignments_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "admin_dashboard_mv"
-            referencedColumns: ["company_id"]
-          },
           {
             foreignKeyName: "move_assignments_company_id_fkey"
             columns: ["company_id"]
@@ -406,19 +392,11 @@ export type Database = {
     Views: {
       admin_dashboard_mv: {
         Row: {
-          active_assignments: number | null
-          company_id: string | null
-          company_name: string | null
-          completed_assignments: number | null
-          contact_email: string | null
-          is_verified: boolean | null
-          last_payment_date: string | null
-          registration_date: string | null
-          registration_status: string | null
-          subscription_status: string | null
-          total_assignments: number | null
-          total_paid_amount: number | null
-          total_payments: number | null
+          id: number | null
+          pending_companies: number | null
+          rejected_companies: number | null
+          total_companies: number | null
+          verified_companies: number | null
         }
         Relationships: []
       }
@@ -514,13 +492,6 @@ export type Database = {
           status: Database["public"]["Enums"]["assignment_status"] | null
         }
         Relationships: [
-          {
-            foreignKeyName: "move_assignments_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "admin_dashboard_mv"
-            referencedColumns: ["company_id"]
-          },
           {
             foreignKeyName: "move_assignments_company_id_fkey"
             columns: ["company_id"]
