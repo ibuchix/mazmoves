@@ -7,6 +7,26 @@ import { DollarSign, Users, CheckCircle, AlertCircle } from "lucide-react";
 import { AdminDashboardData } from "@/types/admin";
 import { Tables } from "@/types/database";
 
+type DashboardStats = {
+  totalCompanies: number;
+  verifiedCompanies: number;
+  totalAssignments: number;
+  totalRevenue: number;
+};
+
+type MaterializedViewData = {
+  id: number;
+  pending_companies: number;
+  rejected_companies: number;
+  total_companies: number;
+  verified_companies: number;
+};
+
+type CompanyData = AdminDashboardData & {
+  move_assignments?: { id: string; status: string }[];
+  company_payments?: { amount: number }[];
+};
+
 export default function AdminDashboard() {
   const { data: dashboardData, isLoading, error } = useQuery({
     queryKey: ["admin-dashboard"],
@@ -36,11 +56,7 @@ export default function AdminDashboard() {
           throw companiesError;
         }
         
-        // Transform companies data to match dashboard view structure
-        return companiesData.map((company: Tables['companies']['Row'] & {
-          move_assignments: { id: string; status: string }[];
-          company_payments: { amount: number }[];
-        }) => ({
+        return (companiesData as CompanyData[]).map((company) => ({
           company_id: company.id,
           company_name: company.name,
           contact_email: company.contact_email,
@@ -57,7 +73,7 @@ export default function AdminDashboard() {
         }));
       }
       
-      return mvData;
+      return mvData as MaterializedViewData[];
     },
   });
 
@@ -70,12 +86,38 @@ export default function AdminDashboard() {
     return <div className="container mx-auto p-6">Error loading dashboard data. Please try again.</div>;
   }
 
-  const stats = {
-    totalCompanies: dashboardData?.length || 0,
-    verifiedCompanies: dashboardData?.filter(c => c.is_verified).length || 0,
-    totalAssignments: dashboardData?.reduce((sum, c) => sum + (c.total_assignments || 0), 0) || 0,
-    totalRevenue: dashboardData?.reduce((sum, c) => sum + (c.total_paid_amount || 0), 0) || 0,
+  const calculateStats = (): DashboardStats => {
+    if (!dashboardData) {
+      return {
+        totalCompanies: 0,
+        verifiedCompanies: 0,
+        totalAssignments: 0,
+        totalRevenue: 0
+      };
+    }
+
+    // If it's materialized view data
+    if ('total_companies' in dashboardData[0]) {
+      const mvData = dashboardData as MaterializedViewData[];
+      return {
+        totalCompanies: mvData[0].total_companies,
+        verifiedCompanies: mvData[0].verified_companies,
+        totalAssignments: 0, // Not available in materialized view
+        totalRevenue: 0 // Not available in materialized view
+      };
+    }
+
+    // If it's detailed company data
+    const companyData = dashboardData as AdminDashboardData[];
+    return {
+      totalCompanies: companyData.length,
+      verifiedCompanies: companyData.filter(c => c.is_verified).length,
+      totalAssignments: companyData.reduce((sum, c) => sum + (c.total_assignments || 0), 0),
+      totalRevenue: companyData.reduce((sum, c) => sum + (c.total_paid_amount || 0), 0)
+    };
   };
+
+  const stats = calculateStats();
 
   return (
     <div className="container mx-auto p-6">
@@ -123,54 +165,57 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Companies Overview</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Company Name</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Assignments</TableHead>
-                <TableHead>Revenue</TableHead>
-                <TableHead>Last Payment</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {dashboardData?.map((company) => (
-                <TableRow key={company.company_id}>
-                  <TableCell className="font-medium">{company.company_name}</TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant={company.is_verified ? "default" : "secondary"}
-                      className={company.is_verified ? "bg-[#84d21f]" : ""}
-                    >
-                      {company.registration_status}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {company.total_assignments.toString()} 
-                    {company.active_assignments > 0 && 
-                      <span className="text-[#84d21f] ml-1">
-                        ({company.active_assignments} active)
-                      </span>
-                    }
-                  </TableCell>
-                  <TableCell>${company.total_paid_amount.toFixed(2)}</TableCell>
-                  <TableCell>
-                    {company.last_payment_date 
-                      ? new Date(company.last_payment_date).toLocaleDateString()
-                      : 'No payments'
-                    }
-                  </TableCell>
+      {/* Only show companies table if we have detailed company data */}
+      {'company_name' in (dashboardData?.[0] || {}) && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Companies Overview</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Company Name</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Assignments</TableHead>
+                  <TableHead>Revenue</TableHead>
+                  <TableHead>Last Payment</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
+              </TableHeader>
+              <TableBody>
+                {(dashboardData as AdminDashboardData[]).map((company) => (
+                  <TableRow key={company.company_id}>
+                    <TableCell className="font-medium">{company.company_name}</TableCell>
+                    <TableCell>
+                      <Badge 
+                        variant={company.is_verified ? "default" : "secondary"}
+                        className={company.is_verified ? "bg-[#84d21f]" : ""}
+                      >
+                        {company.registration_status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {company.total_assignments.toString()} 
+                      {company.active_assignments > 0 && 
+                        <span className="text-[#84d21f] ml-1">
+                          ({company.active_assignments} active)
+                        </span>
+                      }
+                    </TableCell>
+                    <TableCell>${company.total_paid_amount.toFixed(2)}</TableCell>
+                    <TableCell>
+                      {company.last_payment_date 
+                        ? new Date(company.last_payment_date).toLocaleDateString()
+                        : 'No payments'
+                      }
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
