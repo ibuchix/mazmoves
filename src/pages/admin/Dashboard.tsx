@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, Users, CheckCircle, AlertCircle } from "lucide-react";
 import { AdminDashboardData } from "@/types/admin";
-import { Tables } from "@/types/database";
+import { Tables } from "@/integrations/supabase/types";
 
 type DashboardStats = {
   totalCompanies: number;
@@ -22,7 +22,7 @@ type MaterializedViewData = {
   verified_companies: number;
 };
 
-type CompanyData = AdminDashboardData & {
+type RawCompanyData = Tables<'companies'> & {
   move_assignments?: { id: string; status: string }[];
   company_payments?: { amount: number }[];
 };
@@ -56,15 +56,16 @@ export default function AdminDashboard() {
           throw companiesError;
         }
         
-        return (companiesData as CompanyData[]).map((company) => ({
+        // Transform the raw data to match AdminDashboardData type
+        return (companiesData as RawCompanyData[]).map((company): AdminDashboardData => ({
           company_id: company.id,
           company_name: company.name,
           contact_email: company.contact_email,
-          registration_status: company.registration_status,
-          registration_date: company.registration_date,
-          is_verified: company.is_verified,
-          subscription_status: company.subscription_status,
-          last_payment_date: company.last_payment_date,
+          registration_status: company.registration_status || 'pending',
+          registration_date: company.registration_date || '',
+          is_verified: company.is_verified || false,
+          subscription_status: company.subscription_status || 'trial',
+          last_payment_date: company.last_payment_date || null,
           total_assignments: company.move_assignments?.length || 0,
           active_assignments: company.move_assignments?.filter(a => a.status === 'active').length || 0,
           completed_assignments: company.move_assignments?.filter(a => a.status === 'completed').length || 0,
