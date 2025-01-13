@@ -32,7 +32,7 @@ export default function AdminDashboard() {
       <DashboardStats {...stats} />
 
       {/* Only show companies table if we have detailed company data */}
-      {'company_name' in (dashboardData?.[0] || {}) && (
+      {dashboardData && dashboardData.length > 0 && dashboardData[0].company_name !== '' && (
         <CompaniesTable companies={dashboardData} />
       )}
     </div>

@@ -70,7 +70,23 @@ export function useAdminDashboard() {
         }));
       }
       
-      return mvData as MaterializedViewData[];
+      // If materialized view data is available, transform it to match AdminDashboardData
+      const stats = mvData as MaterializedViewData[];
+      return stats.map((stat): AdminDashboardData => ({
+        company_id: '', // Placeholder values for required fields
+        company_name: '',
+        contact_email: '',
+        registration_status: 'pending',
+        registration_date: '',
+        is_verified: false,
+        subscription_status: 'trial',
+        last_payment_date: null,
+        total_assignments: 0,
+        active_assignments: 0,
+        completed_assignments: 0,
+        total_payments: 0,
+        total_paid_amount: 0
+      }));
     },
   });
 
@@ -84,24 +100,11 @@ export function useAdminDashboard() {
       };
     }
 
-    // If it's materialized view data
-    if ('total_companies' in dashboardData[0]) {
-      const mvData = dashboardData as MaterializedViewData[];
-      return {
-        totalCompanies: mvData[0].total_companies,
-        verifiedCompanies: mvData[0].verified_companies,
-        totalAssignments: 0, // Not available in materialized view
-        totalRevenue: 0 // Not available in materialized view
-      };
-    }
-
-    // If it's detailed company data
-    const companyData = dashboardData as AdminDashboardData[];
     return {
-      totalCompanies: companyData.length,
-      verifiedCompanies: companyData.filter(c => c.is_verified).length,
-      totalAssignments: companyData.reduce((sum, c) => sum + (c.total_assignments || 0), 0),
-      totalRevenue: companyData.reduce((sum, c) => sum + (c.total_paid_amount || 0), 0)
+      totalCompanies: dashboardData.length,
+      verifiedCompanies: dashboardData.filter(c => c.is_verified).length,
+      totalAssignments: dashboardData.reduce((sum, c) => sum + (c.total_assignments || 0), 0),
+      totalRevenue: dashboardData.reduce((sum, c) => sum + (c.total_paid_amount || 0), 0)
     };
   };
 
