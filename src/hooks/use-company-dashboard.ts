@@ -16,7 +16,7 @@ export function useCompanyDashboard() {
         .from("companies")
         .select("*")
         .eq("contact_email", session?.user?.email)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
