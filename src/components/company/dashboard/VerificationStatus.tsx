@@ -4,7 +4,7 @@ import { AlertCircle, ShieldCheck } from "lucide-react";
 
 interface VerificationStatusProps {
   isVerified: boolean;
-  verificationDate?: string;
+  verificationDate?: string | null;
   message: string;
 }
 
@@ -13,8 +13,6 @@ export default function VerificationStatus({
   verificationDate, 
   message 
 }: VerificationStatusProps) {
-  console.log("VerificationStatus props:", { isVerified, verificationDate, message }); // Debug log
-  
   return (
     <Card className="bg-slate-50">
       <CardContent className="pt-6">
@@ -42,8 +40,6 @@ export default function VerificationStatus({
 }
 
 export function VerificationBadge({ isVerified }: { isVerified: boolean }) {
-  console.log("VerificationBadge prop:", { isVerified }); // Debug log
-  
   if (isVerified) {
     return (
       <Badge 

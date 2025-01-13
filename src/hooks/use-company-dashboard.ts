@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
 import { MoveAssignmentWithRequest, transformMoveAssignment } from "@/types/move";
 import { CompanyDashboardStats } from "@/types/company";
+import { toast } from "sonner";
 
 export function useCompanyDashboard() {
   const { session } = useAuth();
@@ -12,14 +13,29 @@ export function useCompanyDashboard() {
   const { data: company, isLoading: companyLoading, error: companyError, refetch } = useQuery({
     queryKey: ["company", session?.user?.email],
     queryFn: async () => {
+      if (!session?.user?.email) {
+        throw new Error("No user email found");
+      }
+
       const { data, error } = await supabase
         .from("companies")
         .select("*")
-        .eq("contact_email", session?.user?.email)
+        .eq("contact_email", session.user.email)
         .maybeSingle();
 
-      if (error) throw error;
-      console.log("Company data:", data); // Debug log
+      if (error) {
+        console.error("Error fetching company:", error);
+        toast.error("Failed to fetch company data");
+        throw error;
+      }
+
+      if (!data) {
+        console.error("No company found for email:", session.user.email);
+        toast.error("Company profile not found");
+        return null;
+      }
+
+      console.log("Company data fetched successfully:", data);
       return data;
     },
     enabled: !!session?.user?.email,
@@ -41,7 +57,6 @@ export function useCompanyDashboard() {
         },
         (payload) => {
           console.log('Real-time update received:', payload);
-          // Invalidate all related queries
           queryClient.invalidateQueries({ queryKey: ["company"] });
           queryClient.invalidateQueries({ queryKey: ["assignments"] });
           queryClient.invalidateQueries({ queryKey: ["stats"] });
