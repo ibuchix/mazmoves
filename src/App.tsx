@@ -14,6 +14,7 @@ import Register from "@/pages/company/Register";
 import CompanyDashboard from "@/pages/company/Dashboard";
 import PublicDashboard from "@/pages/company/PublicDashboard";
 import RequestMove from "@/pages/RequestMove";
+import CompanyInvoices from "@/pages/company/Invoices";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { AuthProvider } from "@/components/AuthProvider";
 import "./App.css";
@@ -44,6 +45,15 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["company"]}>
                     <CompanyDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              
+              <Route
+                path="/company/invoices"
+                element={
+                  <ProtectedRoute allowedRoles={["company"]}>
+                    <CompanyInvoices />
                   </ProtectedRoute>
                 }
               />

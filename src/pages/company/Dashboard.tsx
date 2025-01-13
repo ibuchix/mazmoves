@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -9,6 +9,8 @@ import { toast } from "sonner";
 import DashboardStats from "@/components/company/dashboard/DashboardStats";
 import RecentAssignments from "@/components/company/dashboard/RecentAssignments";
 import VerificationStatus, { VerificationBadge } from "@/components/company/dashboard/VerificationStatus";
+import { Button } from "@/components/ui/button";
+import { Receipt } from "lucide-react";
 
 export default function CompanyDashboard() {
   const { session } = useAuth();
@@ -132,7 +134,15 @@ export default function CompanyDashboard() {
       <div className="flex flex-col gap-4 mb-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Company Dashboard</h1>
-          <VerificationBadge isVerified={company?.is_verified || false} />
+          <div className="flex items-center gap-4">
+            <VerificationBadge isVerified={company?.is_verified || false} />
+            <Link to="/company/invoices">
+              <Button className="bg-[#040480] hover:bg-[#1f3dd2]">
+                <Receipt className="w-4 h-4 mr-2" />
+                View Invoices
+              </Button>
+            </Link>
+          </div>
         </div>
         <VerificationStatus 
           isVerified={company?.is_verified || false}
