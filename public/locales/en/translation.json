@@ -1,0 +1,25 @@
+{
+  "footer": {
+    "description": "Professional moving services for homes and businesses. We provide reliable, efficient, and secure moving solutions across the UK.",
+    "quickLinks": {
+      "title": "Quick Links",
+      "home": "Home",
+      "services": "Services",
+      "about": "About Us",
+      "partner": "Partner With Us"
+    },
+    "legal": {
+      "title": "Legal",
+      "terms": "Terms & Conditions",
+      "privacy": "Privacy Policy",
+      "cookies": "Cookie Preferences"
+    },
+    "contact": {
+      "title": "Contact Us",
+      "email": "ask@mazmoves.com",
+      "phone": "+44 738 844 9110",
+      "address": "124 City Road, London, EC1V 2NX"
+    },
+    "copyright": "© {{year}} MAZ Moves Ltd. All Rights Reserved."
+  }
+}

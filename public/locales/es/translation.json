@@ -1,0 +1,25 @@
+{
+  "footer": {
+    "description": "Servicios profesionales de mudanza para hogares y empresas. Proporcionamos soluciones de mudanza confiables, eficientes y seguras en todo el Reino Unido.",
+    "quickLinks": {
+      "title": "Enlaces Rápidos",
+      "home": "Inicio",
+      "services": "Servicios",
+      "about": "Sobre Nosotros",
+      "partner": "Asóciate con Nosotros"
+    },
+    "legal": {
+      "title": "Legal",
+      "terms": "Términos y Condiciones",
+      "privacy": "Política de Privacidad",
+      "cookies": "Preferencias de Cookies"
+    },
+    "contact": {
+      "title": "Contáctanos",
+      "email": "ask@mazmoves.com",
+      "phone": "+44 738 844 9110",
+      "address": "124 City Road, Londres, EC1V 2NX"
+    },
+    "copyright": "© {{year}} MAZ Moves Ltd. Todos los derechos reservados."
+  }
+}
