@@ -61,23 +61,14 @@ export default function Navbar() {
             {session && isRegisteredCompany && <RoleLinks role={userData?.role} />}
           </div>
 
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center">
             {!session && (
-              <>
-                <Button 
-                  variant="outline"
-                  className="border-[#040480] text-[#040480] hover:bg-[#040480] hover:text-white"
-                  onClick={() => window.location.href = '/login'}
-                >
-                  Company Login
-                </Button>
-                <Button 
-                  className="bg-[#d2491f] hover:bg-[#84d21f] text-white transition-all duration-300"
-                  onClick={() => window.location.href = '/companies'}
-                >
-                  Partner With Us
-                </Button>
-              </>
+              <Button 
+                className="bg-[#d2491f] hover:bg-[#84d21f] text-white transition-all duration-300"
+                onClick={() => window.location.href = '/companies'}
+              >
+                Partner With Us
+              </Button>
             )}
             {session && <AuthButton session={session} />}
           </div>

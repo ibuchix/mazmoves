@@ -46,23 +46,14 @@ export default function MobileMenu({ isOpen, onClose, session, userRole }: Mobil
           About
         </Link>
         {session && <RoleLinks role={userRole} />}
-        <div className="mt-4 px-4 pb-2 space-y-2">
+        <div className="mt-4 px-4 pb-2">
           {!session && (
-            <>
-              <Button 
-                variant="outline"
-                className="w-full border-[#040480] text-[#040480] hover:bg-[#040480] hover:text-white"
-                onClick={() => window.location.href = '/login'}
-              >
-                Company Login
-              </Button>
-              <Button 
-                className="w-full bg-[#d2491f] hover:bg-[#84d21f] text-white transition-all duration-300"
-                onClick={() => window.location.href = '/companies'}
-              >
-                Partner With Us
-              </Button>
-            </>
+            <Button 
+              className="w-full bg-[#d2491f] hover:bg-[#84d21f] text-white transition-all duration-300"
+              onClick={() => window.location.href = '/companies'}
+            >
+              Partner With Us
+            </Button>
           )}
           {session && <AuthButton session={session} />}
         </div>
