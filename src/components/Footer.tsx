@@ -143,7 +143,7 @@ export default function Footer() {
               </a>
               <div className="flex items-start gap-3">
                 <MapPin className="w-6 h-6 mt-1 flex-shrink-0" />
-                <span className="text-lg text-gray-300">
+                <span className="text-lg text-gray-300 text-left">
                   124 City Road, London, EC1V 2NX
                 </span>
               </div>
@@ -224,7 +224,7 @@ export default function Footer() {
               </a>
               <div className="flex items-start gap-3">
                 <MapPin className="w-6 h-6 mt-1 flex-shrink-0" />
-                <span className="text-lg text-gray-300">
+                <span className="text-lg text-gray-300 text-left">
                   124 City Road, London, EC1V 2NX
                 </span>
               </div>
