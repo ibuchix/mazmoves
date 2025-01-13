@@ -20,7 +20,7 @@ export default function Footer() {
         <div className="w-full mb-4 md:mb-6">
           <div className="max-w-2xl">
             <FooterLogo />
-            <p className="text-base md:text-lg text-gray-300 mb-4 md:mb-6 font-light leading-relaxed">
+            <p className="text-base md:text-lg text-gray-300 mb-4 md:mb-6 font-light leading-relaxed text-left">
               Professional moving services for homes and businesses. We provide
               reliable, efficient, and secure moving solutions across the UK.
             </p>
