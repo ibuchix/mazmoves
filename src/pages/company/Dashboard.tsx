@@ -11,13 +11,21 @@ export default function CompanyDashboard() {
   useRealtimeAssignments();
   const { company, assignments, stats, verificationMessage } = useCompanyDashboard();
 
+  // Explicitly convert is_verified to boolean and log the value
+  const isVerified = Boolean(company?.is_verified);
+  console.log("Dashboard verification status:", { 
+    raw: company?.is_verified, 
+    converted: isVerified,
+    verificationDate: company?.verification_date 
+  });
+
   return (
     <div className="container mx-auto p-6">
       <div className="flex flex-col gap-4 mb-8">
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Company Dashboard</h1>
           <div className="flex items-center gap-4">
-            <VerificationBadge isVerified={Boolean(company?.is_verified)} />
+            <VerificationBadge isVerified={isVerified} />
             <Link to="/company/invoices">
               <Button className="bg-[#040480] hover:bg-[#1f3dd2]">
                 <Receipt className="w-4 h-4 mr-2" />
@@ -27,7 +35,7 @@ export default function CompanyDashboard() {
           </div>
         </div>
         <VerificationStatus 
-          isVerified={Boolean(company?.is_verified)}
+          isVerified={isVerified}
           verificationDate={company?.verification_date}
           message={verificationMessage}
         />

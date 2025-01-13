@@ -14,6 +14,7 @@ export function useCompanyDashboard() {
     queryKey: ["company", session?.user?.email],
     queryFn: async () => {
       if (!session?.user?.email) {
+        console.error("No user email found in session");
         throw new Error("No user email found");
       }
 
@@ -35,7 +36,11 @@ export function useCompanyDashboard() {
         return null;
       }
 
-      console.log("Company data fetched successfully:", data);
+      console.log("Company verification status:", {
+        is_verified: data.is_verified,
+        verification_date: data.verification_date
+      });
+      
       return data;
     },
     enabled: !!session?.user?.email,
