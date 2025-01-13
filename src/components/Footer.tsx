@@ -14,10 +14,10 @@ import FooterLogo from "./footer/FooterLogo";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#040480] text-white py-6 md:py-10 relative">
+    <footer className="bg-[#040480] text-white py-4 md:py-6 relative">
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         {/* Logo and Description Section - Full Width */}
-        <div className="w-full mb-6 md:mb-10">
+        <div className="w-full mb-4 md:mb-6">
           <div className="max-w-2xl">
             <FooterLogo />
             <p className="text-base md:text-lg text-gray-300 mb-4 md:mb-6 font-light leading-relaxed">
@@ -62,16 +62,16 @@ export default function Footer() {
           </div>
         </div>
 
-        <Separator className="mb-6 md:mb-10 bg-white/20" />
+        <Separator className="mb-4 md:mb-6 bg-white/20" />
 
         {/* Mobile Collapsible Sections */}
         <div className="md:hidden space-y-4">
           <Collapsible>
-            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 bg-transparent rounded-lg">
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-2">
               <span className="text-xl font-bold text-[#d2491f]">Quick Links</span>
               <ChevronDown className="h-5 w-5" />
             </CollapsibleTrigger>
-            <CollapsibleContent className="p-4 space-y-4">
+            <CollapsibleContent className="p-2 space-y-4">
               <Link
                 to="/"
                 className="block text-lg text-gray-300 hover:text-[#84d21f] transition-colors"
@@ -100,11 +100,11 @@ export default function Footer() {
           </Collapsible>
 
           <Collapsible>
-            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 bg-transparent rounded-lg">
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-2">
               <span className="text-xl font-bold text-[#d2491f]">Legal</span>
               <ChevronDown className="h-5 w-5" />
             </CollapsibleTrigger>
-            <CollapsibleContent className="p-4 space-y-4">
+            <CollapsibleContent className="p-2 space-y-4">
               <Link
                 to="/terms-and-conditions"
                 className="block text-lg text-gray-300 hover:text-[#84d21f] transition-colors"
@@ -122,11 +122,11 @@ export default function Footer() {
           </Collapsible>
 
           <Collapsible>
-            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 bg-transparent rounded-lg">
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-2">
               <span className="text-xl font-bold text-[#d2491f]">Contact Us</span>
               <ChevronDown className="h-5 w-5" />
             </CollapsibleTrigger>
-            <CollapsibleContent className="p-4 space-y-4">
+            <CollapsibleContent className="p-2 space-y-4">
               <a
                 href="mailto:ask@mazmoves.com"
                 className="flex items-center gap-3 text-lg text-gray-300 hover:text-[#84d21f] transition-colors"
@@ -154,8 +154,8 @@ export default function Footer() {
         {/* Desktop Three Column Grid */}
         <div className="hidden md:grid md:grid-cols-3 gap-8">
           {/* Navigation Links */}
-          <div className="p-4">
-            <h3 className="text-xl font-bold mb-6 text-[#d2491f]">Quick Links</h3>
+          <div className="p-2">
+            <h3 className="text-xl font-bold mb-4 text-[#d2491f]">Quick Links</h3>
             <div className="flex flex-col gap-3">
               <Link
                 to="/"
@@ -185,8 +185,8 @@ export default function Footer() {
           </div>
 
           {/* Legal Links */}
-          <div className="p-4">
-            <h3 className="text-xl font-bold mb-6 text-[#d2491f]">Legal</h3>
+          <div className="p-2">
+            <h3 className="text-xl font-bold mb-4 text-[#d2491f]">Legal</h3>
             <div className="flex flex-col gap-3">
               <Link
                 to="/terms-and-conditions"
@@ -205,8 +205,8 @@ export default function Footer() {
           </div>
 
           {/* Contact Information */}
-          <div className="p-4">
-            <h3 className="text-xl font-bold mb-6 text-[#d2491f]">Contact Us</h3>
+          <div className="p-2">
+            <h3 className="text-xl font-bold mb-4 text-[#d2491f]">Contact Us</h3>
             <div className="flex flex-col gap-4">
               <a
                 href="mailto:ask@mazmoves.com"
@@ -233,7 +233,7 @@ export default function Footer() {
         </div>
 
         {/* Language Selector and Additional Features */}
-        <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="mt-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <LanguageSelector />
           <p className="text-sm text-center text-gray-400">
             &copy; {new Date().getFullYear()} MAZ Moves Ltd. All Rights Reserved.
