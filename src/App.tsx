@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import Navbar from "@/components/Navbar";
@@ -23,38 +23,36 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
-        <AuthProvider>
-          <div className="flex flex-col min-h-screen">
-            <Navbar />
-            <main className="flex-grow">
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/services" element={<Services />} />
-                <Route path="/companies" element={<Companies />} />
-                <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/company/register" element={<Register />} />
-                <Route path="/request-move" element={<RequestMove />} />
-                <Route path="/company/:id" element={<PublicDashboard />} />
-                
-                <Route
-                  path="/company/dashboard"
-                  element={
-                    <ProtectedRoute allowedRoles={["company"]}>
-                      <CompanyDashboard />
-                    </ProtectedRoute>
-                  }
-                />
-              </Routes>
-            </main>
-            <Footer />
-          </div>
-          <Toaster />
-        </AuthProvider>
-      </Router>
+      <AuthProvider>
+        <div className="flex flex-col min-h-screen">
+          <Navbar />
+          <main className="flex-grow">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/services" element={<Services />} />
+              <Route path="/companies" element={<Companies />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/company/register" element={<Register />} />
+              <Route path="/request-move" element={<RequestMove />} />
+              <Route path="/company/:id" element={<PublicDashboard />} />
+              
+              <Route
+                path="/company/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["company"]}>
+                    <CompanyDashboard />
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
