@@ -310,6 +310,30 @@ export type Database = {
         }
         Relationships: []
       }
+      registration_attempts: {
+        Row: {
+          attempt_time: string | null
+          email: string
+          id: string
+          ip_address: string
+          success: boolean | null
+        }
+        Insert: {
+          attempt_time?: string | null
+          email: string
+          id?: string
+          ip_address: string
+          success?: boolean | null
+        }
+        Update: {
+          attempt_time?: string | null
+          email?: string
+          id?: string
+          ip_address?: string
+          success?: boolean | null
+        }
+        Relationships: []
+      }
       secrets: {
         Row: {
           id: number
@@ -843,6 +867,13 @@ export type Database = {
             }
             Returns: string
           }
+      check_registration_limit: {
+        Args: {
+          check_ip: string
+          check_email: string
+        }
+        Returns: boolean
+      }
       create_company_bypass_rls: {
         Args: {
           company_data: Json
@@ -1631,6 +1662,14 @@ export type Database = {
       postgis_wagyu_version: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      record_registration_attempt: {
+        Args: {
+          attempt_ip: string
+          attempt_email: string
+          was_successful: boolean
+        }
+        Returns: undefined
       }
       spheroid_in: {
         Args: {

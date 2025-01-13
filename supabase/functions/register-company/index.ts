@@ -17,7 +17,7 @@ serve(async (req) => {
   try {
     const formData = await req.formData()
     const registrationData = validateRegistrationData(formData);
-
+    
     if (!registrationData) {
       return new Response(
         JSON.stringify({ 
@@ -32,6 +32,34 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
+
+    // Get client IP address
+    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
+    console.log('Checking rate limit for IP:', clientIP)
+
+    // Check rate limits
+    const { data: rateLimitCheck } = await supabase.rpc('check_registration_limit', {
+      check_ip: clientIP,
+      check_email: registrationData.email
+    })
+
+    if (!rateLimitCheck) {
+      console.log('Rate limit exceeded for IP:', clientIP)
+      // Record the failed attempt
+      await supabase.from('registration_attempts').insert({
+        ip_address: clientIP,
+        email: registrationData.email,
+        success: false
+      })
+
+      return new Response(
+        JSON.stringify({ 
+          error: 'Too many registration attempts. Please try again later.',
+          status: 429
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 429 }
+      )
+    }
 
     // First check if user exists and their status
     const { data: existingUsers } = await supabase.auth.admin.listUsers();
@@ -50,6 +78,13 @@ serve(async (req) => {
           .single();
           
         if (existingCompany) {
+          // Record the failed attempt
+          await supabase.from('registration_attempts').insert({
+            ip_address: clientIP,
+            email: registrationData.email,
+            success: false
+          })
+
           return new Response(
             JSON.stringify({ 
               error: 'Registration failed', 
@@ -144,6 +179,13 @@ serve(async (req) => {
       console.error('Company creation error:', companyError);
       throw companyError;
     }
+
+    // Record successful registration attempt
+    await supabase.from('registration_attempts').insert({
+      ip_address: clientIP,
+      email: registrationData.email,
+      success: true
+    })
 
     // Generate email confirmation link
     const { data: confirmData, error: confirmError } = await supabase.auth.admin.generateLink({
