@@ -19,6 +19,7 @@ export function useCompanyDashboard() {
         .maybeSingle();
 
       if (error) throw error;
+      console.log("Company data:", data); // Debug log
       return data;
     },
     enabled: !!session?.user?.email,
