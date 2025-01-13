@@ -33,44 +33,41 @@ export default function CompanyVerification() {
 
   const handleVerification = async (companyId: string, approve: boolean) => {
     try {
-      const { data: company } = await supabase
-        .from('companies')
-        .select('name, contact_email')
-        .eq('id', companyId)
-        .single();
-
-      const { error } = await supabase
-        .from('companies')
-        .update({ 
-          is_verified: approve,
-          verification_date: new Date().toISOString(),
-          registration_status: approve ? 'approved' : 'rejected',
-          verification_notes: approve ? 'Approved by admin' : 'Rejected by admin'
-        })
-        .eq('id', companyId);
-
-      if (error) {
-        toast.error("Failed to update verification status");
-        return;
-      }
-
-      if (approve && company) {
-        // Send verification email
-        const { error: emailError } = await supabase.functions.invoke('send-verification-email', {
+      if (approve) {
+        // Call the verify-company edge function
+        const { error: verificationError } = await supabase.functions.invoke('verify-company', {
           body: { 
-            companyName: company.name,
-            email: company.contact_email
+            companyId,
+            verificationNotes: 'Approved by admin'
           }
         });
 
-        if (emailError) {
-          console.error("Error sending verification email:", emailError);
-          toast.error("Company verified but failed to send notification email");
+        if (verificationError) {
+          console.error("Verification error:", verificationError);
+          toast.error("Failed to verify company");
           return;
         }
+
+        toast.success("Company verified successfully");
+      } else {
+        // Handle rejection directly since it doesn't require email notification
+        const { error: updateError } = await supabase
+          .from('companies')
+          .update({ 
+            registration_status: 'rejected',
+            verification_notes: 'Rejected by admin'
+          })
+          .eq('id', companyId);
+
+        if (updateError) {
+          console.error("Rejection error:", updateError);
+          toast.error("Failed to reject company");
+          return;
+        }
+
+        toast.success("Company rejected successfully");
       }
 
-      toast.success(`Company ${approve ? 'approved' : 'rejected'} successfully`);
       refetch();
     } catch (error) {
       console.error("Error during verification:", error);
