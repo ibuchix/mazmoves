@@ -1,6 +1,6 @@
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -59,8 +59,11 @@ export default function Login() {
         </div>
 
         <div className="mt-8 text-center">
+          <p className="text-sm text-gray-600 mb-2">
+            Don't have an account? <Link to="/company/register" className="text-[#1f3dd2] hover:underline">Sign up here</Link>
+          </p>
           <p className="text-sm text-gray-600">
-            Need help? <a href="#" className="text-[#1f3dd2] hover:underline">Contact support</a>
+            Need help? <a href="mailto:support@mazmoves.com" className="text-[#1f3dd2] hover:underline">Contact support</a>
           </p>
         </div>
       </div>
