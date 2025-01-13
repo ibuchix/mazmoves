@@ -90,7 +90,7 @@ export function useCompanyDashboard() {
   });
 
   const verificationMessage = company?.is_verified
-    ? "Your company is verified and can receive move assignments"
+    ? `Your company was verified on ${new Date(company.verification_date).toLocaleDateString()}. You can now receive move assignments.`
     : "Your company is pending verification. You will be notified once verified.";
 
   return {
