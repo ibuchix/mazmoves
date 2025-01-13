@@ -12,7 +12,7 @@ export default function CompanyDashboard() {
   const { company, assignments, stats, verificationMessage } = useCompanyDashboard();
 
   // Explicitly convert is_verified to boolean and log the value
-  const isVerified = Boolean(company?.is_verified);
+  const isVerified = company ? Boolean(company.is_verified) : false;
   console.log("Dashboard verification status:", { 
     raw: company?.is_verified, 
     converted: isVerified,

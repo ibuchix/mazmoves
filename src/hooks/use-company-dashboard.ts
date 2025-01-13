@@ -39,11 +39,14 @@ export function useCompanyDashboard() {
       // Log verification status for debugging
       console.log("Company data:", {
         name: data.name,
-        is_verified: data.is_verified,
+        is_verified: Boolean(data.is_verified),
         verification_date: data.verification_date
       });
       
-      return data;
+      return {
+        ...data,
+        is_verified: Boolean(data.is_verified) // Ensure boolean conversion
+      };
     },
     enabled: !!session?.user?.email,
   });
