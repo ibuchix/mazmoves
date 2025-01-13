@@ -34,7 +34,7 @@ export default function Companies() {
           </div>
         </div>
 
-      {/* Benefits Grid */}
+        {/* Benefits Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
           <div className="bg-white rounded-xl shadow-lg p-8 transform transition-all duration-300 hover:scale-105">
             <div className="w-12 h-12 bg-[#040480] rounded-full flex items-center justify-center mb-6">
@@ -97,28 +97,29 @@ export default function Companies() {
           </div>
         </div>
 
-      {/* CTA Section */}
-      <div className="mt-16 bg-gradient-to-r from-[#040480] to-[#1f3dd2] rounded-2xl shadow-xl p-12 text-center max-w-4xl mx-auto">
-        <h2 className="text-3xl font-bold text-white mb-6">
-          Ready to Expand Your Moving Business?
-        </h2>
-        <p className="text-xl text-gray-100 mb-8">
-          Join MAZ Moves today - it's completely free! Start receiving quality leads and grow your business.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button 
-            onClick={() => navigate('/company/register')}
-            className="bg-[#d2491f] hover:bg-[#84d21f] text-white px-8 py-6 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 whitespace-normal sm:whitespace-nowrap"
-          >
-            Register Now
-          </Button>
-          <Button 
-            onClick={() => navigate('/login')}
-            variant="outline"
-            className="border-white text-white hover:bg-white hover:text-[#040480] px-8 py-6 rounded-lg text-lg font-semibold transition-all duration-300"
-          >
-            Company Login
-          </Button>
+        {/* CTA Section */}
+        <div className="mt-16 bg-gradient-to-r from-[#040480] to-[#1f3dd2] rounded-2xl shadow-xl p-12 text-center max-w-4xl mx-auto">
+          <h2 className="text-3xl font-bold text-white mb-6">
+            Ready to Expand Your Moving Business?
+          </h2>
+          <p className="text-xl text-gray-100 mb-8">
+            Join MAZ Moves today - it's completely free! Start receiving quality leads and grow your business.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              onClick={() => navigate('/company/register')}
+              className="bg-[#d2491f] hover:bg-[#84d21f] text-white px-8 py-6 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 whitespace-normal sm:whitespace-nowrap"
+            >
+              Register Now
+            </Button>
+            <Button 
+              onClick={() => navigate('/login')}
+              variant="outline"
+              className="border-white text-white hover:bg-white hover:text-[#040480] px-8 py-6 rounded-lg text-lg font-semibold transition-all duration-300"
+            >
+              Company Login
+            </Button>
+          </div>
         </div>
       </div>
     </div>
