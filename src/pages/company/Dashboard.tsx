@@ -17,7 +17,7 @@ export default function CompanyDashboard() {
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Company Dashboard</h1>
           <div className="flex items-center gap-4">
-            <VerificationBadge isVerified={company?.is_verified || false} />
+            <VerificationBadge isVerified={Boolean(company?.is_verified)} />
             <Link to="/company/invoices">
               <Button className="bg-[#040480] hover:bg-[#1f3dd2]">
                 <Receipt className="w-4 h-4 mr-2" />
@@ -27,7 +27,7 @@ export default function CompanyDashboard() {
           </div>
         </div>
         <VerificationStatus 
-          isVerified={company?.is_verified || false}
+          isVerified={Boolean(company?.is_verified)}
           verificationDate={company?.verification_date}
           message={verificationMessage}
         />
