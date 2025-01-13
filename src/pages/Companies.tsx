@@ -22,7 +22,7 @@ export default function Companies() {
               onClick={() => navigate('/company/register')}
               className="bg-[#d2491f] hover:bg-[#84d21f] text-white px-8 py-6 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105"
             >
-              Join MAZ Moves Today
+              Register Your Company Now
             </Button>
             <Button 
               onClick={() => navigate('/login')}
