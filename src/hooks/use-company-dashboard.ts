@@ -36,7 +36,9 @@ export function useCompanyDashboard() {
         return null;
       }
 
-      console.log("Company verification status:", {
+      // Log verification status for debugging
+      console.log("Company data:", {
+        name: data.name,
         is_verified: data.is_verified,
         verification_date: data.verification_date
       });
