@@ -86,6 +86,7 @@ export function useCompanyDashboard() {
       };
     },
     enabled: !!assignments,
+    initialData: { active: 0, completed: 0, cancelled: 0, pending: 0 }
   });
 
   const verificationMessage = company?.is_verified

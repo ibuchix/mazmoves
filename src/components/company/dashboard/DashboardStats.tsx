@@ -7,7 +7,7 @@ interface DashboardStatsProps {
     completed: number;
     cancelled: number;
     pending: number;
-  };
+  } | undefined;
 }
 
 export default function DashboardStats({ stats }: DashboardStatsProps) {
@@ -15,22 +15,22 @@ export default function DashboardStats({ stats }: DashboardStatsProps) {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
       <StatCard
         title="Active Assignments"
-        value={stats.active}
+        value={stats?.active ?? 0}
         icon={<Truck className="h-4 w-4 text-muted-foreground" />}
       />
       <StatCard
         title="Pending Estimates"
-        value={stats.pending}
+        value={stats?.pending ?? 0}
         icon={<Clock className="h-4 w-4 text-muted-foreground" />}
       />
       <StatCard
         title="Completed Moves"
-        value={stats.completed}
+        value={stats?.completed ?? 0}
         icon={<CheckCircle className="h-4 w-4 text-muted-foreground" />}
       />
       <StatCard
         title="Cancelled"
-        value={stats.cancelled}
+        value={stats?.cancelled ?? 0}
         icon={<XCircle className="h-4 w-4 text-muted-foreground" />}
       />
     </div>
