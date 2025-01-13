@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import AuthButton from "./AuthButton";
 import RoleLinks from "./RoleLinks";
 import { Session } from "@supabase/supabase-js";
+import { Button } from "../ui/button";
 
 interface MobileMenuProps {
   isOpen: boolean;
@@ -31,22 +32,39 @@ export default function MobileMenu({ isOpen, onClose, session, userRole }: Mobil
           Services
         </Link>
         <Link 
+          to="/companies" 
+          className="block px-4 py-3 rounded-md text-[#040480] hover:text-[#1f3dd2] hover:bg-gray-50 font-medium transition-colors duration-200"
+          onClick={onClose}
+        >
+          Companies
+        </Link>
+        <Link 
           to="/about" 
           className="block px-4 py-3 rounded-md text-[#040480] hover:text-[#1f3dd2] hover:bg-gray-50 font-medium transition-colors duration-200"
           onClick={onClose}
         >
           About
         </Link>
-        <Link 
-          to="/contact" 
-          className="block px-4 py-3 rounded-md text-[#040480] hover:text-[#1f3dd2] hover:bg-gray-50 font-medium transition-colors duration-200"
-          onClick={onClose}
-        >
-          Contact
-        </Link>
-        <RoleLinks role={userRole} />
-        <div className="mt-4 px-4 pb-2">
-          <AuthButton session={session} />
+        {session && <RoleLinks role={userRole} />}
+        <div className="mt-4 px-4 pb-2 space-y-2">
+          {!session && (
+            <>
+              <Button 
+                variant="outline"
+                className="w-full border-[#040480] text-[#040480] hover:bg-[#040480] hover:text-white"
+                onClick={() => window.location.href = '/login'}
+              >
+                Company Login
+              </Button>
+              <Button 
+                className="w-full bg-[#d2491f] hover:bg-[#84d21f] text-white transition-all duration-300"
+                onClick={() => window.location.href = '/companies'}
+              >
+                Partner With Us
+              </Button>
+            </>
+          )}
+          {session && <AuthButton session={session} />}
         </div>
       </div>
     </div>
