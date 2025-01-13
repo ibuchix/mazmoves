@@ -15,6 +15,8 @@ import CompanyDashboard from "@/pages/company/Dashboard";
 import PublicDashboard from "@/pages/company/PublicDashboard";
 import RequestMove from "@/pages/RequestMove";
 import CompanyInvoices from "@/pages/company/Invoices";
+import AdminDashboard from "@/pages/admin/Dashboard";
+import AdminBilling from "@/pages/admin/Billing";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { AuthProvider } from "@/components/AuthProvider";
 import "./App.css";
@@ -54,6 +56,24 @@ function App() {
                 element={
                   <ProtectedRoute allowedRoles={["company"]}>
                     <CompanyInvoices />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminDashboard />
+                  </ProtectedRoute>
+                }
+              />
+
+              <Route
+                path="/admin/billing"
+                element={
+                  <ProtectedRoute allowedRoles={["admin"]}>
+                    <AdminBilling />
                   </ProtectedRoute>
                 }
               />

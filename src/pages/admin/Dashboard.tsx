@@ -4,6 +4,9 @@ import { AdminDashboardData } from "@/types/admin";
 import { Tables } from "@/integrations/supabase/types";
 import DashboardStats from "@/components/admin/dashboard/DashboardStats";
 import CompaniesTable from "@/components/admin/dashboard/CompaniesTable";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
+import { Receipt } from "lucide-react";
 
 type DashboardStats = {
   totalCompanies: number;
@@ -120,7 +123,15 @@ export default function AdminDashboard() {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold text-[#040480] mb-8">Admin Dashboard</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-[#040480]">Admin Dashboard</h1>
+        <Link to="/admin/billing">
+          <Button className="bg-[#040480] hover:bg-[#1f3dd2]">
+            <Receipt className="w-4 h-4 mr-2" />
+            View Billing
+          </Button>
+        </Link>
+      </div>
       
       <DashboardStats {...stats} />
 
