@@ -66,6 +66,7 @@ export default function CompanyDashboard() {
   const { data: company, refetch } = useQuery({
     queryKey: ["company", session?.user?.email],
     queryFn: async () => {
+      console.log("Fetching company data for:", session?.user?.email);
       const { data, error } = await supabase
         .from("companies")
         .select("*")
@@ -82,6 +83,7 @@ export default function CompanyDashboard() {
         return null;
       }
 
+      console.log("Company data:", data); // Debug log
       return data;
     },
     enabled: !!session?.user?.email,
