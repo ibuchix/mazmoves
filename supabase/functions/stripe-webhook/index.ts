@@ -4,7 +4,7 @@ import Stripe from 'https://esm.sh/stripe@12.18.0'
 
 const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
   apiVersion: '2023-10-16',
-})
+});
 
 serve(async (req) => {
   const signature = req.headers.get('stripe-signature')
@@ -27,42 +27,44 @@ serve(async (req) => {
     )
 
     switch (event.type) {
-      case 'payment_intent.succeeded': {
-        const paymentIntent = event.data.object
-        const { invoice_id } = paymentIntent.metadata
-
-        // Update invoice status
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated': {
+        const subscription = event.data.object
+        
+        // Update company billing status
         const { error: updateError } = await supabaseClient
-          .from('company_invoices')
+          .from('companies')
           .update({
-            status: 'paid',
-            paid_at: new Date().toISOString()
+            billing_status: 'paid_tier',
+            stripe_customer_id: subscription.customer,
+            subscription_status: subscription.status
           })
-          .eq('id', invoice_id)
+          .eq('stripe_customer_id', subscription.customer)
 
         if (updateError) {
-          throw new Error('Failed to update invoice status')
+          console.error('Error updating company:', updateError)
+          throw updateError
         }
-
         break
       }
 
-      case 'payment_intent.payment_failed': {
-        const paymentIntent = event.data.object
-        const { invoice_id } = paymentIntent.metadata
-
-        // Update invoice status
+      case 'customer.subscription.deleted': {
+        const subscription = event.data.object
+        
+        // Update company billing status back to free tier
         const { error: updateError } = await supabaseClient
-          .from('company_invoices')
+          .from('companies')
           .update({
-            status: 'failed'
+            billing_status: 'free_tier',
+            subscription_status: 'canceled',
+            free_assignments_remaining: 7 // Reset free assignments
           })
-          .eq('id', invoice_id)
+          .eq('stripe_customer_id', subscription.customer)
 
         if (updateError) {
-          throw new Error('Failed to update invoice status')
+          console.error('Error updating company:', updateError)
+          throw updateError
         }
-
         break
       }
     }
