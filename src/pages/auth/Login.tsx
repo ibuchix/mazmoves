@@ -19,9 +19,9 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F8F9FF] to-[#FFFFFF]">
       <div className="max-w-md w-full p-10 bg-white rounded-xl shadow-xl">
         <div className="text-center space-y-4 mb-8">
-          <h1 className="text-4xl font-bold text-[#040480]">Welcome</h1>
+          <h1 className="text-4xl font-bold text-[#040480]">Company Login</h1>
           <p className="text-gray-600">
-            Sign in to your account or create a new one
+            Access your company dashboard
           </p>
         </div>
         
