@@ -23,6 +23,9 @@ export default function DashboardStats({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{totalCompanies.toString()}</div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {verifiedCompanies} verified
+          </p>
         </CardContent>
       </Card>
 
@@ -33,6 +36,9 @@ export default function DashboardStats({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{verifiedCompanies.toString()}</div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {((verifiedCompanies / totalCompanies) * 100).toFixed(1)}% of total
+          </p>
         </CardContent>
       </Card>
 
@@ -43,6 +49,9 @@ export default function DashboardStats({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{totalAssignments.toString()}</div>
+          <p className="text-xs text-muted-foreground mt-1">
+            {(totalAssignments / Math.max(verifiedCompanies, 1)).toFixed(1)} per company
+          </p>
         </CardContent>
       </Card>
 
@@ -53,6 +62,9 @@ export default function DashboardStats({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
+          <p className="text-xs text-muted-foreground mt-1">
+            ${(totalRevenue / Math.max(totalCompanies, 1)).toFixed(2)} per company
+          </p>
         </CardContent>
       </Card>
     </div>
