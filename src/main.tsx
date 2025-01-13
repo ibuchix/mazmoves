@@ -1,5 +1,6 @@
 import React from 'react'
-import ReactDOM from 'react-dom/client'
+import { createRoot } from 'react-dom/client'
+import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import './index.css'
 import { initializeErrorMonitoring, SentryErrorBoundary } from './utils/monitoring'
@@ -7,10 +8,14 @@ import { initializeErrorMonitoring, SentryErrorBoundary } from './utils/monitori
 // Initialize error monitoring in production
 initializeErrorMonitoring();
 
-ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+const root = createRoot(document.getElementById('root')!)
+
+root.render(
   <React.StrictMode>
-    <SentryErrorBoundary fallback={<div>An error has occurred</div>}>
-      <App />
-    </SentryErrorBoundary>
-  </React.StrictMode>,
+    <BrowserRouter>
+      <SentryErrorBoundary fallback={<div>An error has occurred</div>}>
+        <App />
+      </SentryErrorBoundary>
+    </BrowserRouter>
+  </React.StrictMode>
 )
