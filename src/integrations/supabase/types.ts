@@ -1827,6 +1827,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      process_billing_cycle: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       record_registration_attempt: {
         Args: {
           attempt_ip: string
