@@ -11,11 +11,12 @@ export default function CompanyDashboard() {
   useRealtimeAssignments();
   const { company, assignments, stats, verificationMessage } = useCompanyDashboard();
 
-  // Explicitly convert is_verified to boolean and log the value
-  const isVerified = company ? Boolean(company.is_verified) : false;
-  console.log("Dashboard verification status:", { 
-    raw: company?.is_verified, 
-    converted: isVerified,
+  // Strict boolean check for verification status
+  const isVerified = company?.is_verified === true;
+  
+  console.log("Dashboard render verification status:", { 
+    company,
+    isVerified,
     verificationDate: company?.verification_date 
   });
 

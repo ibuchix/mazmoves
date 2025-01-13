@@ -37,15 +37,16 @@ export function useCompanyDashboard() {
       }
 
       // Log verification status for debugging
-      console.log("Company data:", {
-        name: data.name,
-        is_verified: Boolean(data.is_verified),
-        verification_date: data.verification_date
+      console.log("Raw company data from database:", data);
+      console.log("Verification status:", {
+        is_verified: data.is_verified,
+        verification_date: data.verification_date,
+        type: typeof data.is_verified
       });
       
       return {
         ...data,
-        is_verified: Boolean(data.is_verified) // Ensure boolean conversion
+        is_verified: data.is_verified === true // Strict boolean comparison
       };
     },
     enabled: !!session?.user?.email,
@@ -116,7 +117,7 @@ export function useCompanyDashboard() {
   });
 
   const verificationMessage = company?.is_verified
-    ? `Your company was verified on ${new Date(company.verification_date).toLocaleDateString()}. You can now receive move assignments.`
+    ? `Your company has been verified. You can now receive move assignments.`
     : "Your company is pending verification. You will be notified once verified.";
 
   return {
