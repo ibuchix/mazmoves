@@ -18,10 +18,13 @@ export function useCompanyDashboard() {
         throw new Error("No user email found");
       }
 
+      const email = session.user.email.toLowerCase();
+      console.log("Fetching company data for email:", email);
+
       const { data, error } = await supabase
         .from("companies")
         .select("*")
-        .eq("contact_email", session.user.email.toLowerCase())
+        .eq("contact_email", email)
         .maybeSingle();
 
       if (error) {
@@ -31,12 +34,12 @@ export function useCompanyDashboard() {
       }
 
       if (!data) {
-        console.error("No company found for email:", session.user.email);
+        console.error("No company found for email:", email);
         toast.error("Company profile not found");
         return null;
       }
 
-      // Log verification status for debugging
+      // Log raw data for debugging
       console.log("Raw company data from database:", data);
       console.log("Verification status:", {
         is_verified: data.is_verified,
@@ -50,6 +53,7 @@ export function useCompanyDashboard() {
       };
     },
     enabled: !!session?.user?.email,
+    retry: 1 // Only retry once if failed
   });
 
   // Subscribe to real-time changes
