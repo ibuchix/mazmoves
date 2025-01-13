@@ -55,7 +55,6 @@ export default function Navbar() {
             <Link to="/" className="text-[#040480] hover:text-[#1f3dd2] font-medium">Home</Link>
             <Link to="/services" className="text-[#040480] hover:text-[#1f3dd2] font-medium">Services</Link>
             <Link to="/companies" className="text-[#040480] hover:text-[#1f3dd2] font-medium">Companies</Link>
-            <Link to="/about" className="text-[#040480] hover:text-[#1f3dd2] font-medium">About</Link>
             
             {/* Only show role-specific links if user is logged in and registered */}
             {session && isRegisteredCompany && <RoleLinks role={userData?.role} />}

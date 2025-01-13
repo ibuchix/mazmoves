@@ -16,12 +16,6 @@ export default function QuickLinks() {
         Services
       </Link>
       <Link
-        to="/about"
-        className="text-sm text-gray-300 hover:text-[#84d21f] transition-colors"
-      >
-        About Us
-      </Link>
-      <Link
         to="/companies"
         className="text-sm text-gray-300 hover:text-[#84d21f] transition-colors"
       >
