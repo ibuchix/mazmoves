@@ -55,6 +55,32 @@ export function useCompanyDashboard() {
     enabled: !!session?.user?.email,
   });
 
+  // Subscribe to real-time changes
+  useEffect(() => {
+    if (!session?.user?.email) return;
+
+    const channel = supabase
+      .channel('company_updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'companies',
+          filter: `contact_email=eq.${session.user.email}`,
+        },
+        (payload) => {
+          console.log('Real-time update received:', payload);
+          refetch();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [session?.user?.email, refetch]);
+
   const { data: assignments } = useQuery<MoveAssignmentWithRequest[]>({
     queryKey: ["assignments", company?.id],
     queryFn: async () => {
