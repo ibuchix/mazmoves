@@ -1,0 +1,13 @@
+project_id = "tcyulkuyfptlisfyefnn"
+
+[create-stripe-customer]
+verify_jwt = true
+
+[generate-invoice]
+verify_jwt = true
+
+[process-payment]
+verify_jwt = true
+
+[stripe-webhook]
+verify_jwt = false
