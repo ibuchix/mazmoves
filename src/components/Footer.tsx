@@ -3,20 +3,20 @@ import { MapPin, Mail, Phone, Facebook, Twitter } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#040480] text-white py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+    <footer className="bg-[#040480] text-white py-12">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           {/* Logo and Description */}
-          <div className="flex flex-col space-y-4">
+          <div className="flex flex-col gap-6">
             <img 
               src="/lovable-uploads/b700dde9-463e-4b6e-8523-ec9f718b3beb.png" 
               alt="MAZ Moves" 
-              className="h-6 bg-white p-1 rounded w-fit" 
+              className="h-8 bg-white p-1 rounded w-fit" 
             />
             <p className="text-sm text-gray-300">
               Professional moving services for homes and businesses.
             </p>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-4">
               <a 
                 href="https://wa.me/447388449110" 
                 target="_blank" 
@@ -47,9 +47,9 @@ export default function Footer() {
           </div>
           
           {/* Quick Links */}
-          <div className="flex flex-col space-y-3">
-            <h3 className="text-sm font-semibold text-gray-300 mb-2">Quick Links</h3>
-            <div className="flex flex-col space-y-2">
+          <div className="flex flex-col gap-6">
+            <h3 className="text-base font-semibold text-white">Quick Links</h3>
+            <div className="flex flex-col gap-4">
               <Link to="/" className="text-sm text-gray-300 hover:text-[#84d21f] transition-colors">
                 Home
               </Link>
@@ -66,9 +66,9 @@ export default function Footer() {
           </div>
           
           {/* Legal */}
-          <div className="flex flex-col space-y-3">
-            <h3 className="text-sm font-semibold text-gray-300 mb-2">Legal</h3>
-            <div className="flex flex-col space-y-2">
+          <div className="flex flex-col gap-6">
+            <h3 className="text-base font-semibold text-white">Legal</h3>
+            <div className="flex flex-col gap-4">
               <Link to="/terms-and-conditions" className="text-sm text-gray-300 hover:text-[#84d21f] transition-colors">
                 Terms & Conditions
               </Link>
@@ -79,24 +79,24 @@ export default function Footer() {
           </div>
           
           {/* Contact */}
-          <div className="flex flex-col space-y-3">
-            <h3 className="text-sm font-semibold text-gray-300 mb-2">Contact Us</h3>
-            <div className="flex flex-col space-y-2">
+          <div className="flex flex-col gap-6">
+            <h3 className="text-base font-semibold text-white">Contact Us</h3>
+            <div className="flex flex-col gap-4">
               <a 
                 href="mailto:ask@mazmoves.com" 
-                className="text-sm text-gray-300 hover:text-[#84d21f] transition-colors flex items-center space-x-2"
+                className="text-sm text-gray-300 hover:text-[#84d21f] transition-colors flex items-center gap-2"
               >
-                <Mail className="w-4 h-4" />
+                <Mail className="w-4 h-4 flex-shrink-0" />
                 <span>ask@mazmoves.com</span>
               </a>
               <a 
                 href="tel:+447388449110" 
-                className="text-sm text-gray-300 hover:text-[#84d21f] transition-colors flex items-center space-x-2"
+                className="text-sm text-gray-300 hover:text-[#84d21f] transition-colors flex items-center gap-2"
               >
-                <Phone className="w-4 h-4" />
+                <Phone className="w-4 h-4 flex-shrink-0" />
                 <span>+44 738 844 9110</span>
               </a>
-              <div className="flex items-start space-x-2">
+              <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 mt-1 flex-shrink-0" />
                 <span className="text-sm text-gray-300">124 City Road, London, EC1V 2NX</span>
               </div>
@@ -105,8 +105,8 @@ export default function Footer() {
         </div>
         
         {/* Copyright */}
-        <div className="border-t border-white/10 mt-8 pt-4">
-          <p className="text-xs text-center text-gray-400">
+        <div className="border-t border-white/10 mt-12 pt-8">
+          <p className="text-sm text-center text-gray-400">
             &copy; {new Date().getFullYear()} MAZ Moves Ltd. All Rights Reserved.
           </p>
         </div>
