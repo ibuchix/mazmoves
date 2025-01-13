@@ -1,6 +1,5 @@
 import { Link } from "react-router-dom";
 import { MapPin, Mail, Phone, Facebook, Twitter } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import {
   Collapsible,
@@ -15,17 +14,17 @@ import FooterLogo from "./footer/FooterLogo";
 
 export default function Footer() {
   return (
-    <footer className="bg-[#040480] text-white py-8 md:py-16 relative">
+    <footer className="bg-[#040480] text-white py-6 md:py-10 relative">
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
         {/* Logo and Description Section - Full Width */}
-        <div className="w-full mb-8 md:mb-16">
+        <div className="w-full mb-6 md:mb-10">
           <div className="max-w-2xl">
             <FooterLogo />
-            <p className="text-lg md:text-xl text-gray-300 mb-6 md:mb-8 font-light leading-relaxed">
+            <p className="text-base md:text-lg text-gray-300 mb-4 md:mb-6 font-light leading-relaxed">
               Professional moving services for homes and businesses. We provide
               reliable, efficient, and secure moving solutions across the UK.
             </p>
-            <div className="flex items-center gap-6 md:gap-8">
+            <div className="flex items-center gap-4 md:gap-6">
               <a
                 href="https://wa.me/447388449110"
                 target="_blank"
@@ -63,13 +62,13 @@ export default function Footer() {
           </div>
         </div>
 
-        <Separator className="mb-8 md:mb-16 bg-white/20" />
+        <Separator className="mb-6 md:mb-10 bg-white/20" />
 
         {/* Mobile Collapsible Sections */}
         <div className="md:hidden space-y-4">
           <Collapsible>
-            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 bg-white/5 rounded-lg">
-              <span className="text-xl font-bold">Quick Links</span>
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 bg-transparent rounded-lg">
+              <span className="text-xl font-bold text-[#d2491f]">Quick Links</span>
               <ChevronDown className="h-5 w-5" />
             </CollapsibleTrigger>
             <CollapsibleContent className="p-4 space-y-4">
@@ -101,8 +100,8 @@ export default function Footer() {
           </Collapsible>
 
           <Collapsible>
-            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 bg-white/5 rounded-lg">
-              <span className="text-xl font-bold">Legal</span>
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 bg-transparent rounded-lg">
+              <span className="text-xl font-bold text-[#d2491f]">Legal</span>
               <ChevronDown className="h-5 w-5" />
             </CollapsibleTrigger>
             <CollapsibleContent className="p-4 space-y-4">
@@ -123,8 +122,8 @@ export default function Footer() {
           </Collapsible>
 
           <Collapsible>
-            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 bg-white/5 rounded-lg">
-              <span className="text-xl font-bold">Contact Us</span>
+            <CollapsibleTrigger className="flex w-full items-center justify-between p-4 bg-transparent rounded-lg">
+              <span className="text-xl font-bold text-[#d2491f]">Contact Us</span>
               <ChevronDown className="h-5 w-5" />
             </CollapsibleTrigger>
             <CollapsibleContent className="p-4 space-y-4">
@@ -153,94 +152,88 @@ export default function Footer() {
         </div>
 
         {/* Desktop Three Column Grid */}
-        <div className="hidden md:grid md:grid-cols-3 gap-12">
+        <div className="hidden md:grid md:grid-cols-3 gap-8">
           {/* Navigation Links */}
-          <Card className="bg-white/5 border-none">
-            <CardContent className="p-6">
-              <h3 className="text-2xl font-bold mb-8">Quick Links</h3>
-              <div className="flex flex-col gap-4">
-                <Link
-                  to="/"
-                  className="text-lg text-gray-300 hover:text-[#84d21f] transition-colors"
-                >
-                  Home
-                </Link>
-                <Link
-                  to="/services"
-                  className="text-lg text-gray-300 hover:text-[#84d21f] transition-colors"
-                >
-                  Services
-                </Link>
-                <Link
-                  to="/about"
-                  className="text-lg text-gray-300 hover:text-[#84d21f] transition-colors"
-                >
-                  About Us
-                </Link>
-                <Link
-                  to="/companies"
-                  className="text-lg text-gray-300 hover:text-[#84d21f] transition-colors"
-                >
-                  Partner With Us
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="p-4">
+            <h3 className="text-xl font-bold mb-6 text-[#d2491f]">Quick Links</h3>
+            <div className="flex flex-col gap-3">
+              <Link
+                to="/"
+                className="text-lg text-gray-300 hover:text-[#84d21f] transition-colors"
+              >
+                Home
+              </Link>
+              <Link
+                to="/services"
+                className="text-lg text-gray-300 hover:text-[#84d21f] transition-colors"
+              >
+                Services
+              </Link>
+              <Link
+                to="/about"
+                className="text-lg text-gray-300 hover:text-[#84d21f] transition-colors"
+              >
+                About Us
+              </Link>
+              <Link
+                to="/companies"
+                className="text-lg text-gray-300 hover:text-[#84d21f] transition-colors"
+              >
+                Partner With Us
+              </Link>
+            </div>
+          </div>
 
           {/* Legal Links */}
-          <Card className="bg-white/5 border-none">
-            <CardContent className="p-6">
-              <h3 className="text-2xl font-bold mb-8">Legal</h3>
-              <div className="flex flex-col gap-4">
-                <Link
-                  to="/terms-and-conditions"
-                  className="text-lg text-gray-300 hover:text-[#84d21f] transition-colors"
-                >
-                  Terms & Conditions
-                </Link>
-                <Link
-                  to="/privacy-policy"
-                  className="text-lg text-gray-300 hover:text-[#84d21f] transition-colors"
-                >
-                  Privacy Policy
-                </Link>
-                <CookiePreferences />
-              </div>
-            </CardContent>
-          </Card>
+          <div className="p-4">
+            <h3 className="text-xl font-bold mb-6 text-[#d2491f]">Legal</h3>
+            <div className="flex flex-col gap-3">
+              <Link
+                to="/terms-and-conditions"
+                className="text-lg text-gray-300 hover:text-[#84d21f] transition-colors"
+              >
+                Terms & Conditions
+              </Link>
+              <Link
+                to="/privacy-policy"
+                className="text-lg text-gray-300 hover:text-[#84d21f] transition-colors"
+              >
+                Privacy Policy
+              </Link>
+              <CookiePreferences />
+            </div>
+          </div>
 
           {/* Contact Information */}
-          <Card className="bg-white/5 border-none">
-            <CardContent className="p-6">
-              <h3 className="text-2xl font-bold mb-8">Contact Us</h3>
-              <div className="flex flex-col gap-6">
-                <a
-                  href="mailto:ask@mazmoves.com"
-                  className="text-lg text-gray-300 hover:text-[#84d21f] transition-colors flex items-center gap-3"
-                >
-                  <Mail className="w-6 h-6 flex-shrink-0" />
-                  <span>ask@mazmoves.com</span>
-                </a>
-                <a
-                  href="tel:+447388449110"
-                  className="text-lg text-gray-300 hover:text-[#84d21f] transition-colors flex items-center gap-3"
-                >
-                  <Phone className="w-6 h-6 flex-shrink-0" />
-                  <span>+44 738 844 9110</span>
-                </a>
-                <div className="flex items-start gap-3">
-                  <MapPin className="w-6 h-6 mt-1 flex-shrink-0" />
-                  <span className="text-lg text-gray-300">
-                    124 City Road, London, EC1V 2NX
-                  </span>
-                </div>
+          <div className="p-4">
+            <h3 className="text-xl font-bold mb-6 text-[#d2491f]">Contact Us</h3>
+            <div className="flex flex-col gap-4">
+              <a
+                href="mailto:ask@mazmoves.com"
+                className="text-lg text-gray-300 hover:text-[#84d21f] transition-colors flex items-center gap-3"
+              >
+                <Mail className="w-6 h-6 flex-shrink-0" />
+                <span>ask@mazmoves.com</span>
+              </a>
+              <a
+                href="tel:+447388449110"
+                className="text-lg text-gray-300 hover:text-[#84d21f] transition-colors flex items-center gap-3"
+              >
+                <Phone className="w-6 h-6 flex-shrink-0" />
+                <span>+44 738 844 9110</span>
+              </a>
+              <div className="flex items-start gap-3">
+                <MapPin className="w-6 h-6 mt-1 flex-shrink-0" />
+                <span className="text-lg text-gray-300">
+                  124 City Road, London, EC1V 2NX
+                </span>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </div>
 
         {/* Language Selector and Additional Features */}
-        <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="mt-6 flex flex-col md:flex-row items-center justify-between gap-4">
           <LanguageSelector />
           <p className="text-sm text-center text-gray-400">
             &copy; {new Date().getFullYear()} MAZ Moves Ltd. All Rights Reserved.
