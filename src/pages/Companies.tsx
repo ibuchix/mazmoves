@@ -17,12 +17,21 @@ export default function Companies() {
             Join our platform for free and connect with customers actively looking for reliable moving services.
             Pay only when you get assigned to a move!
           </p>
-          <Button 
-            onClick={() => navigate('/company/register')}
-            className="bg-[#d2491f] hover:bg-[#84d21f] text-white px-8 py-6 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105"
-          >
-            Join MAZ Moves Today
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              onClick={() => navigate('/company/register')}
+              className="bg-[#d2491f] hover:bg-[#84d21f] text-white px-8 py-6 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105"
+            >
+              Join MAZ Moves Today
+            </Button>
+            <Button 
+              onClick={() => navigate('/login')}
+              variant="outline"
+              className="border-[#040480] text-[#040480] hover:bg-[#040480] hover:text-white px-8 py-6 rounded-lg text-lg font-semibold transition-all duration-300"
+            >
+              Company Login
+            </Button>
+          </div>
         </div>
 
         {/* Benefits Grid */}
@@ -96,12 +105,21 @@ export default function Companies() {
           <p className="text-xl text-gray-100 mb-8">
             Join MAZ Moves today - it's completely free! Start receiving quality leads and grow your business.
           </p>
-          <Button 
-            onClick={() => navigate('/company/register')}
-            className="bg-[#d2491f] hover:bg-[#84d21f] text-white px-8 py-6 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105"
-          >
-            Register Your Company Now
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              onClick={() => navigate('/company/register')}
+              className="bg-[#d2491f] hover:bg-[#84d21f] text-white px-8 py-6 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105"
+            >
+              Register Your Company Now
+            </Button>
+            <Button 
+              onClick={() => navigate('/login')}
+              variant="outline"
+              className="border-white text-white hover:bg-white hover:text-[#040480] px-8 py-6 rounded-lg text-lg font-semibold transition-all duration-300"
+            >
+              Company Login
+            </Button>
+          </div>
         </div>
       </div>
     </div>
