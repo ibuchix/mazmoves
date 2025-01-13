@@ -37,7 +37,33 @@ export default function CompanyDashboard() {
     checkAuth();
   }, [session, navigate]);
 
-  const { data: company } = useQuery({
+  // Set up real-time subscription for company verification status
+  useEffect(() => {
+    if (!session?.user?.email) return;
+
+    const channel = supabase
+      .channel('public:companies')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'companies',
+          filter: `contact_email=eq.${session.user.email}`,
+        },
+        () => {
+          // Refetch company data when changes occur
+          company.refetch();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [session?.user?.email]);
+
+  const { data: company, refetch } = useQuery({
     queryKey: ["company", session?.user?.email],
     queryFn: async () => {
       const { data, error } = await supabase
