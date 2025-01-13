@@ -7,11 +7,8 @@ import QuickLinks from "./footer/QuickLinks";
 import LegalLinks from "./footer/LegalLinks";
 import ContactInfo from "./footer/ContactInfo";
 import MobileCollapsibleSection from "./footer/MobileCollapsibleSection";
-import { useTranslation } from "react-i18next";
 
 export default function Footer() {
-  const { t } = useTranslation();
-  
   return (
     <footer className="bg-[#040480] text-white py-4 md:py-6 relative">
       <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
@@ -20,7 +17,8 @@ export default function Footer() {
           <div className="max-w-2xl">
             <FooterLogo />
             <p className="text-base md:text-lg text-gray-300 mb-4 md:mb-6 font-light leading-relaxed text-left">
-              {t('footer.description')}
+              Professional moving services for homes and businesses. We provide
+              reliable, efficient, and secure moving solutions across the UK.
             </p>
             <SocialLinks />
           </div>
@@ -30,15 +28,15 @@ export default function Footer() {
 
         {/* Mobile Collapsible Sections */}
         <div className="md:hidden space-y-4">
-          <MobileCollapsibleSection title={t('footer.quickLinks.title')}>
+          <MobileCollapsibleSection title="Quick Links">
             <QuickLinks />
           </MobileCollapsibleSection>
 
-          <MobileCollapsibleSection title={t('footer.legal.title')}>
+          <MobileCollapsibleSection title="Legal">
             <LegalLinks />
           </MobileCollapsibleSection>
 
-          <MobileCollapsibleSection title={t('footer.contact.title')}>
+          <MobileCollapsibleSection title="Contact Us">
             <ContactInfo />
           </MobileCollapsibleSection>
         </div>
@@ -46,17 +44,17 @@ export default function Footer() {
         {/* Desktop Three Column Grid */}
         <div className="hidden md:grid md:grid-cols-3 gap-8">
           <div className="p-2">
-            <h3 className="text-xl font-bold mb-4 text-[#d2491f]">{t('footer.quickLinks.title')}</h3>
+            <h3 className="text-xl font-bold mb-4 text-[#d2491f]">Quick Links</h3>
             <QuickLinks />
           </div>
 
           <div className="p-2">
-            <h3 className="text-xl font-bold mb-4 text-[#d2491f]">{t('footer.legal.title')}</h3>
+            <h3 className="text-xl font-bold mb-4 text-[#d2491f]">Legal</h3>
             <LegalLinks />
           </div>
 
           <div className="p-2">
-            <h3 className="text-xl font-bold mb-4 text-[#d2491f]">{t('footer.contact.title')}</h3>
+            <h3 className="text-xl font-bold mb-4 text-[#d2491f]">Contact Us</h3>
             <ContactInfo />
           </div>
         </div>
@@ -65,7 +63,7 @@ export default function Footer() {
         <div className="mt-4 flex flex-col md:flex-row items-center justify-between gap-4">
           <LanguageSelector />
           <p className="text-sm text-center text-gray-400">
-            {t('footer.copyright', { year: new Date().getFullYear() })}
+            &copy; {new Date().getFullYear()} MAZ Moves Ltd. All Rights Reserved.
           </p>
         </div>
       </div>

@@ -5,17 +5,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useTranslation } from "react-i18next";
+import { useState } from "react";
 
 export default function LanguageSelector() {
-  const { i18n } = useTranslation();
-
-  const handleLanguageChange = (value: string) => {
-    i18n.changeLanguage(value);
-  };
+  const [language, setLanguage] = useState("en");
 
   return (
-    <Select value={i18n.language} onValueChange={handleLanguageChange}>
+    <Select value={language} onValueChange={setLanguage}>
       <SelectTrigger className="w-[140px] bg-white/5 border-white/10">
         <SelectValue placeholder="Select language" />
       </SelectTrigger>
