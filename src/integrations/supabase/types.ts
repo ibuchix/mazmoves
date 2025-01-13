@@ -9,15 +9,47 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      billing_cycles: {
+        Row: {
+          created_at: string | null
+          end_date: string
+          id: string
+          processed_at: string | null
+          start_date: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          end_date: string
+          id?: string
+          processed_at?: string | null
+          start_date: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          end_date?: string
+          id?: string
+          processed_at?: string | null
+          start_date?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           auth_user_id: string | null
+          billing_status: string | null
           business_address: Json
           contact_email: string
           contact_phone: string | null
           created_at: string | null
           description: string | null
           email_verified: boolean | null
+          free_assignments_remaining: number | null
           id: string
           insurance_docs: Json | null
           is_active: boolean | null
@@ -34,6 +66,7 @@ export type Database = {
           registration_number: string | null
           registration_status: string | null
           service_areas: Json | null
+          stripe_customer_id: string | null
           subscription_status: string | null
           updated_at: string | null
           vat_number: string | null
@@ -42,12 +75,14 @@ export type Database = {
         }
         Insert: {
           auth_user_id?: string | null
+          billing_status?: string | null
           business_address: Json
           contact_email: string
           contact_phone?: string | null
           created_at?: string | null
           description?: string | null
           email_verified?: boolean | null
+          free_assignments_remaining?: number | null
           id?: string
           insurance_docs?: Json | null
           is_active?: boolean | null
@@ -64,6 +99,7 @@ export type Database = {
           registration_number?: string | null
           registration_status?: string | null
           service_areas?: Json | null
+          stripe_customer_id?: string | null
           subscription_status?: string | null
           updated_at?: string | null
           vat_number?: string | null
@@ -72,12 +108,14 @@ export type Database = {
         }
         Update: {
           auth_user_id?: string | null
+          billing_status?: string | null
           business_address?: Json
           contact_email?: string
           contact_phone?: string | null
           created_at?: string | null
           description?: string | null
           email_verified?: boolean | null
+          free_assignments_remaining?: number | null
           id?: string
           insurance_docs?: Json | null
           is_active?: boolean | null
@@ -94,6 +132,7 @@ export type Database = {
           registration_number?: string | null
           registration_status?: string | null
           service_areas?: Json | null
+          stripe_customer_id?: string | null
           subscription_status?: string | null
           updated_at?: string | null
           vat_number?: string | null
@@ -101,6 +140,79 @@ export type Database = {
           verification_notes?: string | null
         }
         Relationships: []
+      }
+      company_invoices: {
+        Row: {
+          billing_cycle_id: string
+          company_id: string
+          created_at: string | null
+          due_date: string
+          id: string
+          paid_at: string | null
+          status: Database["public"]["Enums"]["invoice_status"]
+          stripe_customer_id: string | null
+          stripe_invoice_id: string | null
+          stripe_payment_intent_id: string | null
+          subtotal: number
+          tax: number
+          total: number
+          updated_at: string | null
+        }
+        Insert: {
+          billing_cycle_id: string
+          company_id: string
+          created_at?: string | null
+          due_date: string
+          id?: string
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          stripe_customer_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          subtotal?: number
+          tax?: number
+          total?: number
+          updated_at?: string | null
+        }
+        Update: {
+          billing_cycle_id?: string
+          company_id?: string
+          created_at?: string | null
+          due_date?: string
+          id?: string
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          stripe_customer_id?: string | null
+          stripe_invoice_id?: string | null
+          stripe_payment_intent_id?: string | null
+          subtotal?: number
+          tax?: number
+          total?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_invoices_billing_cycle_id_fkey"
+            columns: ["billing_cycle_id"]
+            isOneToOne: false
+            referencedRelation: "billing_cycles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_documents_view"
+            referencedColumns: ["company_id"]
+          },
+        ]
       }
       company_payments: {
         Row: {
@@ -179,6 +291,58 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      invoice_items: {
+        Row: {
+          amount: number
+          assignment_id: string
+          created_at: string | null
+          description: string
+          id: string
+          invoice_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          assignment_id: string
+          created_at?: string | null
+          description: string
+          id?: string
+          invoice_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          assignment_id?: string
+          created_at?: string | null
+          description?: string
+          id?: string
+          invoice_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_items_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "move_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_items_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_moves_view"
+            referencedColumns: ["assignment_id"]
+          },
+          {
+            foreignKeyName: "invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "company_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       move_assignments: {
         Row: {
@@ -3618,6 +3782,7 @@ export type Database = {
     }
     Enums: {
       assignment_status: "active" | "completed" | "cancelled"
+      invoice_status: "draft" | "pending" | "paid" | "failed" | "void"
       request_status:
         | "pending"
         | "assigned"
