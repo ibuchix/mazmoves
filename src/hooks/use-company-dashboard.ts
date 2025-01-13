@@ -2,7 +2,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useEffect } from "react";
-import { MoveAssignmentWithRequest } from "@/types/move";
+import { MoveAssignmentWithRequest, transformMoveAssignment } from "@/types/move";
 import { CompanyDashboardStats } from "@/types/company";
 
 export function useCompanyDashboard() {
@@ -68,7 +68,7 @@ export function useCompanyDashboard() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data ? data.map(transformMoveAssignment) : [];
     },
     enabled: !!company?.id,
   });
@@ -76,26 +76,28 @@ export function useCompanyDashboard() {
   const { data: stats } = useQuery<CompanyDashboardStats>({
     queryKey: ["stats", company?.id],
     queryFn: async () => {
-      const active = assignments?.filter(a => a.status === "active").length || 0;
-      const completed = assignments?.filter(a => a.status === "completed").length || 0;
-      const cancelled = assignments?.filter(a => a.status === "cancelled").length || 0;
-      const pending = assignments?.filter(a => !a.status).length || 0;
-
+      if (!assignments) return { active: 0, completed: 0, cancelled: 0, pending: 0 };
+      
       return {
-        active,
-        completed,
-        cancelled,
-        pending
+        active: assignments.filter(a => a.status === "active").length,
+        completed: assignments.filter(a => a.status === "completed").length,
+        cancelled: assignments.filter(a => a.status === "cancelled").length,
+        pending: assignments.filter(a => !a.status).length
       };
     },
     enabled: !!assignments,
   });
+
+  const verificationMessage = company?.is_verified
+    ? "Your company is verified and can receive move assignments"
+    : "Your company is pending verification. You will be notified once verified.";
 
   return {
     company,
     companyLoading,
     companyError,
     assignments,
-    stats
+    stats,
+    verificationMessage
   };
 }

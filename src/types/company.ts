@@ -13,3 +13,10 @@ export interface CompanyRegistrationForm {
   };
   managerName: string;
 }
+
+export interface CompanyDashboardStats {
+  active: number;
+  completed: number;
+  cancelled: number;
+  pending: number;
+}
