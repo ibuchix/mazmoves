@@ -580,7 +580,6 @@ export type Database = {
     Views: {
       admin_dashboard_mv: {
         Row: {
-          id: number | null
           pending_companies: number | null
           rejected_companies: number | null
           total_companies: number | null
