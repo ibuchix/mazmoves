@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRealtimeAssignments } from "@/hooks/use-realtime-assignments";
-import { Truck, Clock, CheckCircle, XCircle, ShieldCheck } from "lucide-react";
+import { Truck, Clock, CheckCircle, XCircle, ShieldCheck, AlertCircle } from "lucide-react";
 import { MoveAssignmentWithRequest } from "@/types/move";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -95,18 +95,55 @@ export default function CompanyDashboard() {
     pending: assignments?.filter(a => a.status === 'active' && !a.estimated_cost).length || 0,
   };
 
-  return (
-    <div className="container mx-auto p-6">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Company Dashboard</h1>
-        {company?.is_verified && (
+  const getVerificationStatus = () => {
+    if (company?.is_verified) {
+      return {
+        badge: (
           <Badge 
             className="flex items-center gap-1 bg-[#84d21f] hover:bg-[#84d21f] text-white px-3 py-1"
           >
             <ShieldCheck className="h-4 w-4" />
             Verified Company
           </Badge>
-        )}
+        ),
+        message: "Your company is verified and can receive move assignments"
+      };
+    } else {
+      return {
+        badge: (
+          <Badge 
+            className="flex items-center gap-1 bg-[#d2491f] hover:bg-[#d2491f] text-white px-3 py-1"
+          >
+            <AlertCircle className="h-4 w-4" />
+            Pending Verification
+          </Badge>
+        ),
+        message: "Your company is pending verification. You will be notified once verified."
+      };
+    }
+  };
+
+  const verificationStatus = getVerificationStatus();
+
+  return (
+    <div className="container mx-auto p-6">
+      <div className="flex flex-col gap-4 mb-8">
+        <div className="flex items-center justify-between">
+          <h1 className="text-3xl font-bold">Company Dashboard</h1>
+          {verificationStatus.badge}
+        </div>
+        <Card className="bg-slate-50">
+          <CardContent className="pt-6">
+            <p className="text-sm text-slate-600">
+              {verificationStatus.message}
+              {company?.verification_date && (
+                <span className="block mt-1 text-xs">
+                  Verified on: {new Date(company.verification_date).toLocaleDateString()}
+                </span>
+              )}
+            </p>
+          </CardContent>
+        </Card>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

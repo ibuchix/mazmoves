@@ -1671,6 +1671,13 @@ export type Database = {
         }
         Returns: undefined
       }
+      send_verification_email: {
+        Args: {
+          company_name: string
+          email: string
+        }
+        Returns: undefined
+      }
       spheroid_in: {
         Args: {
           "": unknown
