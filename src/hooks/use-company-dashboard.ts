@@ -21,7 +21,7 @@ export function useCompanyDashboard() {
       const { data, error } = await supabase
         .from("companies")
         .select("*")
-        .eq("contact_email", session.user.email)
+        .eq("contact_email", session.user.email.toLowerCase())
         .maybeSingle();
 
       if (error) {
@@ -60,7 +60,7 @@ export function useCompanyDashboard() {
           event: '*',
           schema: 'public',
           table: 'companies',
-          filter: `contact_email=eq.${session.user.email}`,
+          filter: `contact_email=eq.${session.user.email.toLowerCase()}`,
         },
         (payload) => {
           console.log('Real-time update received:', payload);
