@@ -12,6 +12,16 @@ export const initializeErrorMonitoring = () => {
       // Session Replay
       replaysSessionSampleRate: 0.1, // Sample rate for session replay
       replaysOnErrorSampleRate: 1.0, // Sample rate when errors occur
+
+      // Configure alert rules
+      beforeSend(event) {
+        // Add custom alert logic for email-related errors
+        if (event.tags?.errorType === 'email_match_failure') {
+          // Set highest priority for email matching issues
+          event.level = 'error';
+        }
+        return event;
+      },
     });
   }
 };

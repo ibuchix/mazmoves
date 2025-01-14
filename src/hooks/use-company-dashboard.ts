@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { MoveAssignmentWithRequest, transformMoveAssignment } from "@/types/move";
 import { CompanyDashboardStats } from "@/types/company";
 import { toast } from "sonner";
+import * as Sentry from '@sentry/react';
 
 export function useCompanyDashboard() {
   const { session } = useAuth();
@@ -14,8 +15,14 @@ export function useCompanyDashboard() {
     queryKey: ["company", session?.user?.email],
     queryFn: async () => {
       if (!session?.user?.email) {
-        console.error("No user email found in session");
-        throw new Error("No user email found");
+        const error = new Error("No user email found in session");
+        Sentry.captureException(error, {
+          tags: {
+            location: 'useCompanyDashboard',
+            errorType: 'auth_error'
+          }
+        });
+        throw error;
       }
 
       const email = session.user.email;
@@ -24,36 +31,74 @@ export function useCompanyDashboard() {
       const { data, error } = await supabase
         .from("companies")
         .select("*")
-        .ilike("contact_email", email) // Using ilike for case-insensitive comparison
-        .maybeSingle();
+        .ilike("contact_email", email);
 
       if (error) {
         console.error("Error fetching company:", error);
+        Sentry.captureException(error, {
+          tags: {
+            location: 'useCompanyDashboard',
+            errorType: 'database_error',
+            email: email
+          },
+          extra: {
+            query: 'companies.select',
+            emailUsed: email
+          }
+        });
         toast.error("Failed to fetch company data");
         throw error;
       }
 
-      if (!data) {
-        console.error("No company found for email:", email);
+      // Log email matching issues
+      if (!data || data.length === 0) {
+        const noMatchError = new Error(`No company found for email: ${email}`);
+        Sentry.captureMessage("Email matching failure", {
+          level: 'warning',
+          tags: {
+            location: 'useCompanyDashboard',
+            errorType: 'email_match_failure'
+          },
+          extra: {
+            email: email,
+            normalizedEmail: email.toLowerCase(),
+            sessionEmail: session.user.email
+          }
+        });
         toast.error("Company profile not found");
         return null;
       }
 
+      if (data.length > 1) {
+        const duplicateError = new Error(`Multiple companies found for email: ${email}`);
+        Sentry.captureException(duplicateError, {
+          level: 'error',
+          tags: {
+            location: 'useCompanyDashboard',
+            errorType: 'duplicate_company'
+          },
+          extra: {
+            email: email,
+            companiesFound: data.length
+          }
+        });
+      }
+
       // Log raw data for debugging
-      console.log("Raw company data from database:", data);
+      console.log("Raw company data from database:", data[0]);
       console.log("Verification status:", {
-        is_verified: data.is_verified,
-        verification_date: data.verification_date,
-        type: typeof data.is_verified
+        is_verified: data[0].is_verified,
+        verification_date: data[0].verification_date,
+        type: typeof data[0].is_verified
       });
       
       return {
-        ...data,
-        is_verified: data.is_verified === true // Strict boolean comparison
+        ...data[0],
+        is_verified: data[0].is_verified === true // Strict boolean comparison
       };
     },
     enabled: !!session?.user?.email,
-    retry: 1 // Only retry once if failed
+    retry: 1
   });
 
   useEffect(() => {
@@ -97,7 +142,18 @@ export function useCompanyDashboard() {
         .eq("company_id", company?.id)
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        Sentry.captureException(error, {
+          tags: {
+            location: 'useCompanyDashboard',
+            errorType: 'assignments_error'
+          },
+          extra: {
+            companyId: company?.id
+          }
+        });
+        throw error;
+      }
       return data ? data.map(transformMoveAssignment) : [];
     },
     enabled: !!company?.id,
