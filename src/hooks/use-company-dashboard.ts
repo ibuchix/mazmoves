@@ -18,13 +18,13 @@ export function useCompanyDashboard() {
         throw new Error("No user email found");
       }
 
-      const email = session.user.email.toLowerCase();
+      const email = session.user.email;
       console.log("Fetching company data for email:", email);
 
       const { data, error } = await supabase
         .from("companies")
         .select("*")
-        .eq("contact_email", email)
+        .ilike("contact_email", email) // Using ilike for case-insensitive comparison
         .maybeSingle();
 
       if (error) {
@@ -56,7 +56,6 @@ export function useCompanyDashboard() {
     retry: 1 // Only retry once if failed
   });
 
-  // Subscribe to real-time changes
   useEffect(() => {
     if (!session?.user?.email) return;
 
@@ -119,7 +118,7 @@ export function useCompanyDashboard() {
     enabled: !!assignments,
     initialData: { active: 0, completed: 0, cancelled: 0, pending: 0 }
   });
-
+  
   const verificationMessage = company?.is_verified
     ? `Your company has been verified. You can now receive move assignments.`
     : "Your company is pending verification. You will be notified once verified.";
