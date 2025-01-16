@@ -474,6 +474,42 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_logs: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          error_message: string | null
+          id: string
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          error_message?: string | null
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_documents_view"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       registration_attempts: {
         Row: {
           attempt_time: string | null
@@ -1563,6 +1599,13 @@ export type Database = {
           "": unknown
         }
         Returns: Json
+      }
+      log_notification_error: {
+        Args: {
+          company_id: string
+          error_message: string
+        }
+        Returns: undefined
       }
       longtransactionsenabled: {
         Args: Record<PropertyKey, never>
