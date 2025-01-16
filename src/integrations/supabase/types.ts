@@ -348,10 +348,12 @@ export type Database = {
         Row: {
           actual_cost: number | null
           assigned_date: string | null
+          attempt_count: number | null
           company_id: string
           completion_notes: string | null
           created_at: string | null
           estimated_cost: number | null
+          expand_after: string | null
           id: string
           request_id: string
           status: Database["public"]["Enums"]["assignment_status"] | null
@@ -360,10 +362,12 @@ export type Database = {
         Insert: {
           actual_cost?: number | null
           assigned_date?: string | null
+          attempt_count?: number | null
           company_id: string
           completion_notes?: string | null
           created_at?: string | null
           estimated_cost?: number | null
+          expand_after?: string | null
           id?: string
           request_id: string
           status?: Database["public"]["Enums"]["assignment_status"] | null
@@ -372,10 +376,12 @@ export type Database = {
         Update: {
           actual_cost?: number | null
           assigned_date?: string | null
+          attempt_count?: number | null
           company_id?: string
           completion_notes?: string | null
           created_at?: string | null
           estimated_cost?: number | null
+          expand_after?: string | null
           id?: string
           request_id?: string
           status?: Database["public"]["Enums"]["assignment_status"] | null
@@ -3827,7 +3833,7 @@ export type Database = {
       }
     }
     Enums: {
-      assignment_status: "active" | "completed" | "cancelled"
+      assignment_status: "active" | "completed" | "cancelled" | "accepted"
       invoice_status: "draft" | "pending" | "paid" | "failed" | "void"
       request_status:
         | "pending"

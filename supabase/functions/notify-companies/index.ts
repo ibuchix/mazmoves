@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { findNearbyCompanies } from './company-finder.ts';
 import { Company, MoveRequest, Assignment } from './types.ts';
 import { RADIUS_MILES } from './distance.ts';
 
@@ -34,37 +33,34 @@ serve(async (req) => {
 
     if (requestError) throw requestError;
 
-    // Get all verified companies
-    const { data: companies, error: companiesError } = await supabase
-      .from('companies')
-      .select('*')
-      .eq('is_verified', true)
-      .eq('is_active', true);
+    // Find nearby companies using the new optimized function
+    const { data: nearbyCompanies, error: companiesError } = await supabase
+      .rpc('find_nearby_companies', {
+        pickup_lat: request.pickup_latitude,
+        pickup_lng: request.pickup_longitude,
+        delivery_lat: request.delivery_latitude,
+        delivery_lng: request.delivery_longitude,
+        radius_km: RADIUS_MILES * 1.60934 // Convert miles to km
+      });
 
     if (companiesError) throw companiesError;
 
-    console.log(`Found ${companies.length} potential companies`);
+    console.log(`Found ${nearbyCompanies.length} potential companies`);
 
-    // First try pickup location
-    let { assignments, locationUsed } = await findNearbyCompanies(supabase, request, false);
-
-    // If no companies found near pickup, try delivery location
-    if (assignments.length === 0) {
-      console.log('No companies found near pickup location, trying delivery location');
-      const deliveryResults = await findNearbyCompanies(supabase, request, true);
-      assignments = deliveryResults.assignments;
-      locationUsed = deliveryResults.locationUsed;
-    }
-
-    // Create assignments and send notifications
+    // Create assignments for the closest companies
     const createdAssignments = [];
-    for (const { company, distance } of assignments) {
+    const expandAfter = new Date();
+    expandAfter.setMinutes(expandAfter.getMinutes() + 5); // Set expansion time to 5 minutes from now
+
+    for (const { company_id, company_name, distance_km } of nearbyCompanies) {
       const { data: assignment, error: assignmentError } = await supabase
         .from('move_assignments')
         .insert({
           request_id: requestId,
-          company_id: company.id,
-          status: 'active'
+          company_id: company_id,
+          status: 'active',
+          attempt_count: 1,
+          expand_after: expandAfter.toISOString()
         })
         .select()
         .single();
@@ -88,12 +84,11 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             from: 'MAZ Moves <notifications@mazmoves.com>',
-            to: [company.contact_email],
+            to: [company_name],
             subject: 'New Move Request Available',
             html: `
               <h2>New Move Request Details</h2>
-              <p>A new moving request has been submitted ${Math.round(distance)} miles from your location 
-              (based on the ${locationUsed} address).</p>
+              <p>A new moving request has been submitted ${Math.round(distance_km)} km from your location.</p>
               
               <h3>Move Details:</h3>
               <ul>
@@ -116,14 +111,13 @@ serve(async (req) => {
         console.error('Error sending email:', emailError);
       }
 
-      createdAssignments.push({ ...assignment, distance });
+      createdAssignments.push({ ...assignment, distance_km });
     }
 
     console.log(`Created ${createdAssignments.length} assignments within ${RADIUS_MILES} mile radius`);
 
-    // If no companies were found within range of either location
+    // If no companies were found within range
     if (createdAssignments.length === 0) {
-      // Update move request status to indicate no companies found
       const { error: updateError } = await supabase
         .from('move_requests')
         .update({ status: 'no_companies_found' })
@@ -138,10 +132,9 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         assignmentCount: createdAssignments.length,
-        locationUsed,
         message: createdAssignments.length > 0 
-          ? `Created ${createdAssignments.length} assignments within ${RADIUS_MILES} mile radius of ${locationUsed} location`
-          : `No companies found within ${RADIUS_MILES} miles of either pickup or delivery location`
+          ? `Created ${createdAssignments.length} assignments within ${RADIUS_MILES} mile radius`
+          : `No companies found within ${RADIUS_MILES} miles of pickup location`
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
