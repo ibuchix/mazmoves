@@ -6,6 +6,7 @@ import RecentAssignments from "@/components/company/dashboard/RecentAssignments"
 import VerificationStatus, { VerificationBadge } from "@/components/company/dashboard/VerificationStatus";
 import { useCompanyDashboard } from "@/hooks/use-company-dashboard";
 import { useRealtimeAssignments } from "@/hooks/use-realtime-assignments";
+import PendingAssignments from "@/components/company/assignments/PendingAssignments";
 
 export default function CompanyDashboard() {
   useRealtimeAssignments();
@@ -43,7 +44,20 @@ export default function CompanyDashboard() {
       </div>
       
       <DashboardStats stats={stats} />
-      <RecentAssignments assignments={assignments} />
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Pending Assignments</h2>
+          <PendingAssignments 
+            assignments={assignments || []} 
+            onAssignmentUpdate={() => {}} 
+          />
+        </div>
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Recent Assignments</h2>
+          <RecentAssignments assignments={assignments} />
+        </div>
+      </div>
     </div>
   );
 }
