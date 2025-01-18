@@ -40,7 +40,7 @@ export default function AssignmentCard({ assignment, onAccept, onDecline }: Assi
       setIsLoading(true);
       const { error } = await supabase
         .from('move_assignments')
-        .update({ status: 'declined' })
+        .update({ status: 'cancelled' })
         .eq('id', assignment.id);
 
       if (error) throw error;
