@@ -516,6 +516,69 @@ export type Database = {
           },
         ]
       }
+      rate_limit_configs: {
+        Row: {
+          created_at: string | null
+          id: string
+          limit_type: Database["public"]["Enums"]["rate_limit_type"]
+          max_requests: number
+          updated_at: string | null
+          window_seconds: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          limit_type: Database["public"]["Enums"]["rate_limit_type"]
+          max_requests: number
+          updated_at?: string | null
+          window_seconds: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          limit_type?: Database["public"]["Enums"]["rate_limit_type"]
+          max_requests?: number
+          updated_at?: string | null
+          window_seconds?: number
+        }
+        Relationships: []
+      }
+      rate_limit_logs: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          id: string
+          limit_type: Database["public"]["Enums"]["rate_limit_type"]
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          limit_type: Database["public"]["Enums"]["rate_limit_type"]
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          id?: string
+          limit_type?: Database["public"]["Enums"]["rate_limit_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rate_limit_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rate_limit_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_documents_view"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       registration_attempts: {
         Row: {
           attempt_time: string | null
@@ -1072,6 +1135,13 @@ export type Database = {
             }
             Returns: string
           }
+      check_rate_limit: {
+        Args: {
+          p_company_id: string
+          p_limit_type: Database["public"]["Enums"]["rate_limit_type"]
+        }
+        Returns: boolean
+      }
       check_registration_limit: {
         Args: {
           check_ip: string
@@ -3835,6 +3905,7 @@ export type Database = {
     Enums: {
       assignment_status: "active" | "completed" | "cancelled" | "accepted"
       invoice_status: "draft" | "pending" | "paid" | "failed" | "void"
+      rate_limit_type: "hourly" | "daily" | "monthly"
       request_status:
         | "pending"
         | "assigned"

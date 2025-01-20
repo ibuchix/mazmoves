@@ -32,7 +32,7 @@ serve(async (req) => {
 
     if (requestError) throw requestError;
 
-    // Find nearby companies using the new optimized function
+    // Find nearby companies using the optimized function
     const { data: nearbyCompanies, error: companiesError } = await supabase
       .rpc('find_nearby_companies', {
         pickup_lat: request.pickup_latitude,
@@ -52,6 +52,31 @@ serve(async (req) => {
     expandAfter.setMinutes(expandAfter.getMinutes() + 5); // Set expansion time to 5 minutes from now
 
     for (const { company_id, company_name, distance_km } of nearbyCompanies) {
+      // Check rate limits before proceeding
+      const { data: withinHourlyLimit } = await supabase
+        .rpc('check_rate_limit', {
+          p_company_id: company_id,
+          p_limit_type: 'hourly'
+        });
+
+      const { data: withinDailyLimit } = await supabase
+        .rpc('check_rate_limit', {
+          p_company_id: company_id,
+          p_limit_type: 'daily'
+        });
+
+      if (!withinHourlyLimit || !withinDailyLimit) {
+        console.log(`Rate limit reached for company ${company_id}`);
+        // Log the rate limit hit
+        await supabase
+          .from('rate_limit_logs')
+          .insert({
+            company_id: company_id,
+            limit_type: !withinHourlyLimit ? 'hourly' : 'daily'
+          });
+        continue;
+      }
+
       const { data: assignment, error: assignmentError } = await supabase
         .from('move_assignments')
         .insert({
@@ -105,6 +130,14 @@ serve(async (req) => {
 
         if (!emailResponse.ok) {
           console.error('Error sending email notification to company:', await emailResponse.text());
+        } else {
+          // Log successful email send
+          await supabase
+            .from('rate_limit_logs')
+            .insert({
+              company_id: company_id,
+              limit_type: 'hourly'
+            });
         }
       } catch (emailError) {
         console.error('Error sending email:', emailError);
