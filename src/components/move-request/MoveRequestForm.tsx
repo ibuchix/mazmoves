@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { LoadingOverlay } from "@/components/ui/loading-overlay";
@@ -10,100 +9,15 @@ import { PropertySizeStep } from "./PropertySizeStep";
 import { AddressStep } from "./AddressStep";
 import { ContactStep } from "./ContactStep";
 import { SuccessDialog } from "./SuccessDialog";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { geocodeAddress, addressToJson } from "@/utils/address";
+import { useSubmitMoveRequest } from "@/hooks/use-submit-move-request";
 
 export function MoveRequestForm() {
   const [step, setStep] = useState(1);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
   const [moveType, setMoveType] = useState<MoveType | null>(null);
-  const navigate = useNavigate();
-  const { toast } = useToast();
-  
   const { register, handleSubmit, watch, formState: { errors } } = useForm<IMoveRequestForm>();
+  const { isSubmitting, showSuccess, handleSubmit: onSubmit, handleSuccessClose } = useSubmitMoveRequest();
 
   const totalSteps = 5;
-
-  const onSubmit = async (data: IMoveRequestForm) => {
-    if (isSubmitting) return;
-    
-    setIsSubmitting(true);
-    try {
-      console.log("Starting form submission with data:", data);
-      
-      const [pickupCoords, deliveryCoords] = await Promise.all([
-        geocodeAddress(data.pickupAddress),
-        geocodeAddress(data.deliveryAddress)
-      ]);
-
-      console.log("Geocoding results:", { pickupCoords, deliveryCoords });
-
-      const moveRequestData = {
-        pickup_address: addressToJson(data.pickupAddress),
-        delivery_address: addressToJson(data.deliveryAddress),
-        requested_date: data.moveDate,
-        estimated_size: data.propertySize,
-        special_instructions: data.specialInstructions,
-        customer_email: data.email,
-        customer_name: data.fullName,
-        customer_phone: data.phone,
-        pickup_latitude: pickupCoords.latitude,
-        pickup_longitude: pickupCoords.longitude,
-        delivery_latitude: deliveryCoords.latitude,
-        delivery_longitude: deliveryCoords.longitude
-      };
-
-      const { data: moveRequest, error: moveRequestError } = await supabase
-        .from("move_requests")
-        .insert(moveRequestData)
-        .select()
-        .single();
-
-      if (moveRequestError) {
-        throw moveRequestError;
-      }
-
-      // Send confirmation email
-      const { error: confirmationError } = await supabase.functions.invoke('send-confirmation-email', {
-        body: { 
-          customerEmail: data.email,
-          customerName: data.fullName
-        }
-      });
-
-      if (confirmationError) {
-        console.error("Error sending confirmation email:", confirmationError);
-      }
-
-      // Notify companies
-      const { error: notifyError } = await supabase.functions.invoke('notify-companies', {
-        body: { requestId: moveRequest.id }
-      });
-
-      if (notifyError) {
-        throw notifyError;
-      }
-
-      setShowSuccess(true);
-      toast({
-        title: "Success",
-        description: "Move request submitted successfully!",
-        variant: "default"
-      });
-
-    } catch (error: any) {
-      console.error("Detailed error in submission:", error);
-      toast({
-        title: "Error",
-        description: "Failed to submit request. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const nextStep = () => setStep((prev) => Math.min(prev + 1, totalSteps));
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
@@ -200,10 +114,7 @@ export function MoveRequestForm() {
 
       <SuccessDialog 
         isOpen={showSuccess} 
-        onClose={() => {
-          setShowSuccess(false);
-          navigate("/");
-        }}
+        onClose={handleSuccessClose}
       />
     </div>
   );
