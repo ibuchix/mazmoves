@@ -12,6 +12,7 @@ import { ContactStep } from "./ContactStep";
 import { SuccessDialog } from "./SuccessDialog";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { geocodeAddress, addressToJson } from "@/utils/address";
 
 export function MoveRequestForm() {
   const [step, setStep] = useState(1);
@@ -86,11 +87,19 @@ export function MoveRequestForm() {
       }
 
       setShowSuccess(true);
-      toast.success("Move request submitted successfully!");
+      toast({
+        title: "Success",
+        description: "Move request submitted successfully!",
+        variant: "default"
+      });
 
     } catch (error: any) {
       console.error("Detailed error in submission:", error);
-      toast.error("Failed to submit request. Please try again.");
+      toast({
+        title: "Error",
+        description: "Failed to submit request. Please try again.",
+        variant: "destructive"
+      });
     } finally {
       setIsSubmitting(false);
     }
