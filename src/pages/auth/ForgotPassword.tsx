@@ -1,0 +1,76 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+
+export default function ForgotPassword() {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth/reset-password`,
+      });
+
+      if (error) throw error;
+
+      toast.success("Check your email for the password reset link");
+      navigate("/login");
+    } catch (error: any) {
+      toast.error(error.message || "An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F8F9FF] to-[#FFFFFF]">
+      <div className="max-w-md w-full p-10 bg-white rounded-xl shadow-xl">
+        <div className="text-center space-y-4 mb-8">
+          <h1 className="text-4xl font-bold text-[#040480]">Reset Password</h1>
+          <p className="text-gray-600">
+            Enter your email address and we'll send you a link to reset your password
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div>
+            <Input
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              className="w-full"
+            />
+          </div>
+
+          <Button
+            type="submit"
+            className="w-full bg-[#040480] hover:bg-[#1f3dd2] text-white"
+            disabled={loading}
+          >
+            {loading ? "Sending..." : "Send Reset Link"}
+          </Button>
+
+          <div className="text-center">
+            <Button
+              variant="link"
+              onClick={() => navigate("/login")}
+              className="text-[#1f3dd2] hover:text-[#84d21f]"
+            >
+              Back to Login
+            </Button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}

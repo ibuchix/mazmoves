@@ -9,6 +9,8 @@ import Companies from "@/pages/Companies";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsAndConditions from "@/pages/TermsAndConditions";
 import Login from "@/pages/auth/Login";
+import ForgotPassword from "@/pages/auth/ForgotPassword";
+import ResetPassword from "@/pages/auth/ResetPassword";
 import Register from "@/pages/company/Register";
 import CompanyDashboard from "@/pages/company/Dashboard";
 import PublicDashboard from "@/pages/company/PublicDashboard";
@@ -36,6 +38,8 @@ function App() {
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
               <Route path="/terms-and-conditions" element={<TermsAndConditions />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/auth/forgot-password" element={<ForgotPassword />} />
+              <Route path="/auth/reset-password" element={<ResetPassword />} />
               <Route path="/company/register" element={<Register />} />
               <Route path="/request-move" element={<RequestMove />} />
               <Route path="/company/:id" element={<PublicDashboard />} />

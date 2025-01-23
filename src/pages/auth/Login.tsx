@@ -62,6 +62,9 @@ export default function Login() {
           <p className="text-sm text-gray-600 mb-2">
             Don't have an account? <Link to="/company/register" className="text-[#1f3dd2] hover:underline">Sign up here</Link>
           </p>
+          <p className="text-sm text-gray-600 mb-2">
+            <Link to="/auth/forgot-password" className="text-[#1f3dd2] hover:underline">Forgot your password?</Link>
+          </p>
           <p className="text-sm text-gray-600">
             Need help? <a href="mailto:support@mazmoves.com" className="text-[#1f3dd2] hover:underline">Contact support</a>
           </p>
