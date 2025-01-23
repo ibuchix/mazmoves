@@ -70,6 +70,7 @@ export function MoveRequestForm() {
                   title="Pickup Address"
                   type="pickup"
                   register={register}
+                  errors={errors}
                   isInternational={moveType === "international"}
                   isGeocoding={isGeocodingPickup}
                 />
@@ -80,13 +81,17 @@ export function MoveRequestForm() {
                   title="Delivery Address"
                   type="delivery"
                   register={register}
+                  errors={errors}
                   isInternational={moveType === "international"}
                   isGeocoding={isGeocodingDelivery}
                 />
               )}
 
               {step === 5 && (
-                <ContactStep register={register} />
+                <ContactStep 
+                  register={register}
+                  errors={errors}
+                />
               )}
 
               <div className="flex justify-between pt-4">
