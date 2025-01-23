@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { Mail, ArrowLeft } from "lucide-react";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -41,14 +42,15 @@ export default function ForgotPassword() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
+          <div className="relative">
+            <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
             <Input
               type="email"
               placeholder="Email address"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full"
+              className="pl-10 w-full"
             />
           </div>
 
@@ -66,6 +68,7 @@ export default function ForgotPassword() {
               onClick={() => navigate("/login")}
               className="text-[#1f3dd2] hover:text-[#84d21f]"
             >
+              <ArrowLeft className="mr-2 h-4 w-4" />
               Back to Login
             </Button>
           </div>
