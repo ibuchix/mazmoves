@@ -6,6 +6,7 @@ import { HowItWorksSection } from "@/components/home/HowItWorksSection";
 import { TestimonialsSection } from "@/components/home/TestimonialsSection";
 import { ServicesSection } from "@/components/home/ServicesSection";
 import { CallToAction } from "@/components/home/CallToAction";
+import { AsyncContent } from "@/components/ui/async-content";
 
 export default function Index() {
   const [moveType, setMoveType] = useState<MoveType | null>(null);
@@ -21,16 +22,18 @@ export default function Index() {
   };
 
   return (
-    <div className="flex-1">
-      <HeroSection 
-        moveType={moveType}
-        setMoveType={setMoveType}
-        onGetQuotes={handleGetQuotes}
-      />
-      <HowItWorksSection />
-      <ServicesSection />
-      <TestimonialsSection />
-      <CallToAction />
-    </div>
+    <AsyncContent loading={false} error={null}>
+      <div className="flex-1">
+        <HeroSection 
+          moveType={moveType}
+          setMoveType={setMoveType}
+          onGetQuotes={handleGetQuotes}
+        />
+        <HowItWorksSection />
+        <ServicesSection />
+        <TestimonialsSection />
+        <CallToAction />
+      </div>
+    </AsyncContent>
   );
 }
