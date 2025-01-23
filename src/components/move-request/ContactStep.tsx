@@ -1,53 +1,123 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { UseFormRegister } from "react-hook-form";
+import { UseFormRegister, FieldErrors } from "react-hook-form";
 import { MoveRequestForm } from "@/types/move-request";
 
 interface ContactStepProps {
   register: UseFormRegister<MoveRequestForm>;
+  errors: FieldErrors<MoveRequestForm>;
 }
 
-export function ContactStep({ register }: ContactStepProps) {
+export function ContactStep({ register, errors }: ContactStepProps) {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Contact Information</h3>
+      <h3 className="text-lg font-semibold text-[#040480]">Contact Information</h3>
       <div className="grid gap-4">
-        <div>
-          <Label htmlFor="fullName">Full Name</Label>
+        <div className="space-y-2">
+          <Label htmlFor="fullName" className="text-sm font-medium text-[#040480]">
+            Full Name
+            <span className="text-red-500 ml-1">*</span>
+          </Label>
           <Input
             id="fullName"
-            {...register("fullName", { required: true })}
+            {...register("fullName", { 
+              required: "Full name is required",
+              minLength: {
+                value: 2,
+                message: "Name must be at least 2 characters"
+              }
+            })}
+            className={`h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 ${
+              errors.fullName ? "border-red-500" : ""
+            }`}
           />
+          {errors.fullName && (
+            <p className="text-red-500 text-sm mt-1">{errors.fullName.message}</p>
+          )}
         </div>
-        <div>
-          <Label htmlFor="email">Email Address</Label>
+
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-sm font-medium text-[#040480]">
+            Email Address
+            <span className="text-red-500 ml-1">*</span>
+          </Label>
           <Input
             id="email"
             type="email"
-            {...register("email", { required: true })}
+            {...register("email", {
+              required: "Email address is required",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                message: "Please enter a valid email address"
+              }
+            })}
+            className={`h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 ${
+              errors.email ? "border-red-500" : ""
+            }`}
           />
+          {errors.email && (
+            <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+          )}
         </div>
-        <div>
-          <Label htmlFor="phone">Phone Number</Label>
+
+        <div className="space-y-2">
+          <Label htmlFor="phone" className="text-sm font-medium text-[#040480]">
+            Phone Number
+            <span className="text-red-500 ml-1">*</span>
+          </Label>
           <Input
             id="phone"
             type="tel"
-            {...register("phone", { required: true })}
+            {...register("phone", {
+              required: "Phone number is required",
+              pattern: {
+                value: /^[0-9\s\-\+\(\)]{8,}$/,
+                message: "Please enter a valid phone number"
+              }
+            })}
+            className={`h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 ${
+              errors.phone ? "border-red-500" : ""
+            }`}
           />
+          {errors.phone && (
+            <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
+          )}
         </div>
-        <div>
-          <Label htmlFor="moveDate">Preferred Move Date</Label>
+
+        <div className="space-y-2">
+          <Label htmlFor="moveDate" className="text-sm font-medium text-[#040480]">
+            Preferred Move Date
+            <span className="text-red-500 ml-1">*</span>
+          </Label>
           <Input
             id="moveDate"
             type="date"
-            {...register("moveDate", { required: true })}
+            {...register("moveDate", {
+              required: "Move date is required",
+              validate: (value) => {
+                const date = new Date(value);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                return date >= today || "Move date cannot be in the past";
+              }
+            })}
+            className={`h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 ${
+              errors.moveDate ? "border-red-500" : ""
+            }`}
           />
+          {errors.moveDate && (
+            <p className="text-red-500 text-sm mt-1">{errors.moveDate.message}</p>
+          )}
         </div>
-        <div>
-          <Label htmlFor="specialInstructions">Special Instructions (Optional)</Label>
+
+        <div className="space-y-2">
+          <Label htmlFor="specialInstructions" className="text-sm font-medium text-[#040480]">
+            Special Instructions (Optional)
+          </Label>
           <Input
             id="specialInstructions"
             {...register("specialInstructions")}
+            className="h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300"
           />
         </div>
       </div>
