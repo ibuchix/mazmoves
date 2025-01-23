@@ -1,5 +1,11 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { CheckCircle } from "lucide-react";
 
 interface SuccessDialogProps {
   isOpen: boolean;
@@ -11,19 +17,17 @@ export function SuccessDialog({ isOpen, onClose }: SuccessDialogProps) {
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center text-xl font-semibold text-[#040480]">
-            Success!
+          <DialogTitle className="text-center flex flex-col items-center gap-4">
+            <CheckCircle className="h-12 w-12 text-[#84d21f]" />
+            <span>Request Submitted Successfully!</span>
           </DialogTitle>
-          <DialogDescription className="text-center">
-            Your Move Request has been submitted successfully. You will receive a confirmation email shortly.
-          </DialogDescription>
         </DialogHeader>
-        <div className="flex justify-center mt-4">
-          <Button 
-            onClick={onClose}
-            className="bg-[#040480] hover:bg-[#1f3dd2] text-white"
-          >
-            Return to Home
+        <div className="text-center space-y-4">
+          <p className="text-gray-600">
+            Thank you for submitting your move request. We will contact you shortly with quotes from our verified moving companies.
+          </p>
+          <Button onClick={onClose} className="bg-[#040480] hover:bg-[#1f3dd2] text-white">
+            Close
           </Button>
         </div>
       </DialogContent>
