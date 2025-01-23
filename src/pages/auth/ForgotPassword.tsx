@@ -16,6 +16,19 @@ export default function ForgotPassword() {
     setLoading(true);
 
     try {
+      // Check rate limit before proceeding
+      const { data: rateCheck, error: rateError } = await supabase.rpc(
+        'check_password_reset_rate_limit',
+        { p_email: email }
+      );
+
+      if (rateError) throw rateError;
+
+      if (!rateCheck) {
+        toast.error("Too many reset attempts. Please try again later.");
+        return;
+      }
+
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/reset-password`,
       });
@@ -25,7 +38,12 @@ export default function ForgotPassword() {
       toast.success("Check your email for the password reset link");
       navigate("/login");
     } catch (error: any) {
-      toast.error(error.message || "An error occurred");
+      // Don't expose whether email exists for security
+      if (error.message?.toLowerCase().includes('email not found')) {
+        toast.success("If an account exists with this email, you will receive a reset link");
+      } else {
+        toast.error(error.message || "An error occurred");
+      }
     } finally {
       setLoading(false);
     }

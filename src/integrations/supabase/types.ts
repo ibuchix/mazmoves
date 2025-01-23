@@ -9,6 +9,30 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      auth_rate_limits: {
+        Row: {
+          attempt_count: number | null
+          email: string
+          first_attempt_at: string | null
+          id: string
+          last_attempt_at: string | null
+        }
+        Insert: {
+          attempt_count?: number | null
+          email: string
+          first_attempt_at?: string | null
+          id?: string
+          last_attempt_at?: string | null
+        }
+        Update: {
+          attempt_count?: number | null
+          email?: string
+          first_attempt_at?: string | null
+          id?: string
+          last_attempt_at?: string | null
+        }
+        Relationships: []
+      }
       billing_cycles: {
         Row: {
           created_at: string | null
@@ -1135,6 +1159,14 @@ export type Database = {
             }
             Returns: string
           }
+      check_password_reset_rate_limit: {
+        Args: {
+          p_email: string
+          max_attempts?: number
+          window_minutes?: number
+        }
+        Returns: boolean
+      }
       check_rate_limit: {
         Args: {
           p_company_id: string
