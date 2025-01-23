@@ -1,4 +1,5 @@
 import { Address } from "@/types/address";
+import { Json } from "@/integrations/supabase/types";
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Coordinates {
