@@ -15,12 +15,21 @@ export function MoveRequestForm() {
   const [step, setStep] = useState(1);
   const [moveType, setMoveType] = useState<MoveType | null>(null);
   const { register, handleSubmit, watch, formState: { errors } } = useForm<IMoveRequestForm>();
-  const { isSubmitting, showSuccess, handleSubmit: onSubmit, handleSuccessClose } = useSubmitMoveRequest();
+  const { 
+    isSubmitting, 
+    isGeocodingPickup,
+    isGeocodingDelivery,
+    showSuccess, 
+    handleSubmit: onSubmit, 
+    handleSuccessClose 
+  } = useSubmitMoveRequest();
 
   const totalSteps = 5;
 
   const nextStep = () => setStep((prev) => Math.min(prev + 1, totalSteps));
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
+
+  const isProcessing = isSubmitting || isGeocodingPickup || isGeocodingDelivery;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -62,6 +71,7 @@ export function MoveRequestForm() {
                   type="pickup"
                   register={register}
                   isInternational={moveType === "international"}
+                  isGeocoding={isGeocodingPickup}
                 />
               )}
 
@@ -71,6 +81,7 @@ export function MoveRequestForm() {
                   type="delivery"
                   register={register}
                   isInternational={moveType === "international"}
+                  isGeocoding={isGeocodingDelivery}
                 />
               )}
 
@@ -85,6 +96,7 @@ export function MoveRequestForm() {
                     variant="outline" 
                     onClick={prevStep}
                     className="bg-white hover:bg-gray-50"
+                    disabled={isProcessing}
                   >
                     Previous
                   </Button>
@@ -94,13 +106,14 @@ export function MoveRequestForm() {
                     type="button" 
                     onClick={nextStep}
                     className="bg-[#040480] hover:bg-[#1f3dd2] text-white ml-auto"
+                    disabled={isProcessing}
                   >
                     Next
                   </Button>
                 ) : (
                   <Button 
                     type="submit" 
-                    disabled={isSubmitting}
+                    disabled={isProcessing}
                     className="bg-[#040480] hover:bg-[#1f3dd2] text-white ml-auto"
                   >
                     {isSubmitting ? "Submitting..." : "Submit Request"}

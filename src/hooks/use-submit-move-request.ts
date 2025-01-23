@@ -7,6 +7,8 @@ import { geocodeAddress, addressToJson } from "@/utils/address";
 
 export function useSubmitMoveRequest() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isGeocodingPickup, setIsGeocodingPickup] = useState(false);
+  const [isGeocodingDelivery, setIsGeocodingDelivery] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -18,10 +20,15 @@ export function useSubmitMoveRequest() {
     try {
       console.log("Starting form submission with data:", data);
       
-      const [pickupCoords, deliveryCoords] = await Promise.all([
-        geocodeAddress(data.pickupAddress),
-        geocodeAddress(data.deliveryAddress)
-      ]);
+      // Geocode pickup address
+      setIsGeocodingPickup(true);
+      const pickupCoords = await geocodeAddress(data.pickupAddress);
+      setIsGeocodingPickup(false);
+
+      // Geocode delivery address
+      setIsGeocodingDelivery(true);
+      const deliveryCoords = await geocodeAddress(data.deliveryAddress);
+      setIsGeocodingDelivery(false);
 
       console.log("Geocoding results:", { pickupCoords, deliveryCoords });
 
@@ -87,6 +94,8 @@ export function useSubmitMoveRequest() {
       });
     } finally {
       setIsSubmitting(false);
+      setIsGeocodingPickup(false);
+      setIsGeocodingDelivery(false);
     }
   };
 
@@ -97,6 +106,8 @@ export function useSubmitMoveRequest() {
 
   return {
     isSubmitting,
+    isGeocodingPickup,
+    isGeocodingDelivery,
     showSuccess,
     handleSubmit,
     handleSuccessClose
