@@ -1,6 +1,7 @@
 import { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { checkVerificationRateLimit } from "./rateLimit";
 
 export type AuthEvent = 'SIGNED_OUT' | 'PASSWORD_RECOVERY' | 'SIGNED_IN' | 'TOKEN_REFRESHED';
 
