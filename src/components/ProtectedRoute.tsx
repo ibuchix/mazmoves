@@ -12,12 +12,19 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({ children, allowedRoles = [] }: ProtectedRouteProps) {
   const { session, loading } = useAuth();
   
-  // Query to get user role
+  // Query to get user role and verification status
   const { data: userData, isLoading: roleLoading } = useQuery({
     queryKey: ["user-role", session?.user?.id],
     queryFn: async () => {
       if (!session?.user?.id) return null;
       
+      // Check if email is verified
+      if (!session.user.email_confirmed_at) {
+        toast.error("Please verify your email address before accessing this page");
+        await supabase.auth.signOut();
+        return null;
+      }
+
       const { data, error } = await supabase
         .from("users")
         .select("role")
