@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children, allowedRoles = [] }: ProtectedRouteProps) {
-  const { session, loading } = useAuth();
+  const { session, loading, resendVerificationEmail } = useAuth();
   
   // Query to get user role and verification status
   const { data: userData, isLoading: roleLoading } = useQuery({
@@ -20,41 +20,66 @@ export default function ProtectedRoute({ children, allowedRoles = [] }: Protecte
       
       // Check if email is verified
       if (!session.user.email_confirmed_at) {
-        toast.error("Please verify your email address before accessing this page", {
-          description: "Check your inbox for the verification link",
-          duration: 5000
+        toast.error("Please verify your email address", {
+          description: (
+            <div className="flex flex-col gap-2">
+              <p>Check your inbox for the verification link</p>
+              <button 
+                onClick={(e) => {
+                  e.preventDefault();
+                  resendVerificationEmail();
+                }}
+                className="text-sm underline text-blue-500 hover:text-blue-600"
+              >
+                Resend verification email
+              </button>
+            </div>
+          ),
+          duration: 8000
         });
         await supabase.auth.signOut();
         return null;
       }
 
-      const { data, error } = await supabase
-        .from("users")
-        .select("role")
-        .eq("id", session.user.id)
-        .maybeSingle();
-      
-      if (error) {
-        console.error("Error fetching user role:", error);
-        toast.error("Error checking user permissions", {
-          description: "Please try again or contact support",
+      try {
+        const { data, error } = await supabase
+          .from("users")
+          .select("role")
+          .eq("id", session.user.id)
+          .maybeSingle();
+        
+        if (error) {
+          console.error("Error fetching user role:", error);
+          toast.error("Error checking permissions", {
+            description: "Please try again or contact support",
+            duration: 5000
+          });
+          return null;
+        }
+
+        if (!data) {
+          console.error("No user found with ID:", session.user.id);
+          toast.error("User profile not found", {
+            description: "Please try logging in again",
+            duration: 5000
+          });
+          return null;
+        }
+
+        return data;
+      } catch (error: any) {
+        // Handle network errors
+        console.error("Network error:", error);
+        toast.error("Network error", {
+          description: "Please check your connection and try again",
           duration: 5000
         });
         return null;
       }
-
-      if (!data) {
-        console.error("No user found with ID:", session.user.id);
-        toast.error("User profile not found", {
-          description: "Please try logging in again",
-          duration: 5000
-        });
-        return null;
-      }
-
-      return data;
     },
     enabled: !!session?.user?.id,
+    retry: 2, // Retry failed requests twice
+    retryDelay: 1000, // Wait 1 second between retries
   });
 
   // Show loading state
@@ -78,7 +103,7 @@ export default function ProtectedRoute({ children, allowedRoles = [] }: Protecte
   // Check role access if roles are specified
   if (allowedRoles.length > 0) {
     if (!userData || !allowedRoles.includes(userData.role)) {
-      toast.error("You don't have permission to access this page", {
+      toast.error("Access denied", {
         description: "Please contact an administrator if you believe this is a mistake",
         duration: 5000
       });
