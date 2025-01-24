@@ -15,21 +15,27 @@ export type Database = {
           email: string
           first_attempt_at: string | null
           id: string
+          ip_address: string | null
           last_attempt_at: string | null
+          verification_attempts: number | null
         }
         Insert: {
           attempt_count?: number | null
           email: string
           first_attempt_at?: string | null
           id?: string
+          ip_address?: string | null
           last_attempt_at?: string | null
+          verification_attempts?: number | null
         }
         Update: {
           attempt_count?: number | null
           email?: string
           first_attempt_at?: string | null
           id?: string
+          ip_address?: string | null
           last_attempt_at?: string | null
+          verification_attempts?: number | null
         }
         Relationships: []
       }
@@ -1178,6 +1184,13 @@ export type Database = {
         Args: {
           check_ip: string
           check_email: string
+        }
+        Returns: boolean
+      }
+      check_verification_rate_limit: {
+        Args: {
+          p_email: string
+          p_ip: string
         }
         Returns: boolean
       }

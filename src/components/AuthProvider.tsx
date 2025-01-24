@@ -29,10 +29,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
+      // Get client IP for rate limiting
+      const { data: { ip_address } } = await supabase.functions.invoke('get-client-ip');
+
       // Check rate limit before sending
       const { data: rateCheck, error: rateError } = await supabase.rpc(
-        'check_password_reset_rate_limit',
-        { p_email: session.user.email }
+        'check_verification_rate_limit',
+        { 
+          p_email: session.user.email,
+          p_ip: ip_address 
+        }
       );
 
       if (rateError) throw rateError;
@@ -59,7 +65,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error: any) {
       console.error("Error resending verification email:", error);
       
-      // Handle different error cases
+      // Handle different error cases without exposing sensitive info
       if (error.message?.includes('rate limit')) {
         toast.error("Too many attempts", {
           description: "Please wait a while before trying again",
@@ -72,7 +78,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
       } else {
         toast.error("Failed to send verification email", {
-          description: error.message || "Please try again later",
+          description: "Please try again later",
           duration: 5000
         });
       }
@@ -80,8 +86,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
+    // Enhanced session management
+    let mounted = true;
+
     // Get initial session
     supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (!mounted) return;
+
       if (error) {
         console.error("Error fetching session:", error);
         toast.error("Authentication error", {
@@ -97,29 +108,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_OUT') {
-        toast.info("Signed out successfully");
-      } else if (event === 'PASSWORD_RECOVERY') {
-        toast.info("Password reset email sent");
-      } else if (event === 'SIGNED_IN') {
-        if (session?.user?.email_confirmed_at) {
-          toast.success("Signed in successfully");
-        }
-      } else if (event === 'TOKEN_REFRESHED') {
-        // Handle expired tokens
-        if (!session) {
-          toast.error("Session expired", {
-            description: "Please login again",
-            duration: 5000
-          });
-        }
+      if (!mounted) return;
+
+      // Handle different auth events
+      switch (event) {
+        case 'SIGNED_OUT':
+          toast.info("Signed out successfully");
+          break;
+        case 'PASSWORD_RECOVERY':
+          toast.info("Password reset email sent");
+          break;
+        case 'SIGNED_IN':
+          if (session?.user?.email_confirmed_at) {
+            toast.success("Signed in successfully");
+          }
+          break;
+        case 'TOKEN_REFRESHED':
+          if (!session) {
+            toast.error("Session expired", {
+              description: "Please login again",
+              duration: 5000
+            });
+          }
+          break;
       }
 
       setSession(session);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // Cleanup
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   return (
