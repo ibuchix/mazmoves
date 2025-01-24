@@ -21,6 +21,9 @@ export const initializeErrorMonitoring = () => {
           routingInstrumentation: Sentry.reactRouterV6Instrumentation(
             BrowserRouter,
             [],
+            undefined,
+            undefined,
+            undefined,
             {
               startTransactionOnLocationChange: true,
               startTransactionOnPageLoad: true
