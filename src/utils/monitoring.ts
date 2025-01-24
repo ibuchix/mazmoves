@@ -22,7 +22,6 @@ export const initializeErrorMonitoring = () => {
             useRoutes,
             useLocation,
             useNavigate,
-            BrowserRouter,
             {
               startTransactionOnLocationChange: true,
               startTransactionOnPageLoad: true
