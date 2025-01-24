@@ -12,25 +12,33 @@ serve(async (req) => {
   }
 
   try {
-    const ip_address = req.headers.get('x-forwarded-for')?.split(',')[0] || 
-                      req.headers.get('x-real-ip') || 
-                      '0.0.0.0';
+    // Get the client IP from the request headers
+    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0] || 
+                    req.headers.get('x-real-ip') ||
+                    '0.0.0.0';
 
     return new Response(
-      JSON.stringify({ ip_address }),
+      JSON.stringify({ 
+        ip_address: clientIP
+      }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
-      }
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+        status: 200,
+      },
     )
   } catch (error) {
-    console.error('Error getting IP:', error)
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: error.message }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500
-      }
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+        status: 400,
+      },
     )
   }
 })

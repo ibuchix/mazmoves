@@ -2,8 +2,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 export async function checkVerificationRateLimit(email: string) {
   try {
-    // Get client IP for rate limiting
-    const { data: { ip_address } } = await supabase.functions.invoke('get-client-ip');
+    // Get client IP using a more reliable method
+    const { data: { ip_address }, error: ipError } = await supabase.functions.invoke('get-client-ip', {
+      method: 'POST'
+    });
+
+    if (ipError) throw ipError;
 
     // Check rate limit before sending
     const { data: rateCheck, error: rateError } = await supabase.rpc(
