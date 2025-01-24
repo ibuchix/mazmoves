@@ -8,8 +8,7 @@ interface HeroSectionProps {
   setMoveType: (type: MoveType) => void;
   onGetQuotes: () => void;
 }
-
-export const HeroSection = ({ moveType, setMoveType, onGetQuotes }: HeroSectionProps) => {
+const HeroSection = ({ moveType, setMoveType, onGetQuotes }: HeroSectionProps) => {
   return (
     <section className="relative bg-gradient-to-r from-[#040480] to-[#1f3dd2] py-12 md:py-20">
       <div className="absolute inset-0 bg-black opacity-5"></div>
@@ -69,4 +68,6 @@ export const HeroSection = ({ moveType, setMoveType, onGetQuotes }: HeroSectionP
       </div>
     </section>
   );
-}
+};
+
+export default HeroSection;

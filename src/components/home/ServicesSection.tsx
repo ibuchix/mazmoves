@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 
-export const ServicesSection = () => {
+const ServicesSection = () => {
   const services = [
     {
       title: "Residential Moving",
@@ -34,3 +34,5 @@ export const ServicesSection = () => {
     </section>
   );
 };
+
+export default ServicesSection;
