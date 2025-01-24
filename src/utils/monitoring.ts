@@ -54,6 +54,26 @@ export const initializeErrorMonitoring = () => {
   }
 };
 
+// Web vitals reporting helper
+export const reportWebVitals = (metric: { name: string; delta: number; id: string }) => {
+  Sentry.addBreadcrumb({
+    category: 'Web Vitals',
+    message: `${metric.name} - Delta: ${metric.delta}`,
+    level: 'info',
+  });
+
+  // Report as a custom measurement
+  Sentry.captureMessage(`Web Vital: ${metric.name}`, {
+    tags: {
+      webVitalId: metric.id,
+      metricName: metric.name,
+    },
+    extra: {
+      delta: metric.delta,
+    },
+  });
+};
+
 // Performance monitoring helper
 export const measurePageLoad = (pageName: string) => {
   if (import.meta.env.PROD) {

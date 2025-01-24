@@ -22,7 +22,7 @@ root.render(
 
 // Report web vitals
 if (import.meta.env.PROD) {
-  const reportWebVital = (metric) => {
+  const reportWebVital = (metric: any) => {
     reportWebVitals(metric);
   };
 
