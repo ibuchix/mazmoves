@@ -1,9 +1,48 @@
 import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function PrivacyPolicy() {
+  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
+
+  const handleDataDeletionRequest = async () => {
+    try {
+      setIsSubmittingRequest(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast.error("Please login to submit a data deletion request");
+        return;
+      }
+
+      const { error } = await supabase.functions.invoke('handle-data-request', {
+        body: { 
+          type: 'deletion',
+          userId: user.id,
+          userEmail: user.email
+        }
+      });
+
+      if (error) throw error;
+
+      toast.success("Data deletion request submitted successfully", {
+        description: "We will process your request within 30 days"
+      });
+    } catch (error) {
+      console.error('Error submitting data request:', error);
+      toast.error("Failed to submit request", {
+        description: "Please try again or contact support"
+      });
+    } finally {
+      setIsSubmittingRequest(false);
+    }
+  };
+
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <h1 className="text-3xl font-bold text-[#040480] mb-6">Privacy Policy</h1>
+      <h1 className="text-3xl font-bold text-[#040480] mb-6">Privacy Policy & Data Processing Agreement</h1>
       
       <Card className="p-6 space-y-6 shadow-lg">
         <section className="space-y-4">
@@ -20,47 +59,84 @@ export default function PrivacyPolicy() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-[#1f3dd2]">2. How We Use Your Information</h2>
+          <h2 className="text-2xl font-semibold text-[#1f3dd2]">2. Legal Basis for Processing (GDPR)</h2>
           <p className="text-gray-700 leading-relaxed">
-            We use the information we collect to:
+            We process your data under the following legal bases:
           </p>
           <ul className="list-disc pl-6 text-gray-700 space-y-2">
-            <li>Provide and improve our services</li>
-            <li>Communicate with you about your move</li>
-            <li>Process payments and transactions</li>
-            <li>Send you marketing communications (with your consent)</li>
+            <li>Contract fulfillment - to provide our moving services</li>
+            <li>Legal obligation - to comply with legal requirements</li>
+            <li>Legitimate interests - to improve our services</li>
+            <li>Consent - for marketing communications</li>
           </ul>
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-[#1f3dd2]">3. Information Sharing</h2>
+          <h2 className="text-2xl font-semibold text-[#1f3dd2]">3. Your Data Rights</h2>
           <p className="text-gray-700 leading-relaxed">
-            We do not sell your personal information. We may share your information with:
+            Under GDPR, you have the following rights:
           </p>
           <ul className="list-disc pl-6 text-gray-700 space-y-2">
-            <li>Service providers and partners</li>
-            <li>Legal authorities when required by law</li>
-            <li>Professional advisors and insurers</li>
+            <li>Right to access your personal data</li>
+            <li>Right to rectification of inaccurate data</li>
+            <li>Right to erasure ("right to be forgotten")</li>
+            <li>Right to restrict processing</li>
+            <li>Right to data portability</li>
+            <li>Right to object to processing</li>
           </ul>
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-[#1f3dd2]">4. Your Rights</h2>
+          <h2 className="text-2xl font-semibold text-[#1f3dd2]">4. Data Processing Agreement</h2>
           <p className="text-gray-700 leading-relaxed">
-            You have the right to:
+            This section constitutes our data processing agreement:
           </p>
           <ul className="list-disc pl-6 text-gray-700 space-y-2">
-            <li>Access your personal information</li>
-            <li>Request corrections to your data</li>
-            <li>Request deletion of your data</li>
-            <li>Opt-out of marketing communications</li>
+            <li>We process data only on documented instructions</li>
+            <li>We ensure confidentiality of processing</li>
+            <li>We implement appropriate security measures</li>
+            <li>We assist with data subject rights requests</li>
+            <li>We delete or return data at end of service</li>
+            <li>We provide information to demonstrate compliance</li>
           </ul>
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-[#1f3dd2]">5. Contact Us</h2>
+          <h2 className="text-2xl font-semibold text-[#1f3dd2]">5. Data Retention</h2>
           <p className="text-gray-700 leading-relaxed">
-            If you have any questions about this Privacy Policy, please contact us at:
+            We retain your data for as long as necessary to:
+          </p>
+          <ul className="list-disc pl-6 text-gray-700 space-y-2">
+            <li>Provide our services to you</li>
+            <li>Comply with legal obligations</li>
+            <li>Resolve disputes</li>
+            <li>Enforce our agreements</li>
+          </ul>
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="text-2xl font-semibold text-[#1f3dd2]">6. Data Deletion Request</h2>
+          <p className="text-gray-700 leading-relaxed">
+            You can request deletion of your personal data at any time:
+          </p>
+          <div className="mt-4">
+            <Button 
+              onClick={handleDataDeletionRequest}
+              disabled={isSubmittingRequest}
+              className="bg-[#040480] hover:bg-[#1f3dd2]"
+            >
+              {isSubmittingRequest ? "Submitting..." : "Request Data Deletion"}
+            </Button>
+          </div>
+          <p className="text-sm text-gray-600 mt-2">
+            Note: Some data may be retained if required by law or legitimate business purposes.
+          </p>
+        </section>
+
+        <section className="space-y-4">
+          <h2 className="text-2xl font-semibold text-[#1f3dd2]">7. Contact Us</h2>
+          <p className="text-gray-700 leading-relaxed">
+            For any privacy-related queries or to exercise your data rights:
           </p>
           <div className="bg-gray-50 p-4 rounded-lg">
             <p className="text-gray-700">Email: ask@mazmoves.com</p>
