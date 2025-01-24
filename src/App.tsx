@@ -20,6 +20,7 @@ import AdminDashboard from "@/pages/admin/Dashboard";
 import AdminBilling from "@/pages/admin/Billing";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { AuthProvider } from "@/components/AuthProvider";
+import CookieConsent from "@/components/cookie/CookieConsent";
 import "./App.css";
 
 const queryClient = new QueryClient();
@@ -83,6 +84,7 @@ function App() {
           </main>
           <Footer />
         </div>
+        <CookieConsent />
         <Toaster />
       </AuthProvider>
     </QueryClientProvider>
