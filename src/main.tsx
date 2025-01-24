@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import './index.css'
-import { initializeErrorMonitoring, SentryErrorBoundary } from './utils/monitoring'
+import { initializeErrorMonitoring, SentryErrorBoundary, reportWebVitals } from './utils/monitoring'
 
 // Initialize error monitoring in production
 initializeErrorMonitoring();
@@ -19,3 +19,19 @@ root.render(
     </BrowserRouter>
   </React.StrictMode>
 )
+
+// Report web vitals
+if (import.meta.env.PROD) {
+  const reportWebVital = (metric) => {
+    reportWebVitals(metric);
+  };
+
+  // @ts-ignore - web-vitals types are not included
+  import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+    getCLS(reportWebVital);
+    getFID(reportWebVital);
+    getFCP(reportWebVital);
+    getLCP(reportWebVital);
+    getTTFB(reportWebVital);
+  });
+}
