@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react';
 import { BrowserTracing } from '@sentry/tracing';
-import { BrowserRouter } from 'react-router-dom';
+import { BrowserRouter, useNavigate, useLocation, useRoutes } from 'react-router-dom';
 
 export const initializeErrorMonitoring = () => {
   if (import.meta.env.PROD) {
@@ -17,13 +17,12 @@ export const initializeErrorMonitoring = () => {
           ],
           // Track child spans of pageload transactions
           markBackgroundTransactions: true,
-          // Enable React Router instrumentation (fixed argument count)
+          // Enable React Router instrumentation
           routingInstrumentation: Sentry.reactRouterV6Instrumentation(
+            useRoutes,
+            useLocation,
+            useNavigate,
             BrowserRouter,
-            [],
-            undefined,
-            undefined,
-            undefined,
             {
               startTransactionOnLocationChange: true,
               startTransactionOnPageLoad: true
@@ -53,25 +52,6 @@ export const initializeErrorMonitoring = () => {
       },
     });
   }
-};
-
-export const reportWebVitals = ({ name, delta, id }) => {
-  Sentry.addBreadcrumb({
-    category: 'Web Vitals',
-    message: `${name} - Delta: ${delta}`,
-    level: 'info',
-  });
-
-  // Report as a custom measurement
-  Sentry.captureMessage(`Web Vital: ${name}`, {
-    tags: {
-      webVitalId: id,
-      metricName: name,
-    },
-    extra: {
-      delta: delta,
-    },
-  });
 };
 
 // Performance monitoring helper
