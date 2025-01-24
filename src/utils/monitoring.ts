@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react';
 import { BrowserTracing } from '@sentry/tracing';
-import { BrowserRouter, useNavigate, useLocation, useRoutes } from 'react-router-dom';
+import { useNavigate, useLocation, useRoutes } from 'react-router-dom';
 
 export const initializeErrorMonitoring = () => {
   if (import.meta.env.PROD) {
@@ -22,6 +22,8 @@ export const initializeErrorMonitoring = () => {
             useRoutes,
             useLocation,
             useNavigate,
+            useRoutes,
+            useLocation,
             {
               startTransactionOnLocationChange: true,
               startTransactionOnPageLoad: true
