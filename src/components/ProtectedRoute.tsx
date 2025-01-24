@@ -20,7 +20,10 @@ export default function ProtectedRoute({ children, allowedRoles = [] }: Protecte
       
       // Check if email is verified
       if (!session.user.email_confirmed_at) {
-        toast.error("Please verify your email address before accessing this page");
+        toast.error("Please verify your email address before accessing this page", {
+          description: "Check your inbox for the verification link",
+          duration: 5000
+        });
         await supabase.auth.signOut();
         return null;
       }
@@ -33,13 +36,19 @@ export default function ProtectedRoute({ children, allowedRoles = [] }: Protecte
       
       if (error) {
         console.error("Error fetching user role:", error);
-        toast.error("Error checking user permissions");
+        toast.error("Error checking user permissions", {
+          description: "Please try again or contact support",
+          duration: 5000
+        });
         return null;
       }
 
       if (!data) {
         console.error("No user found with ID:", session.user.id);
-        toast.error("User profile not found");
+        toast.error("User profile not found", {
+          description: "Please try logging in again",
+          duration: 5000
+        });
         return null;
       }
 
@@ -59,14 +68,20 @@ export default function ProtectedRoute({ children, allowedRoles = [] }: Protecte
 
   // Redirect to login if not authenticated
   if (!session) {
-    toast.error("Please login to access this page");
+    toast.error("Please login to access this page", {
+      description: "You need to be logged in to view this content",
+      duration: 5000
+    });
     return <Navigate to="/login" replace />;
   }
 
   // Check role access if roles are specified
   if (allowedRoles.length > 0) {
     if (!userData || !allowedRoles.includes(userData.role)) {
-      toast.error("You don't have permission to access this page");
+      toast.error("You don't have permission to access this page", {
+        description: "Please contact an administrator if you believe this is a mistake",
+        duration: 5000
+      });
       return <Navigate to="/" replace />;
     }
   }
