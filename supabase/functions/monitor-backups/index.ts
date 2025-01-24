@@ -1,14 +1,11 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, {
+      headers: { 'Access-Control-Allow-Origin': '*' }
+    })
   }
 
   try {
@@ -17,59 +14,52 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Check for failed backups in the last 24 hours
+    // Check for failed backups
     const { data: failedBackups, error: queryError } = await supabase
       .from('backup_management.database_backups')
-      .select('*')
+      .select()
       .eq('status', 'failed')
-      .gt('started_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
+      .order('created_at', { ascending: false })
+      .limit(10)
 
     if (queryError) {
       throw new Error(`Failed to query backup status: ${queryError.message}`)
     }
 
-    // Check for storage backup failures
-    const { data: failedStorageBackups, error: storageQueryError } = await supabase
-      .from('backup_management.storage_backups')
-      .select('*')
-      .eq('status', 'failed')
-      .gt('started_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
-
-    if (storageQueryError) {
-      throw new Error(`Failed to query storage backup status: ${storageQueryError.message}`)
-    }
-
-    // If there are any failures, send notification (implement your notification logic here)
-    if (failedBackups.length > 0 || failedStorageBackups.length > 0) {
-      // Here you would implement your notification logic
-      // For example, sending an email to administrators
-      console.error('Backup failures detected:', {
-        failedBackups,
-        failedStorageBackups
-      })
-    }
-
     // Clean up old backups
     await supabase.rpc('backup_management.cleanup_old_backups')
 
+    // Check storage usage
+    const { data: storageStats, error: storageError } = await supabase
+      .from('backup_management.storage_backups')
+      .select('backup_size')
+      .gt('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+
+    if (storageError) {
+      throw new Error(`Failed to get storage stats: ${storageError.message}`)
+    }
+
+    const totalStorageUsed = storageStats.reduce((acc, curr) => acc + (curr.backup_size || 0), 0)
+
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        failedBackups: failedBackups.length,
-        failedStorageBackups: failedStorageBackups.length
+      JSON.stringify({
+        success: true,
+        failed_backups: failedBackups,
+        total_storage_used: totalStorageUsed,
+        monitored_at: new Date().toISOString()
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
     console.error('Backup monitoring failed:', error)
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error.message 
+      JSON.stringify({
+        success: false,
+        error: error.message
       }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         status: 500
       }
     )

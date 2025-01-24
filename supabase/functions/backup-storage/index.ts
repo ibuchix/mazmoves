@@ -2,14 +2,11 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { format } from "https://deno.land/std@0.168.0/datetime/mod.ts";
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+    return new Response(null, {
+      headers: { 'Access-Control-Allow-Origin': '*' }
+    })
   }
 
   try {
@@ -18,13 +15,14 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
+    const { bucket_name } = await req.json()
     const timestamp = format(new Date(), "yyyy-MM-dd-HH-mm-ss")
     
     // Create backup record
     const { data: backupRecord, error: insertError } = await supabase
       .from('backup_management.storage_backups')
       .insert({
-        bucket_name: 'company_docs',
+        bucket_name,
         status: 'in_progress'
       })
       .select()
@@ -34,24 +32,24 @@ serve(async (req) => {
       throw new Error(`Failed to create backup record: ${insertError.message}`)
     }
 
-    // List all files in the company_docs bucket
+    // List all files in the bucket
     const { data: files, error: listError } = await supabase
       .storage
-      .from('company_docs')
+      .from(bucket_name)
       .list()
 
     if (listError) {
-      throw new Error(`Failed to list files: ${listError.message}`)
+      throw new Error(`Failed to list bucket contents: ${listError.message}`)
     }
 
     let totalSize = 0
-    const backupFolder = `storage-backup-${timestamp}`
+    const backupFiles = []
 
-    // Copy each file to the backup bucket
+    // Download and backup each file
     for (const file of files) {
-      const { data: fileData, error: downloadError } = await supabase
+      const { data, error: downloadError } = await supabase
         .storage
-        .from('company_docs')
+        .from(bucket_name)
         .download(file.name)
 
       if (downloadError) {
@@ -59,17 +57,19 @@ serve(async (req) => {
         continue
       }
 
+      const backupPath = `${bucket_name}-backup/${timestamp}/${file.name}`
       const { error: uploadError } = await supabase
         .storage
         .from('database_backups')
-        .upload(`${backupFolder}/${file.name}`, fileData)
+        .upload(backupPath, data)
 
       if (uploadError) {
         console.error(`Failed to upload ${file.name}: ${uploadError.message}`)
         continue
       }
 
-      totalSize += file.metadata?.size || 0
+      totalSize += data.size
+      backupFiles.push(file.name)
     }
 
     // Update backup record
@@ -78,11 +78,10 @@ serve(async (req) => {
       .update({
         status: 'completed',
         completed_at: new Date().toISOString(),
-        total_files: files.length,
+        total_files: backupFiles.length,
         backup_size: totalSize,
-        backup_location: backupFolder,
         metadata: {
-          success: true,
+          files: backupFiles,
           timestamp: new Date().toISOString()
         }
       })
@@ -93,23 +92,23 @@ serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
+      JSON.stringify({
+        success: true,
         message: 'Storage backup completed successfully',
         backup_id: backupRecord.id
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { 'Content-Type': 'application/json' } }
     )
 
   } catch (error) {
     console.error('Storage backup failed:', error)
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: error.message 
+      JSON.stringify({
+        success: false,
+        error: error.message
       }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' },
         status: 500
       }
     )
