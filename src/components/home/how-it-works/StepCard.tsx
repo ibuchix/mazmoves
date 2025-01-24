@@ -1,4 +1,4 @@
-import { LucideIcon } from "lucide-react";
+import { LucideIcon, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface StepCardProps {
