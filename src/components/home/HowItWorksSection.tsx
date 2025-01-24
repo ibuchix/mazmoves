@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, ClipboardList, BarChart3, Calendar, CheckCircle } from "lucide-react";
 
-const HowItWorksSection = () => {
+export const HowItWorksSection = () => {
   const steps = [
     {
       step: "1",
@@ -84,5 +84,3 @@ const HowItWorksSection = () => {
     </section>
   );
 };
-
-export default HowItWorksSection;

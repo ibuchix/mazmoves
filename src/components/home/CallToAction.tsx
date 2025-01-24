@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
-const CallToAction = () => {
+export const CallToAction = () => {
   const navigate = useNavigate();
 
   const handleGetQuotes = () => {
@@ -23,5 +23,3 @@ const CallToAction = () => {
     </section>
   );
 };
-
-export default CallToAction;
