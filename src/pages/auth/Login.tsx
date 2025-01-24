@@ -8,11 +8,33 @@ export default function Login() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    supabase.auth.onAuthStateChange((event, session) => {
+    // Check for redirect response
+    const handleAuthRedirect = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      
+      if (error) {
+        console.error('Error during auth redirect:', error);
+        return;
+      }
+
+      if (session) {
+        // If user is already logged in, redirect to home
+        navigate("/");
+      }
+    };
+
+    handleAuthRedirect();
+
+    // Listen for auth state changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session) {
         navigate("/");
       }
     });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
   return (
