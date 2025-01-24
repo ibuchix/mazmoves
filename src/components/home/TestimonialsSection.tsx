@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Star, Quote } from "lucide-react";
 
-export const TestimonialsSection = () => {
+const TestimonialsSection = () => {
   const testimonials = [
     {
       name: "Sarah Johnson",
@@ -56,3 +56,5 @@ export const TestimonialsSection = () => {
     </section>
   );
 };
+
+export default TestimonialsSection;
