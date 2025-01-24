@@ -17,12 +17,11 @@ export const initializeErrorMonitoring = () => {
           ],
           // Track child spans of pageload transactions
           markBackgroundTransactions: true,
-          // Track performance of React components
-          trackComponents: true,
           // Enable React Router instrumentation (fixed argument count)
           routingInstrumentation: Sentry.reactRouterV6Instrumentation(
+            BrowserRouter,
+            [],
             {
-              historyRouter: BrowserRouter,
               startTransactionOnLocationChange: true,
               startTransactionOnPageLoad: true
             }
@@ -53,7 +52,6 @@ export const initializeErrorMonitoring = () => {
   }
 };
 
-// Web Vitals monitoring
 export const reportWebVitals = ({ name, delta, id }) => {
   Sentry.addBreadcrumb({
     category: 'Web Vitals',
