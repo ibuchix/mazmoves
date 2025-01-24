@@ -99,7 +99,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_OUT') {
         toast.info("Signed out successfully");
-      } else if (event === 'USER_DELETED') {
+      } else if (event === 'SIGNED_OUT') { // This was the issue - duplicate condition
         toast.info("Account deleted successfully");
       } else if (event === 'PASSWORD_RECOVERY') {
         toast.info("Password reset email sent");
