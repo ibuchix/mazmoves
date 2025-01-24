@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/react';
 import { BrowserTracing } from '@sentry/tracing';
+import { BrowserRouter } from 'react-router-dom';
 
 export const initializeErrorMonitoring = () => {
   if (import.meta.env.PROD) {
@@ -18,8 +19,14 @@ export const initializeErrorMonitoring = () => {
           markBackgroundTransactions: true,
           // Track performance of React components
           trackComponents: true,
-          // Enable React Router instrumentation
-          routingInstrumentation: Sentry.reactRouterV6Instrumentation(),
+          // Enable React Router instrumentation (fixed argument count)
+          routingInstrumentation: Sentry.reactRouterV6Instrumentation(
+            {
+              historyRouter: BrowserRouter,
+              startTransactionOnLocationChange: true,
+              startTransactionOnPageLoad: true
+            }
+          ),
         }),
       ],
       // Performance Monitoring
