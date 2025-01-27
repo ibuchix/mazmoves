@@ -11,12 +11,12 @@ interface HeroSectionProps {
 
 export const HeroSection = ({ moveType, setMoveType, onGetQuotes }: HeroSectionProps) => {
   return (
-    <section className="relative bg-gradient-to-r from-[#040480] to-[#1f3dd2] py-12 md:py-20">
+    <section className="relative bg-gradient-to-r from-[#040480] to-[#1f3dd2] py-8 md:py-20">
       <div className="absolute inset-0 bg-black opacity-5"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-          {/* Form Section */}
-          <div className="bg-white/95 backdrop-blur-sm p-6 md:p-8 rounded-xl shadow-lg order-2 md:order-1">
+        <div className="grid md:grid-cols-2 gap-6 md:gap-12 items-center">
+          {/* Form Section - Mobile First */}
+          <div className="order-first md:order-1 bg-white/95 backdrop-blur-sm p-4 md:p-8 rounded-xl shadow-lg">
             <h2 className="text-xl md:text-2xl font-bold text-[#040480] mb-4 md:mb-6">Start Your Move</h2>
             <MoveTypeStep
               value={moveType}
@@ -29,10 +29,10 @@ export const HeroSection = ({ moveType, setMoveType, onGetQuotes }: HeroSectionP
             >
               Get Free Quotes
             </Button>
-            <div className="mt-4 text-center">
+            <div className="mt-3 md:mt-4 text-center">
               <Link 
                 to="/company/register"
-                className="inline-block text-[#1f3dd2] hover:text-[#84d21f] font-semibold"
+                className="inline-block text-[#1f3dd2] hover:text-[#84d21f] font-semibold text-sm md:text-base"
               >
                 Are you a moving company? Join us →
               </Link>
@@ -40,28 +40,28 @@ export const HeroSection = ({ moveType, setMoveType, onGetQuotes }: HeroSectionP
           </div>
           
           {/* Content Section */}
-          <div className="text-white flex flex-col justify-center space-y-6 md:space-y-8 md:pl-8 order-1 md:order-2">
-            <p className="text-xl md:text-2xl text-gray-100 font-light">
+          <div className="order-last md:order-2 text-white flex flex-col justify-center space-y-4 md:space-y-8 md:pl-8">
+            <p className="text-lg md:text-2xl text-gray-100 font-light">
               Get instant quotes from trusted movers. Free to use, no obligations.
             </p>
-            <div className="space-y-4 md:space-y-6">
+            <div className="space-y-3 md:space-y-6">
               <div className="flex items-start space-x-3 md:space-x-4 bg-white/10 backdrop-blur-sm p-3 md:p-4 rounded-lg">
-                <svg className="w-6 h-6 md:w-8 md:h-8 text-[#84d21f] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 md:w-8 md:h-8 text-[#84d21f] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                 </svg>
-                <span className="text-lg md:text-xl leading-tight">Verified Professional Movers</span>
+                <span className="text-base md:text-xl leading-tight">Verified Professional Movers</span>
               </div>
               <div className="flex items-start space-x-3 md:space-x-4 bg-white/10 backdrop-blur-sm p-3 md:p-4 rounded-lg">
-                <svg className="w-6 h-6 md:w-8 md:h-8 text-[#84d21f] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 md:w-8 md:h-8 text-[#84d21f] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                 </svg>
-                <span className="text-lg md:text-xl leading-tight">Compare Multiple Quotes</span>
+                <span className="text-base md:text-xl leading-tight">Compare Multiple Quotes</span>
               </div>
               <div className="flex items-start space-x-3 md:space-x-4 bg-white/10 backdrop-blur-sm p-3 md:p-4 rounded-lg">
-                <svg className="w-6 h-6 md:w-8 md:h-8 text-[#84d21f] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 md:w-8 md:h-8 text-[#84d21f] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                 </svg>
-                <span className="text-lg md:text-xl leading-tight">100% Free Service</span>
+                <span className="text-base md:text-xl leading-tight">100% Free Service</span>
               </div>
             </div>
           </div>
