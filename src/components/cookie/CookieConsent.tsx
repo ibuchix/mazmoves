@@ -49,6 +49,8 @@ export default function CookieConsent() {
     toast({
       title: "Preferences Saved",
       description: "Your cookie preferences have been updated.",
+      className: "bg-white p-2 text-sm w-auto max-w-[250px]",
+      duration: 2000,
     });
   };
 
