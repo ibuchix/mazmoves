@@ -55,27 +55,29 @@ export default function CookieConsent() {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-50">
+    <div className="fixed inset-x-0 bottom-0 bg-white border-t border-gray-200 p-4 shadow-lg z-50">
       <div className="container mx-auto max-w-7xl">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex-1">
+        <div className="flex flex-col space-y-4">
+          <div>
             <p className="text-sm text-gray-600">
               We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic. 
               By clicking "Accept All", you consent to our use of cookies.
             </p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 justify-end">
             <CookiePreferences />
             <Button 
               variant="outline" 
               onClick={acceptNecessary}
-              className="whitespace-nowrap"
+              className="w-full sm:w-auto whitespace-nowrap text-sm"
+              size="sm"
             >
               Necessary Only
             </Button>
             <Button 
               onClick={acceptAll}
-              className="bg-[#84d21f] hover:bg-[#d2491f] whitespace-nowrap"
+              className="w-full sm:w-auto bg-[#84d21f] hover:bg-[#d2491f] whitespace-nowrap text-sm"
+              size="sm"
             >
               Accept All
             </Button>

@@ -20,11 +20,15 @@ export default function CookiePreferences() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="link" className="text-gray-300 hover:text-[#84d21f]">
+        <Button 
+          variant="link" 
+          className="text-gray-600 hover:text-[#84d21f] w-full sm:w-auto text-sm"
+          size="sm"
+        >
           Cookie Preferences
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] w-[95vw] sm:w-full">
         <DialogHeader>
           <DialogTitle>Cookie Preferences</DialogTitle>
           <DialogDescription>
@@ -34,8 +38,8 @@ export default function CookiePreferences() {
         <div className="grid gap-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium">Necessary Cookies</h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="font-medium text-sm">Necessary Cookies</h4>
+              <p className="text-xs text-muted-foreground">
                 Required for the website to function
               </p>
             </div>
@@ -43,8 +47,8 @@ export default function CookiePreferences() {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium">Analytics Cookies</h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="font-medium text-sm">Analytics Cookies</h4>
+              <p className="text-xs text-muted-foreground">
                 Help us improve our website
               </p>
             </div>
@@ -57,8 +61,8 @@ export default function CookiePreferences() {
           </div>
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="font-medium">Marketing Cookies</h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="font-medium text-sm">Marketing Cookies</h4>
+              <p className="text-xs text-muted-foreground">
                 Used for targeted advertising
               </p>
             </div>
