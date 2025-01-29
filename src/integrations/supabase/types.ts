@@ -290,6 +290,68 @@ export type Database = {
         }
         Relationships: []
       }
+      company_insurance_documents: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          document_path: string
+          expires_at: string | null
+          id: string
+          insurance_type_id: string | null
+          updated_at: string | null
+          verified: boolean | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          document_path: string
+          expires_at?: string | null
+          id?: string
+          insurance_type_id?: string | null
+          updated_at?: string | null
+          verified?: boolean | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          document_path?: string
+          expires_at?: string | null
+          id?: string
+          insurance_type_id?: string | null
+          updated_at?: string | null
+          verified?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_insurance_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_insurance_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_documents_view"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "company_insurance_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_moves_view"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "company_insurance_documents_insurance_type_id_fkey"
+            columns: ["insurance_type_id"]
+            isOneToOne: false
+            referencedRelation: "insurance_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       company_invoices: {
         Row: {
           billing_cycle_id: string
@@ -497,6 +559,33 @@ export type Database = {
             referencedColumns: ["company_id"]
           },
         ]
+      }
+      insurance_types: {
+        Row: {
+          country_code: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_required: boolean | null
+          name: string
+        }
+        Insert: {
+          country_code: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_required?: boolean | null
+          name: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_required?: boolean | null
+          name?: string
+        }
+        Relationships: []
       }
       invoice_items: {
         Row: {

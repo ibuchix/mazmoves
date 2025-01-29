@@ -9,10 +9,27 @@ import { Separator } from "@/components/ui/separator";
 import { RegistrationSuccessDialog } from "./RegistrationSuccessDialog";
 import { useCompanyRegistration } from "@/hooks/use-company-registration";
 import { CompanyRegistrationForm } from "@/types/company";
+import { useState } from "react";
 
 export function RegisterCompanyForm() {
-  const { register, handleSubmit, formState: { errors } } = useForm<CompanyRegistrationForm>();
+  const { register, handleSubmit, watch, formState: { errors } } = useForm<CompanyRegistrationForm>();
   const { uploading, showSuccessDialog, setShowSuccessDialog, handleRegistration } = useCompanyRegistration();
+  const [selectedCountry, setSelectedCountry] = useState<string>();
+  
+  // Watch for country changes
+  const countryValue = watch('country');
+  
+  // Update selected country when the country field changes
+  useEffect(() => {
+    if (countryValue) {
+      try {
+        const countryData = JSON.parse(countryValue);
+        setSelectedCountry(countryData.code);
+      } catch (e) {
+        console.error('Error parsing country data:', e);
+      }
+    }
+  }, [countryValue]);
 
   return (
     <>
@@ -25,7 +42,7 @@ export function RegisterCompanyForm() {
             <Separator className="my-8" />
             <AddressSection register={register} errors={errors} />
             <Separator className="my-8" />
-            <InsuranceSection errors={errors} />
+            <InsuranceSection errors={errors} countryCode={selectedCountry} />
           </div>
 
           <div className="pt-4">
