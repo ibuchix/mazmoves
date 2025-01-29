@@ -9,7 +9,7 @@ import { Separator } from "@/components/ui/separator";
 import { RegistrationSuccessDialog } from "./RegistrationSuccessDialog";
 import { useCompanyRegistration } from "@/hooks/use-company-registration";
 import { CompanyRegistrationForm } from "@/types/company";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export function RegisterCompanyForm() {
   const { register, handleSubmit, watch, formState: { errors } } = useForm<CompanyRegistrationForm>();
