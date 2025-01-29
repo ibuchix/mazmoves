@@ -113,18 +113,12 @@ serve(async (req) => {
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: registrationData.email,
         password: registrationData.password,
-        email_confirm: false, // This ensures a confirmation email is sent
+        email_confirm: false,
         user_metadata: { role: 'company' }
       })
 
-      if (authError) {
-        throw authError;
-      }
-
-      if (!authData.user) {
-        throw new Error('No user data returned');
-      }
-      
+      if (authError) throw authError;
+      if (!authData.user) throw new Error('No user data returned');
       userId = authData.user.id;
     }
 
