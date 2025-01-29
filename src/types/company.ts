@@ -27,5 +27,4 @@ export interface InsuranceType {
   id: string;
   name: string;
   description: string;
-  is_required: boolean;
 }

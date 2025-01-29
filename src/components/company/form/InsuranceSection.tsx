@@ -24,7 +24,6 @@ export function InsuranceSection({ errors, countryCode, register }: InsuranceSec
         .from('insurance_types')
         .select('*')
         .eq('country_code', countryCode)
-        .eq('is_required', true)
         .order('name');
 
       if (!error && data) {
