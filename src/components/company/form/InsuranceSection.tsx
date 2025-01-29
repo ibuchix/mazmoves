@@ -19,6 +19,8 @@ export function InsuranceSection({ errors, countryCode, register }: InsuranceSec
     async function fetchInsuranceTypes() {
       if (!countryCode) return;
       
+      console.log("Fetching insurance types for country:", countryCode); // Debug log
+      
       const { data, error } = await supabase
         .from('insurance_types')
         .select('*')
@@ -26,7 +28,10 @@ export function InsuranceSection({ errors, countryCode, register }: InsuranceSec
         .order('is_required', { ascending: false });
 
       if (!error && data) {
+        console.log("Fetched insurance types:", data); // Debug log
         setInsuranceTypes(data);
+      } else if (error) {
+        console.error("Error fetching insurance types:", error);
       }
     }
 
@@ -34,11 +39,15 @@ export function InsuranceSection({ errors, countryCode, register }: InsuranceSec
   }, [countryCode]);
 
   if (!countryCode) {
+    console.log("No country code provided"); // Debug log
     return null;
   }
 
   const requiredInsurances = insuranceTypes.filter(type => type.is_required);
   const optionalInsurances = insuranceTypes.filter(type => !type.is_required);
+
+  console.log("Required insurances:", requiredInsurances); // Debug log
+  console.log("Optional insurances:", optionalInsurances); // Debug log
 
   return (
     <div className="space-y-6">

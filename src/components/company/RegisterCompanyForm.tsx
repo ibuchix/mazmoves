@@ -25,6 +25,7 @@ export function RegisterCompanyForm() {
       try {
         const countryData = JSON.parse(countryValue);
         setSelectedCountry(countryData.code);
+        console.log("Selected country code:", countryData.code); // Debug log
       } catch (e) {
         console.error('Error parsing country data:', e);
       }
