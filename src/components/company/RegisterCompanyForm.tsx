@@ -42,7 +42,7 @@ export function RegisterCompanyForm() {
             <Separator className="my-8" />
             <AddressSection register={register} errors={errors} />
             <Separator className="my-8" />
-            <InsuranceSection errors={errors} countryCode={selectedCountry} />
+            <InsuranceSection register={register} errors={errors} countryCode={selectedCountry} />
           </div>
 
           <div className="pt-4">

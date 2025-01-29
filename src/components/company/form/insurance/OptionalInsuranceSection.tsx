@@ -3,12 +3,15 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Upload } from "lucide-react";
 import { InsuranceType } from "@/types/company";
+import { UseFormRegister } from "react-hook-form";
+import { CompanyRegistrationForm } from "@/types/company";
 
 interface OptionalInsuranceSectionProps {
   insurances: InsuranceType[];
+  register: UseFormRegister<CompanyRegistrationForm>;
 }
 
-export function OptionalInsuranceSection({ insurances }: OptionalInsuranceSectionProps) {
+export function OptionalInsuranceSection({ insurances, register }: OptionalInsuranceSectionProps) {
   if (insurances.length === 0) return null;
 
   return (
@@ -31,7 +34,7 @@ export function OptionalInsuranceSection({ insurances }: OptionalInsuranceSectio
               <div className="relative">
                 <Input
                   id={`insurance_${insurance.id}`}
-                  name={`insurance_${insurance.id}`}
+                  {...register(`insurance_${insurance.id}`)}
                   type="file"
                   accept=".pdf,.doc,.docx"
                   className="h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-medium file:bg-[#040480] file:text-white hover:file:bg-[#1f3dd2] cursor-pointer"

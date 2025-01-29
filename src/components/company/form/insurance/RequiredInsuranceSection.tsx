@@ -3,13 +3,16 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Upload } from "lucide-react";
 import { InsuranceType } from "@/types/company";
+import { UseFormRegister } from "react-hook-form";
+import { CompanyRegistrationForm } from "@/types/company";
 
 interface RequiredInsuranceSectionProps {
   insurances: InsuranceType[];
   errors: any;
+  register: UseFormRegister<CompanyRegistrationForm>;
 }
 
-export function RequiredInsuranceSection({ insurances, errors }: RequiredInsuranceSectionProps) {
+export function RequiredInsuranceSection({ insurances, errors, register }: RequiredInsuranceSectionProps) {
   if (insurances.length === 0) return null;
 
   return (
@@ -32,16 +35,15 @@ export function RequiredInsuranceSection({ insurances, errors }: RequiredInsuran
               <div className="relative">
                 <Input
                   id={`insurance_${insurance.id}`}
-                  name={`insurance_${insurance.id}`}
+                  {...register(`insurance_${insurance.id}`, { required: true })}
                   type="file"
                   accept=".pdf,.doc,.docx"
-                  required
                   className="h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-medium file:bg-[#040480] file:text-white hover:file:bg-[#1f3dd2] cursor-pointer"
                 />
                 <Upload className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#040480] w-5 h-5" />
               </div>
               {errors[`insurance_${insurance.id}`] && (
-                <p className="text-red-500 text-sm">{errors[`insurance_${insurance.id}`].message}</p>
+                <p className="text-red-500 text-sm">This document is required</p>
               )}
             </div>
           </Card>

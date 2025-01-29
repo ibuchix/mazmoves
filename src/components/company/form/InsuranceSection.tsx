@@ -3,13 +3,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { RequiredInsuranceSection } from "./insurance/RequiredInsuranceSection";
 import { OptionalInsuranceSection } from "./insurance/OptionalInsuranceSection";
 import { InsuranceType } from "@/types/company";
+import { UseFormRegister } from "react-hook-form";
+import { CompanyRegistrationForm } from "@/types/company";
 
 interface InsuranceSectionProps {
   errors: any;
   countryCode?: string;
+  register: UseFormRegister<CompanyRegistrationForm>;
 }
 
-export function InsuranceSection({ errors, countryCode }: InsuranceSectionProps) {
+export function InsuranceSection({ errors, countryCode, register }: InsuranceSectionProps) {
   const [insuranceTypes, setInsuranceTypes] = useState<InsuranceType[]>([]);
 
   useEffect(() => {
@@ -40,8 +43,8 @@ export function InsuranceSection({ errors, countryCode }: InsuranceSectionProps)
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold text-[#040480]">Insurance Documents</h3>
-      <RequiredInsuranceSection insurances={requiredInsurances} errors={errors} />
-      <OptionalInsuranceSection insurances={optionalInsurances} />
+      <RequiredInsuranceSection insurances={requiredInsurances} errors={errors} register={register} />
+      <OptionalInsuranceSection insurances={optionalInsurances} register={register} />
     </div>
   );
 }
