@@ -32,15 +32,20 @@ export function RequiredInsuranceSection({ insurances, errors, register }: Requi
               {insurance.description && (
                 <p className="text-sm text-gray-500">{insurance.description}</p>
               )}
-              <div className="relative">
-                <Input
-                  id={`insurance_${insurance.id}`}
-                  {...register(`insurance_${insurance.id}`, { required: "This insurance document is required" })}
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  className="h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-medium file:bg-[#040480] file:text-white hover:file:bg-[#1f3dd2] cursor-pointer"
-                />
-                <Upload className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#040480] w-5 h-5" />
+              <div className="relative group">
+                <div className="relative flex items-center justify-center w-full h-11 px-4 border border-[#1f3dd2] rounded-md bg-white hover:bg-gray-50 cursor-pointer transition-all duration-300">
+                  <Input
+                    id={`insurance_${insurance.id}`}
+                    {...register(`insurance_${insurance.id}`, { required: "This insurance document is required" })}
+                    type="file"
+                    accept=".pdf,.doc,.docx"
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  />
+                  <div className="flex items-center gap-2 text-[#040480]">
+                    <Upload className="w-5 h-5" />
+                    <span className="text-sm font-medium">Choose File</span>
+                  </div>
+                </div>
               </div>
               {errors[`insurance_${insurance.id}`] && (
                 <p className="text-red-500 text-sm">{errors[`insurance_${insurance.id}`].message}</p>
