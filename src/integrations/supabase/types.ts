@@ -36,6 +36,49 @@ export type Database = {
         }
         Relationships: []
       }
+      au_companies: {
+        Row: {
+          abn: string | null
+          company_id: string
+          created_at: string | null
+          state: string | null
+        }
+        Insert: {
+          abn?: string | null
+          company_id: string
+          created_at?: string | null
+          state?: string | null
+        }
+        Update: {
+          abn?: string | null
+          company_id?: string
+          created_at?: string | null
+          state?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "au_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "au_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "company_documents_view"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "au_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "scheduled_moves_view"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       auth_rate_limits: {
         Row: {
           attempt_count: number | null
@@ -95,6 +138,49 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      ca_companies: {
+        Row: {
+          business_number: string | null
+          company_id: string
+          created_at: string | null
+          province: string | null
+        }
+        Insert: {
+          business_number?: string | null
+          company_id: string
+          created_at?: string | null
+          province?: string | null
+        }
+        Update: {
+          business_number?: string | null
+          company_id?: string
+          created_at?: string | null
+          province?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ca_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ca_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "company_documents_view"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "ca_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "scheduled_moves_view"
+            referencedColumns: ["company_id"]
+          },
+        ]
       }
       companies: {
         Row: {
@@ -369,6 +455,49 @@ export type Database = {
         }
         Relationships: []
       }
+      gb_companies: {
+        Row: {
+          companies_house_number: string | null
+          company_id: string
+          created_at: string | null
+          vat_registered: boolean | null
+        }
+        Insert: {
+          companies_house_number?: string | null
+          company_id: string
+          created_at?: string | null
+          vat_registered?: boolean | null
+        }
+        Update: {
+          companies_house_number?: string | null
+          company_id?: string
+          created_at?: string | null
+          vat_registered?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gb_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "gb_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "company_documents_view"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "gb_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "scheduled_moves_view"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       invoice_items: {
         Row: {
           amount: number
@@ -614,6 +743,46 @@ export type Database = {
           },
         ]
       }
+      nz_companies: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          nzbn: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          nzbn?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          nzbn?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "nz_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "nz_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "company_documents_view"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "nz_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "scheduled_moves_view"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       rate_limit_configs: {
         Row: {
           created_at: string | null
@@ -749,6 +918,49 @@ export type Database = {
           srtext?: string | null
         }
         Relationships: []
+      }
+      us_companies: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          ein: string | null
+          state: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          ein?: string | null
+          state?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          ein?: string | null
+          state?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "us_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "us_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "company_documents_view"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "us_companies_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "scheduled_moves_view"
+            referencedColumns: ["company_id"]
+          },
+        ]
       }
       users: {
         Row: {
