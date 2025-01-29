@@ -242,6 +242,13 @@ export type Database = {
             referencedRelation: "company_documents_view"
             referencedColumns: ["company_id"]
           },
+          {
+            foreignKeyName: "company_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_moves_view"
+            referencedColumns: ["company_id"]
+          },
         ]
       }
       company_payments: {
@@ -291,6 +298,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "company_documents_view"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "company_payments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_moves_view"
             referencedColumns: ["company_id"]
           },
         ]
@@ -433,11 +447,25 @@ export type Database = {
             referencedColumns: ["company_id"]
           },
           {
+            foreignKeyName: "move_assignments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_moves_view"
+            referencedColumns: ["company_id"]
+          },
+          {
             foreignKeyName: "move_assignments_request_id_fkey"
             columns: ["request_id"]
             isOneToOne: false
             referencedRelation: "move_requests"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "move_assignments_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_moves_view"
+            referencedColumns: ["request_id"]
           },
         ]
       }
@@ -544,6 +572,13 @@ export type Database = {
             referencedRelation: "company_documents_view"
             referencedColumns: ["company_id"]
           },
+          {
+            foreignKeyName: "notification_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_moves_view"
+            referencedColumns: ["company_id"]
+          },
         ]
       }
       rate_limit_configs: {
@@ -605,6 +640,13 @@ export type Database = {
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "company_documents_view"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "rate_limit_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_moves_view"
             referencedColumns: ["company_id"]
           },
         ]
@@ -813,29 +855,7 @@ export type Database = {
           requested_date: string | null
           status: Database["public"]["Enums"]["assignment_status"] | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "move_assignments_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "move_assignments_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "company_documents_view"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "move_assignments_request_id_fkey"
-            columns: ["request_id"]
-            isOneToOne: false
-            referencedRelation: "move_requests"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
     }
     Functions: {
