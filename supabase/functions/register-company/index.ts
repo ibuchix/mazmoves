@@ -128,11 +128,12 @@ serve(async (req) => {
       userId = authData.user.id;
     }
 
-    // Upload insurance documents
+    // Upload insurance documents with company-specific folder
     const { transitPath, liabilityPath } = await uploadInsuranceDocuments(
       supabase,
       registrationData.transitInsurance,
-      registrationData.liabilityInsurance
+      registrationData.liabilityInsurance,
+      userId
     );
 
     // Create user record if it doesn't exist
