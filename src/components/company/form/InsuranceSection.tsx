@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RequiredInsuranceSection } from "./insurance/RequiredInsuranceSection";
-import { OptionalInsuranceSection } from "./insurance/OptionalInsuranceSection";
 import { InsuranceType } from "@/types/company";
 import { UseFormRegister } from "react-hook-form";
 import { CompanyRegistrationForm } from "@/types/company";
@@ -13,23 +12,24 @@ interface InsuranceSectionProps {
 }
 
 export function InsuranceSection({ errors, countryCode, register }: InsuranceSectionProps) {
-  const [insuranceTypes, setInsuranceTypes] = useState<InsuranceType[]>([]);
+  const [requiredInsurances, setRequiredInsurances] = useState<InsuranceType[]>([]);
 
   useEffect(() => {
     async function fetchInsuranceTypes() {
       if (!countryCode) return;
       
-      console.log("Fetching insurance types for country:", countryCode); // Debug log
+      console.log("Fetching required insurance types for country:", countryCode);
       
       const { data, error } = await supabase
         .from('insurance_types')
         .select('*')
         .eq('country_code', countryCode)
-        .order('is_required', { ascending: false });
+        .eq('is_required', true)
+        .order('name');
 
       if (!error && data) {
-        console.log("Fetched insurance types:", data); // Debug log
-        setInsuranceTypes(data);
+        console.log("Fetched required insurance types:", data);
+        setRequiredInsurances(data);
       } else if (error) {
         console.error("Error fetching insurance types:", error);
       }
@@ -39,21 +39,14 @@ export function InsuranceSection({ errors, countryCode, register }: InsuranceSec
   }, [countryCode]);
 
   if (!countryCode) {
-    console.log("No country code provided"); // Debug log
+    console.log("No country code provided");
     return null;
   }
 
-  const requiredInsurances = insuranceTypes.filter(type => type.is_required);
-  const optionalInsurances = insuranceTypes.filter(type => !type.is_required);
-
-  console.log("Required insurances:", requiredInsurances); // Debug log
-  console.log("Optional insurances:", optionalInsurances); // Debug log
-
   return (
     <div className="space-y-6">
-      <h3 className="text-lg font-semibold text-[#040480]">Insurance Documents</h3>
+      <h3 className="text-lg font-semibold text-[#040480]">Required Insurance Documents</h3>
       <RequiredInsuranceSection insurances={requiredInsurances} errors={errors} register={register} />
-      <OptionalInsuranceSection insurances={optionalInsurances} register={register} />
     </div>
   );
 }
