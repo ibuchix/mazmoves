@@ -41,11 +41,14 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex-shrink-0">
-            <Link to="/">
+            <Link to="/" className="block">
               <img 
                 src="/lovable-uploads/b700dde9-463e-4b6e-8523-ec9f718b3beb.png" 
-                alt="MAZ Moves" 
-                className="h-14 transform hover:scale-105 transition-transform duration-200" 
+                alt="MAZ Moves - Your Trusted Moving Partner" 
+                className="h-16 w-auto transform hover:scale-105 transition-all duration-300 ease-in-out hover:drop-shadow-md"
+                loading="eager"
+                width="180"
+                height="64"
               />
             </Link>
           </div>
