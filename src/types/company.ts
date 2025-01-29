@@ -12,6 +12,7 @@ export interface CompanyRegistrationForm {
     zipCode: string;
   };
   managerName: string;
+  country: string; // JSON string containing {code: string, name: string}
 }
 
 export interface CompanyDashboardStats {

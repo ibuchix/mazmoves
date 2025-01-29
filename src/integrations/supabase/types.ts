@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      allowed_countries: {
+        Row: {
+          country_code: string
+          country_name: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          country_code: string
+          country_name: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          country_code?: string
+          country_name?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       auth_rate_limits: {
         Row: {
           attempt_count: number | null
@@ -76,6 +103,8 @@ export type Database = {
           business_address: Json
           contact_email: string
           contact_phone: string | null
+          country_code: string | null
+          country_name: string | null
           created_at: string | null
           description: string | null
           email_verified: boolean | null
@@ -109,6 +138,8 @@ export type Database = {
           business_address: Json
           contact_email: string
           contact_phone?: string | null
+          country_code?: string | null
+          country_name?: string | null
           created_at?: string | null
           description?: string | null
           email_verified?: boolean | null
@@ -142,6 +173,8 @@ export type Database = {
           business_address?: Json
           contact_email?: string
           contact_phone?: string | null
+          country_code?: string | null
+          country_name?: string | null
           created_at?: string | null
           description?: string | null
           email_verified?: boolean | null
@@ -1722,6 +1755,12 @@ export type Database = {
           "": unknown
         }
         Returns: unknown
+      }
+      is_country_allowed: {
+        Args: {
+          check_code: string
+        }
+        Returns: boolean
       }
       is_valid_admin_creator: {
         Args: {

@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CompanyDetailsSectionProps {
   register: any;
@@ -7,6 +8,14 @@ interface CompanyDetailsSectionProps {
 }
 
 export function CompanyDetailsSection({ register, errors }: CompanyDetailsSectionProps) {
+  const allowedCountries = [
+    { code: "US", name: "United States" },
+    { code: "CA", name: "Canada" },
+    { code: "GB", name: "United Kingdom" },
+    { code: "AU", name: "Australia" },
+    { code: "NZ", name: "New Zealand" }
+  ];
+
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold text-[#040480]">Company Information</h3>
@@ -34,6 +43,29 @@ export function CompanyDetailsSection({ register, errors }: CompanyDetailsSectio
             placeholder="Enter official registration number"
           />
           {errors.registrationNumber && <p className="text-red-500 text-sm mt-1">{errors.registrationNumber.message}</p>}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="country" className="text-sm font-medium text-[#040480]">
+            Country
+            <span className="text-red-500 ml-1">*</span>
+          </Label>
+          <Select 
+            {...register("country", { required: "Country is required" })}
+            defaultValue=""
+          >
+            <SelectTrigger className="h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300">
+              <SelectValue placeholder="Select your country" />
+            </SelectTrigger>
+            <SelectContent>
+              {allowedCountries.map((country) => (
+                <SelectItem key={country.code} value={JSON.stringify(country)}>
+                  {country.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.country && <p className="text-red-500 text-sm mt-1">{errors.country.message}</p>}
         </div>
 
         <div className="space-y-2">

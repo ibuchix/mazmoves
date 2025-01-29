@@ -20,6 +20,9 @@ export function useCompanyRegistration() {
         throw new Error('Insurance documents are required');
       }
 
+      // Parse country data
+      const countryData = JSON.parse(data.country);
+
       // Create form data
       const formData = new FormData();
       formData.append('email', data.email);
@@ -32,6 +35,8 @@ export function useCompanyRegistration() {
       formData.append('address', JSON.stringify(data.address));
       formData.append('transitInsurance', transitInsuranceInput.files[0]);
       formData.append('liabilityInsurance', liabilityInsuranceInput.files[0]);
+      formData.append('countryCode', countryData.code);
+      formData.append('countryName', countryData.name);
 
       // Call the registration edge function
       const { data: response, error } = await supabase.functions.invoke('register-company', {
@@ -65,6 +70,8 @@ export function useCompanyRegistration() {
         errorMessage += "An account with this email already exists. Please use a different email or login. ";
       } else if (error.message.includes('Insurance')) {
         errorMessage += "Please ensure all required insurance documents are uploaded. ";
+      } else if (error.message.includes('Registration is not available in this country')) {
+        errorMessage += error.message;
       } else {
         errorMessage += "Please try again or contact support if the issue persists. ";
       }
