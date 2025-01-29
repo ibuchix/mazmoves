@@ -490,6 +490,79 @@ export type Database = {
           },
         ]
       }
+      document_access_logs: {
+        Row: {
+          action_type: string
+          company_id: string
+          created_at: string | null
+          document_path: string
+          id: string
+          ip_address: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          action_type: string
+          company_id: string
+          created_at?: string | null
+          document_path: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          action_type?: string
+          company_id?: string
+          created_at?: string | null
+          document_path?: string
+          id?: string
+          ip_address?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_access_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_access_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_documents_view"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "document_access_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_moves_view"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "document_access_logs_company_id_fkey1"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_access_logs_company_id_fkey1"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "company_documents_view"
+            referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "document_access_logs_company_id_fkey1"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_moves_view"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       email_templates: {
         Row: {
           created_at: string | null
@@ -1002,6 +1075,30 @@ export type Database = {
           proj4text?: string | null
           srid?: number
           srtext?: string | null
+        }
+        Relationships: []
+      }
+      storage_config: {
+        Row: {
+          created_at: string | null
+          id: string
+          max_file_size_mb: number
+          retention_days: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          max_file_size_mb?: number
+          retention_days?: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          max_file_size_mb?: number
+          retention_days?: number
+          updated_at?: string | null
         }
         Relationships: []
       }
