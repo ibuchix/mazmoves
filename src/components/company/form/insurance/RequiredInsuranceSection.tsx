@@ -35,7 +35,7 @@ export function RequiredInsuranceSection({ insurances, errors, register }: Requi
               <div className="relative">
                 <Input
                   id={`insurance_${insurance.id}`}
-                  {...register(`insurance_${insurance.id}`, { required: true })}
+                  {...register(`insurance_${insurance.id}` as keyof CompanyRegistrationForm, { required: true })}
                   type="file"
                   accept=".pdf,.doc,.docx"
                   className="h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-medium file:bg-[#040480] file:text-white hover:file:bg-[#1f3dd2] cursor-pointer"
