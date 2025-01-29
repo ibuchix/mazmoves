@@ -13,7 +13,7 @@ export interface CompanyRegistrationForm {
   };
   managerName: string;
   country: string; // JSON string containing {code: string, name: string}
-  [key: `insurance_${string}`]: File | null; // Add this line to support dynamic insurance fields
+  [key: string]: any; // More flexible index signature to handle both File and other types
 }
 
 export interface CompanyDashboardStats {

@@ -35,7 +35,7 @@ export function RequiredInsuranceSection({ insurances, errors, register }: Requi
               <div className="relative">
                 <Input
                   id={`insurance_${insurance.id}`}
-                  {...register(`insurance_${insurance.id}` as keyof CompanyRegistrationForm, { required: true })}
+                  {...register(`insurance_${insurance.id}`, { required: "This insurance document is required" })}
                   type="file"
                   accept=".pdf,.doc,.docx"
                   className="h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:font-medium file:bg-[#040480] file:text-white hover:file:bg-[#1f3dd2] cursor-pointer"
@@ -43,7 +43,7 @@ export function RequiredInsuranceSection({ insurances, errors, register }: Requi
                 <Upload className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#040480] w-5 h-5" />
               </div>
               {errors[`insurance_${insurance.id}`] && (
-                <p className="text-red-500 text-sm">This document is required</p>
+                <p className="text-red-500 text-sm">{errors[`insurance_${insurance.id}`].message}</p>
               )}
             </div>
           </Card>
