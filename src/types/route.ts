@@ -1,0 +1,8 @@
+import { ReactNode } from "react";
+
+export interface RouteConfig {
+  path: string;
+  element: ReactNode;
+  requiresAuth?: boolean;
+  allowedRoles?: string[];
+}
