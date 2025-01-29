@@ -21,3 +21,10 @@ export interface CompanyDashboardStats {
   cancelled: number;
   pending: number;
 }
+
+export interface InsuranceType {
+  id: string;
+  name: string;
+  description: string;
+  is_required: boolean;
+}
