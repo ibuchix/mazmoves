@@ -50,21 +50,18 @@ export function CompanyDetailsSection({ register, errors }: CompanyDetailsSectio
             Country
             <span className="text-red-500 ml-1">*</span>
           </Label>
-          <Select 
+          <select 
             {...register("country", { required: "Country is required" })}
+            className="w-full h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 rounded-md"
             defaultValue=""
           >
-            <SelectTrigger className="h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300">
-              <SelectValue placeholder="Select your country" />
-            </SelectTrigger>
-            <SelectContent>
-              {allowedCountries.map((country) => (
-                <SelectItem key={country.code} value={JSON.stringify(country)}>
-                  {country.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <option value="" disabled>Select your country</option>
+            {allowedCountries.map((country) => (
+              <option key={country.code} value={JSON.stringify(country)}>
+                {country.name}
+              </option>
+            ))}
+          </select>
           {errors.country && <p className="text-red-500 text-sm mt-1">{errors.country.message}</p>}
         </div>
 
