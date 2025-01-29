@@ -1,5 +1,5 @@
 import { Suspense, lazy } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import Navbar from "@/components/Navbar";
@@ -41,6 +41,7 @@ function App() {
               </div>
             }>
               <Routes>
+                {/* Redirect root to index */}
                 <Route path="/" element={<Index />} />
                 <Route path="/services" element={<Services />} />
                 <Route path="/companies" element={<Companies />} />
@@ -88,6 +89,9 @@ function App() {
                     </ProtectedRoute>
                   }
                 />
+
+                {/* Catch all route - redirect to home */}
+                <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Suspense>
           </main>
