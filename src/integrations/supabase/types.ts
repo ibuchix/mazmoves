@@ -36,6 +36,21 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          key: string
+          value: string
+        }
+        Insert: {
+          key: string
+          value: string
+        }
+        Update: {
+          key?: string
+          value?: string
+        }
+        Relationships: []
+      }
       au_companies: {
         Row: {
           abn: string | null
@@ -194,6 +209,9 @@ export type Database = {
           created_at: string | null
           description: string | null
           email_verified: boolean | null
+          encrypted_contact_phone: string | null
+          encrypted_registration_number: string | null
+          encrypted_vat_number: string | null
           free_assignments_remaining: number | null
           id: string
           insurance_docs: Json | null
@@ -229,6 +247,9 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           email_verified?: boolean | null
+          encrypted_contact_phone?: string | null
+          encrypted_registration_number?: string | null
+          encrypted_vat_number?: string | null
           free_assignments_remaining?: number | null
           id?: string
           insurance_docs?: Json | null
@@ -264,6 +285,9 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           email_verified?: boolean | null
+          encrypted_contact_phone?: string | null
+          encrypted_registration_number?: string | null
+          encrypted_vat_number?: string | null
           free_assignments_remaining?: number | null
           id?: string
           insurance_docs?: Json | null
@@ -1153,6 +1177,7 @@ export type Database = {
           address: Json | null
           created_at: string | null
           email: string
+          encrypted_phone: string | null
           full_name: string
           id: string
           is_active: boolean | null
@@ -1164,6 +1189,7 @@ export type Database = {
           address?: Json | null
           created_at?: string | null
           email: string
+          encrypted_phone?: string | null
           full_name: string
           id?: string
           is_active?: boolean | null
@@ -1175,6 +1201,7 @@ export type Database = {
           address?: Json | null
           created_at?: string | null
           email?: string
+          encrypted_phone?: string | null
           full_name?: string
           id?: string
           is_active?: boolean | null
@@ -1675,6 +1702,13 @@ export type Database = {
         }
         Returns: undefined
       }
+      decrypt_sensitive_data: {
+        Args: {
+          encrypted_data: string
+          key_id?: string
+        }
+        Returns: string
+      }
       disablelongtransactions: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -1728,6 +1762,13 @@ export type Database = {
           }
       enablelongtransactions: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      encrypt_sensitive_data: {
+        Args: {
+          data: string
+          key_id?: string
+        }
         Returns: string
       }
       equals: {
@@ -2156,9 +2197,35 @@ export type Database = {
         }
         Returns: unknown
       }
+      get_decrypted_company_data: {
+        Args: {
+          company_id: string
+        }
+        Returns: {
+          id: string
+          registration_number: string
+          vat_number: string
+          contact_phone: string
+        }[]
+      }
+      get_decrypted_user_data: {
+        Args: {
+          user_id: string
+        }
+        Returns: {
+          id: string
+          phone: string
+        }[]
+      }
       get_proj4_from_srid: {
         Args: {
           "": number
+        }
+        Returns: string
+      }
+      get_setting: {
+        Args: {
+          setting_key: string
         }
         Returns: string
       }
@@ -2212,6 +2279,10 @@ export type Database = {
       longtransactionsenabled: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      migrate_sensitive_data: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       path: {
         Args: {
