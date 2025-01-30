@@ -12,10 +12,13 @@ import { FormProgress } from "./FormProgress";
 import { FormNavigation } from "./FormNavigation";
 import { useSubmitMoveRequest } from "@/hooks/use-submit-move-request";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "react-router-dom";
 
 export function MoveRequestForm() {
-  const [step, setStep] = useState(1);
-  const [moveType, setMoveType] = useState<MoveType | null>(null);
+  const location = useLocation();
+  const initialMoveType = location.state?.moveType || null;
+  const [step, setStep] = useState(initialMoveType ? 2 : 1);
+  const [moveType, setMoveType] = useState<MoveType | null>(initialMoveType);
   const { register, handleSubmit, watch, formState: { errors } } = useForm<IMoveRequestForm>();
   const { toast } = useToast();
   const { 
@@ -62,6 +65,11 @@ export function MoveRequestForm() {
 
   const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
 
+  const handleMoveTypeChange = (type: MoveType) => {
+    setMoveType(type);
+    setStep(2); // Immediately move to step 2 when type is selected
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <Card>
@@ -75,8 +83,8 @@ export function MoveRequestForm() {
               {step === 1 && (
                 <MoveTypeStep
                   value={moveType}
-                  onChange={(value) => setMoveType(value)}
-                  onNext={nextStep}
+                  onChange={handleMoveTypeChange}
+                  onNext={() => setStep(2)}
                 />
               )}
 

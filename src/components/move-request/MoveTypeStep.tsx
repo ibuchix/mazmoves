@@ -1,6 +1,7 @@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { MoveType } from "@/types/move-request";
+import { useEffect } from "react";
 
 interface MoveTypeStepProps {
   value: MoveType | null;
@@ -9,18 +10,19 @@ interface MoveTypeStepProps {
 }
 
 export function MoveTypeStep({ value, onChange, onNext }: MoveTypeStepProps) {
-  const handleChange = (value: MoveType) => {
-    onChange(value);
-    // Automatically trigger next step when a selection is made
-    onNext();
-  };
+  // When value changes and is not null, trigger onNext
+  useEffect(() => {
+    if (value) {
+      onNext();
+    }
+  }, [value, onNext]);
 
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">What type of move is this?</h3>
       <RadioGroup
         defaultValue={value || undefined}
-        onValueChange={(value: MoveType) => handleChange(value)}
+        onValueChange={(value: MoveType) => onChange(value)}
       >
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="domestic" id="domestic" />
