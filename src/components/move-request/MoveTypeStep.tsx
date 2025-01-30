@@ -5,15 +5,22 @@ import { MoveType } from "@/types/move-request";
 interface MoveTypeStepProps {
   value: MoveType | null;
   onChange: (value: MoveType) => void;
+  onNext: () => void;
 }
 
-export function MoveTypeStep({ value, onChange }: MoveTypeStepProps) {
+export function MoveTypeStep({ value, onChange, onNext }: MoveTypeStepProps) {
+  const handleChange = (value: MoveType) => {
+    onChange(value);
+    // Automatically trigger next step when a selection is made
+    onNext();
+  };
+
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">What type of move is this?</h3>
       <RadioGroup
         defaultValue={value || undefined}
-        onValueChange={(value: MoveType) => onChange(value)}
+        onValueChange={(value: MoveType) => handleChange(value)}
       >
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="domestic" id="domestic" />

@@ -31,12 +31,6 @@ export function MoveRequestForm() {
   const isProcessing = isSubmitting || isGeocodingPickup || isGeocodingDelivery;
 
   const nextStep = () => {
-    // For step 1 (move type selection), automatically proceed when user clicks "Get Free Quotes"
-    if (step === 1 && moveType) {
-      setStep(2);
-      return;
-    }
-
     // For step 3 (pickup address), validate before proceeding
     if (step === 3) {
       const pickupAddress = watch("pickupAddress");
@@ -82,6 +76,7 @@ export function MoveRequestForm() {
                 <MoveTypeStep
                   value={moveType}
                   onChange={(value) => setMoveType(value)}
+                  onNext={nextStep}
                 />
               )}
 
