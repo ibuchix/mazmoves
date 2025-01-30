@@ -23,10 +23,10 @@ serve(async (req) => {
     const { requestId } = await req.json();
     console.log(`Starting to process move request ${requestId}`);
 
-    // Get the move request details
+    // Get the move request details with move type
     const { data: request, error: requestError } = await supabase
       .from('move_requests')
-      .select('*')
+      .select('*, move_type')  // Added move_type to the selection
       .eq('id', requestId)
       .single();
 
@@ -125,6 +125,9 @@ serve(async (req) => {
       const pickupAddress = Object.values(request.pickup_address).join(', ');
       const deliveryAddress = Object.values(request.delivery_address).join(', ');
 
+      // Get move type display text
+      const moveTypeDisplay = request.move_type ? request.move_type.charAt(0).toUpperCase() + request.move_type.slice(1) : 'Not specified';
+
       // Send email notification to company
       try {
         console.log(`Sending email notification to ${company_name} at ${company.contact_email}`);
@@ -142,6 +145,9 @@ serve(async (req) => {
               <h2>New Move Request Details</h2>
               <p>A new moving request has been submitted ${Math.round(distance_km)} km from your location.</p>
               
+              <h3>Move Type:</h3>
+              <p><strong>${moveTypeDisplay} Move</strong></p>
+
               <h3>Customer Information:</h3>
               <ul>
                 <li><strong>Name:</strong> ${request.customer_name}</li>
