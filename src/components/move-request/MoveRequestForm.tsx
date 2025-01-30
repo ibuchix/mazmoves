@@ -70,6 +70,25 @@ export function MoveRequestForm() {
     setStep(2); // Immediately move to step 2 when type is selected
   };
 
+  const handleFormSubmit = (data: IMoveRequestForm) => {
+    if (!moveType) {
+      toast({
+        title: "Missing Move Type",
+        description: "Please select a move type before submitting",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Include the moveType in the submission data
+    const formData = {
+      ...data,
+      moveType
+    };
+    
+    onSubmit(formData);
+  };
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       <Card>
@@ -79,7 +98,7 @@ export function MoveRequestForm() {
             
             <FormProgress step={step} totalSteps={totalSteps} />
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
               {step === 1 && (
                 <MoveTypeStep
                   value={moveType}
