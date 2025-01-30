@@ -1,3 +1,5 @@
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
 interface CompanyData {
   name: string;
   registration_number: string;

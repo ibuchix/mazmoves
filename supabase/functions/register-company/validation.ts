@@ -8,8 +8,8 @@ export interface RegistrationData {
   address: any;
   transitInsurance: File;
   liabilityInsurance: File;
-  countryCode?: string;
-  countryName?: string;
+  latitude?: number;
+  longitude?: number;
 }
 
 export function validateRegistrationData(formData: FormData): RegistrationData | null {
@@ -22,11 +22,12 @@ export function validateRegistrationData(formData: FormData): RegistrationData |
   const address = JSON.parse(formData.get('address') as string);
   const transitInsurance = formData.get('transitInsurance') as File;
   const liabilityInsurance = formData.get('liabilityInsurance') as File;
-  const countryData = JSON.parse(formData.get('country') as string);
+  const latitude = parseFloat(formData.get('latitude') as string);
+  const longitude = parseFloat(formData.get('longitude') as string);
 
   if (!email || !password || !companyName || !registrationNumber || 
       !phone || !managerName || !address || !transitInsurance || 
-      !liabilityInsurance || !countryData) {
+      !liabilityInsurance) {
     return null;
   }
 
@@ -40,7 +41,7 @@ export function validateRegistrationData(formData: FormData): RegistrationData |
     address,
     transitInsurance,
     liabilityInsurance,
-    countryCode: countryData.code,
-    countryName: countryData.name
+    latitude,
+    longitude
   };
 }

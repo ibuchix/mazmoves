@@ -2,7 +2,6 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { validateRegistrationData } from './validation.ts'
 import { uploadInsuranceDocuments } from './file-handler.ts'
-import { geocodeAddress } from './geocoding.ts'
 import { handleAuthentication } from './auth-service.ts'
 import { createCompanyRecord, createUserRecord } from './company-service.ts'
 import { checkRateLimits, recordSuccessfulAttempt } from './rate-limit-service.ts'
@@ -71,9 +70,6 @@ serve(async (req) => {
       registrationData.address
     );
 
-    // Geocode address
-    const coordinates = await geocodeAddress(registrationData.address);
-
     // Create company record
     await createCompanyRecord(supabase, {
       name: registrationData.companyName,
@@ -86,8 +82,8 @@ serve(async (req) => {
         { type: 'transit', path: transitPath },
         { type: 'liability', path: liabilityPath }
       ],
-      latitude: coordinates?.latitude,
-      longitude: coordinates?.longitude,
+      latitude: registrationData.latitude,
+      longitude: registrationData.longitude,
       auth_user_id: userId,
       registration_status: 'pending'
     });
