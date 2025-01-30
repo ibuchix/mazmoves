@@ -75,7 +75,8 @@ export function useSubmitMoveRequest() {
         pickup_latitude: pickupCoords.latitude,
         pickup_longitude: pickupCoords.longitude,
         delivery_latitude: deliveryCoords.latitude,
-        delivery_longitude: deliveryCoords.longitude
+        delivery_longitude: deliveryCoords.longitude,
+        move_type: sanitizedData.moveType
       };
 
       const { data: moveRequest, error: moveRequestError } = await supabase
