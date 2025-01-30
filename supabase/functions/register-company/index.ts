@@ -3,6 +3,10 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { validateRegistrationData } from './validation.ts'
 import { uploadInsuranceDocuments } from './file-handler.ts'
 import { geocodeAddress } from './geocoding.ts'
+import { handleAuthentication } from './auth-service.ts'
+import { createCompanyRecord, createUserRecord } from './company-service.ts'
+import { checkRateLimits, recordSuccessfulAttempt } from './rate-limit-service.ts'
+import { generateConfirmationLink, sendWelcomeEmail } from './notification-service.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -38,91 +42,18 @@ serve(async (req) => {
     console.log('Checking rate limit for IP:', clientIP)
 
     // Check rate limits
-    const { data: rateLimitCheck } = await supabase.rpc('check_registration_limit', {
-      check_ip: clientIP,
-      check_email: registrationData.email
-    })
+    await checkRateLimits(supabase, clientIP, registrationData.email);
 
-    if (!rateLimitCheck) {
-      console.log('Rate limit exceeded for IP:', clientIP)
-      // Record the failed attempt
-      await supabase.from('registration_attempts').insert({
-        ip_address: clientIP,
-        email: registrationData.email,
-        success: false
-      })
-
-      return new Response(
-        JSON.stringify({ 
-          error: 'Too many registration attempts. Please try again later.',
-          status: 429
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 429 }
-      )
-    }
-
-    // First check if user exists and their status
+    // Check existing users and handle authentication
     const { data: existingUsers } = await supabase.auth.admin.listUsers();
-    const existingUser = existingUsers?.users.find(u => u.email === registrationData.email);
-    
-    let userId;
-    
-    if (existingUser) {
-      // Check if the user is soft-deleted
-      if (!existingUser.banned_until && !existingUser.deleted_at) {
-        // Check if company already exists for this user
-        const { data: existingCompany } = await supabase
-          .from('companies')
-          .select('id')
-          .eq('auth_user_id', existingUser.id)
-          .single();
-          
-        if (existingCompany) {
-          // Record the failed attempt
-          await supabase.from('registration_attempts').insert({
-            ip_address: clientIP,
-            email: registrationData.email,
-            success: false
-          })
+    const { userId } = await handleAuthentication(
+      supabase, 
+      registrationData.email, 
+      registrationData.password,
+      existingUsers
+    );
 
-          return new Response(
-            JSON.stringify({ 
-              error: 'Registration failed', 
-              details: 'A company is already registered with this account',
-              status: 422
-            }),
-            { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 422 }
-          )
-        }
-        userId = existingUser.id;
-      } else {
-        // If user is soft-deleted, we'll create a new user
-        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-          email: registrationData.email,
-          password: registrationData.password,
-          email_confirm: false,
-          user_metadata: { role: 'company' }
-        });
-
-        if (authError) throw authError;
-        if (!authData.user) throw new Error('No user data returned');
-        userId = authData.user.id;
-      }
-    } else {
-      // Create new auth user with email confirmation required
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: registrationData.email,
-        password: registrationData.password,
-        email_confirm: false,
-        user_metadata: { role: 'company' }
-      })
-
-      if (authError) throw authError;
-      if (!authData.user) throw new Error('No user data returned');
-      userId = authData.user.id;
-    }
-
-    // Upload insurance documents with company-specific folder
+    // Upload insurance documents
     const { transitPath, liabilityPath } = await uploadInsuranceDocuments(
       supabase,
       registrationData.transitInsurance,
@@ -130,85 +61,48 @@ serve(async (req) => {
       userId
     );
 
-    // Create user record if it doesn't exist
-    const { error: userError } = await supabase
-      .from('users')
-      .upsert({
-        id: userId,
-        email: registrationData.email,
-        full_name: registrationData.managerName,
-        role: 'company',
-        phone: registrationData.phone,
-        address: registrationData.address
-      })
-
-    if (userError) {
-      console.error('Error creating/updating user record:', userError);
-      throw userError;
-    }
+    // Create user record
+    await createUserRecord(
+      supabase,
+      userId,
+      registrationData.email,
+      registrationData.managerName,
+      registrationData.phone,
+      registrationData.address
+    );
 
     // Geocode address
     const coordinates = await geocodeAddress(registrationData.address);
 
-    // Create company record with RLS temporarily disabled
-    const { error: companyError } = await supabase.rpc('create_company_bypass_rls', {
-      company_data: {
-        name: registrationData.companyName,
-        registration_number: registrationData.registrationNumber,
-        contact_email: registrationData.email,
-        contact_phone: registrationData.phone,
-        business_address: registrationData.address,
-        manager_name: registrationData.managerName,
-        insurance_docs: [
-          { type: 'transit', path: transitPath },
-          { type: 'liability', path: liabilityPath }
-        ],
-        latitude: coordinates?.latitude,
-        longitude: coordinates?.longitude,
-        auth_user_id: userId,
-        registration_status: 'pending'
-      }
-    })
-
-    if (companyError) {
-      console.error('Company creation error:', companyError);
-      throw companyError;
-    }
-
-    // Record successful registration attempt
-    await supabase.from('registration_attempts').insert({
-      ip_address: clientIP,
-      email: registrationData.email,
-      success: true
-    })
-
-    // Generate email confirmation link
-    const { data: confirmData, error: confirmError } = await supabase.auth.admin.generateLink({
-      type: 'signup',
-      email: registrationData.email,
-      options: {
-        redirectTo: `${Deno.env.get('SUPABASE_URL')}/auth/v1/verify`
-      }
+    // Create company record
+    await createCompanyRecord(supabase, {
+      name: registrationData.companyName,
+      registration_number: registrationData.registrationNumber,
+      contact_email: registrationData.email,
+      contact_phone: registrationData.phone,
+      business_address: registrationData.address,
+      manager_name: registrationData.managerName,
+      insurance_docs: [
+        { type: 'transit', path: transitPath },
+        { type: 'liability', path: liabilityPath }
+      ],
+      latitude: coordinates?.latitude,
+      longitude: coordinates?.longitude,
+      auth_user_id: userId,
+      registration_status: 'pending'
     });
 
-    if (confirmError) {
-      console.error('Error generating confirmation link:', confirmError);
-      throw confirmError;
-    }
+    // Record successful registration
+    await recordSuccessfulAttempt(supabase, clientIP, registrationData.email);
 
-    // Send welcome email with confirmation link
-    try {
-      await supabase.functions.invoke('send-welcome-email', {
-        body: { 
-          email: registrationData.email, 
-          companyName: registrationData.companyName,
-          confirmationLink: confirmData.properties.action_link
-        }
-      })
-    } catch (emailError) {
-      console.error('Welcome email error:', emailError)
-      // Don't fail registration if email fails
-    }
+    // Generate and send confirmation email
+    const confirmData = await generateConfirmationLink(supabase, registrationData.email);
+    await sendWelcomeEmail(
+      supabase,
+      registrationData.email,
+      registrationData.companyName,
+      confirmData.properties.action_link
+    );
 
     return new Response(
       JSON.stringify({ 
