@@ -1184,6 +1184,30 @@ export type Database = {
         }
         Relationships: []
       }
+      validation_failures: {
+        Row: {
+          created_at: string | null
+          failure_reason: string | null
+          id: string
+          ip_address: string | null
+          request_data: Json | null
+        }
+        Insert: {
+          created_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          ip_address?: string | null
+          request_data?: Json | null
+        }
+        Update: {
+          created_at?: string | null
+          failure_reason?: string | null
+          id?: string
+          ip_address?: string | null
+          request_data?: Json | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       admin_dashboard_mv: {

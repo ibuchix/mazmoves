@@ -19,28 +19,57 @@ export function useSubmitMoveRequest() {
     setIsSubmitting(true);
     try {
       console.log("Starting form submission with data:", data);
+
+      // Get client IP for rate limiting
+      const { data: { ip_address } } = await supabase.functions.invoke('get-client-ip');
+      
+      // Validate request
+      const { data: validationResponse, error: validationError } = await supabase.functions.invoke(
+        'validate-move-request',
+        {
+          body: { 
+            moveRequest: data,
+            clientIp: ip_address
+          }
+        }
+      );
+
+      if (validationError || !validationResponse.success) {
+        const errors = validationError?.message || validationResponse?.errors;
+        console.error("Validation failed:", errors);
+        toast({
+          title: "Validation Error",
+          description: Array.isArray(errors) 
+            ? errors.map(e => e.message).join(", ")
+            : "Please check your input and try again",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const sanitizedData = validationResponse.data;
       
       // Geocode pickup address
       setIsGeocodingPickup(true);
-      const pickupCoords = await geocodeAddress(data.pickupAddress);
+      const pickupCoords = await geocodeAddress(sanitizedData.pickupAddress);
       setIsGeocodingPickup(false);
 
       // Geocode delivery address
       setIsGeocodingDelivery(true);
-      const deliveryCoords = await geocodeAddress(data.deliveryAddress);
+      const deliveryCoords = await geocodeAddress(sanitizedData.deliveryAddress);
       setIsGeocodingDelivery(false);
 
       console.log("Geocoding results:", { pickupCoords, deliveryCoords });
 
       const moveRequestData = {
-        pickup_address: addressToJson(data.pickupAddress),
-        delivery_address: addressToJson(data.deliveryAddress),
-        requested_date: data.moveDate,
-        estimated_size: data.propertySize,
-        special_instructions: data.specialInstructions,
-        customer_email: data.email,
-        customer_name: data.fullName,
-        customer_phone: data.phone,
+        pickup_address: addressToJson(sanitizedData.pickupAddress),
+        delivery_address: addressToJson(sanitizedData.deliveryAddress),
+        requested_date: sanitizedData.moveDate,
+        estimated_size: sanitizedData.propertySize,
+        special_instructions: sanitizedData.specialInstructions,
+        customer_email: sanitizedData.email,
+        customer_name: sanitizedData.fullName,
+        customer_phone: sanitizedData.phone,
         pickup_latitude: pickupCoords.latitude,
         pickup_longitude: pickupCoords.longitude,
         delivery_latitude: deliveryCoords.latitude,
@@ -60,8 +89,8 @@ export function useSubmitMoveRequest() {
       // Send confirmation email
       const { error: confirmationError } = await supabase.functions.invoke('send-confirmation-email', {
         body: { 
-          customerEmail: data.email,
-          customerName: data.fullName
+          customerEmail: sanitizedData.email,
+          customerName: sanitizedData.fullName
         }
       });
 
