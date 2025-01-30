@@ -66,6 +66,18 @@ serve(async (req) => {
     for (const { company_id, company_name, distance_km } of nearbyCompanies) {
       console.log(`Processing company: ${company_name} (${distance_km.toFixed(2)} km away)`);
 
+      // Get company email
+      const { data: company } = await supabase
+        .from('companies')
+        .select('contact_email')
+        .eq('id', company_id)
+        .single();
+
+      if (!company?.contact_email) {
+        console.error(`No contact email found for company ${company_name}`);
+        continue;
+      }
+
       // Check rate limits before proceeding
       const { data: withinHourlyLimit } = await supabase
         .rpc('check_rate_limit', {
@@ -115,7 +127,7 @@ serve(async (req) => {
 
       // Send email notification to company
       try {
-        console.log(`Sending email notification to ${company_name}`);
+        console.log(`Sending email notification to ${company_name} at ${company.contact_email}`);
         const emailResponse = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
@@ -124,7 +136,7 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             from: 'MAZ Moves <notifications@mazmoves.com>',
-            to: [company_name],
+            to: company.contact_email,
             subject: 'New Move Request Available',
             html: `
               <h2>New Move Request Details</h2>
@@ -154,9 +166,10 @@ serve(async (req) => {
         });
 
         if (!emailResponse.ok) {
-          console.error(`Error sending email to ${company_name}:`, await emailResponse.text());
+          const errorText = await emailResponse.text();
+          console.error(`Error sending email notification to company: ${errorText}`);
         } else {
-          console.log(`Successfully sent email to ${company_name}`);
+          console.log(`Successfully sent email to ${company_name} at ${company.contact_email}`);
           await supabase
             .from('rate_limit_logs')
             .insert({
