@@ -1,10 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+import { verifyOrigin, corsHeaders } from "../_shared/verify-origin.ts";
 
 const RADIUS_MILES = 25;
 
@@ -22,11 +18,23 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Verify the request origin
+    if (!verifyOrigin(req)) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized origin' }),
+        { 
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     const { record } = await req.json();
     
     // Initialize Supabase client
