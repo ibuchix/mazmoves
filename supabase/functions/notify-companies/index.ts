@@ -21,7 +21,7 @@ serve(async (req) => {
     );
 
     const { requestId } = await req.json();
-    console.log(`Processing move request ${requestId}`);
+    console.log(`Starting to process move request ${requestId}`);
 
     // Get the move request details
     const { data: request, error: requestError } = await supabase
@@ -31,6 +31,7 @@ serve(async (req) => {
       .single();
 
     if (requestError) throw requestError;
+    console.log(`Found move request from ${request.customer_name} (${request.customer_email})`);
 
     // Find nearby companies using the optimized function
     const { data: nearbyCompanies, error: companiesError } = await supabase
@@ -44,14 +45,27 @@ serve(async (req) => {
 
     if (companiesError) throw companiesError;
 
-    console.log(`Found ${nearbyCompanies.length} potential companies`);
+    console.log(`Found ${nearbyCompanies.length} verified companies within ${RADIUS_MILES} miles`);
+    
+    if (nearbyCompanies.length === 0) {
+      console.log('No verified companies found in range');
+      return new Response(
+        JSON.stringify({ 
+          success: false, 
+          message: 'No verified companies found in range'
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Create assignments for the closest companies
     const createdAssignments = [];
     const expandAfter = new Date();
-    expandAfter.setMinutes(expandAfter.getMinutes() + 5); // Set expansion time to 5 minutes from now
+    expandAfter.setMinutes(expandAfter.getMinutes() + 5);
 
     for (const { company_id, company_name, distance_km } of nearbyCompanies) {
+      console.log(`Processing company: ${company_name} (${distance_km.toFixed(2)} km away)`);
+
       // Check rate limits before proceeding
       const { data: withinHourlyLimit } = await supabase
         .rpc('check_rate_limit', {
@@ -66,8 +80,7 @@ serve(async (req) => {
         });
 
       if (!withinHourlyLimit || !withinDailyLimit) {
-        console.log(`Rate limit reached for company ${company_id}`);
-        // Log the rate limit hit
+        console.log(`Rate limit reached for company ${company_name}`);
         await supabase
           .from('rate_limit_logs')
           .insert({
@@ -90,9 +103,11 @@ serve(async (req) => {
         .single();
 
       if (assignmentError) {
-        console.error('Error creating assignment:', assignmentError);
+        console.error(`Error creating assignment for ${company_name}:`, assignmentError);
         continue;
       }
+
+      console.log(`Created assignment for company ${company_name}`);
 
       // Format addresses for email
       const pickupAddress = Object.values(request.pickup_address).join(', ');
@@ -100,6 +115,7 @@ serve(async (req) => {
 
       // Send email notification to company
       try {
+        console.log(`Sending email notification to ${company_name}`);
         const emailResponse = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
@@ -114,6 +130,13 @@ serve(async (req) => {
               <h2>New Move Request Details</h2>
               <p>A new moving request has been submitted ${Math.round(distance_km)} km from your location.</p>
               
+              <h3>Customer Information:</h3>
+              <ul>
+                <li><strong>Name:</strong> ${request.customer_name}</li>
+                <li><strong>Email:</strong> ${request.customer_email}</li>
+                <li><strong>Phone:</strong> ${request.customer_phone || 'Not provided'}</li>
+              </ul>
+
               <h3>Move Details:</h3>
               <ul>
                 <li><strong>Pickup Address:</strong> ${pickupAddress}</li>
@@ -123,15 +146,17 @@ serve(async (req) => {
                 ${request.special_instructions ? `<li><strong>Special Instructions:</strong> ${request.special_instructions}</li>` : ''}
               </ul>
               
-              <p>Please check your dashboard at <a href="https://mazmoves.com/company/dashboard">https://mazmoves.com/company/dashboard</a> for more details and to respond to this request.</p>
+              <p>Please contact the customer directly to provide your quote and discuss the move details.</p>
+              
+              <p>You can also check your dashboard at <a href="https://mazmoves.com/company/dashboard">https://mazmoves.com/company/dashboard</a> for more information.</p>
             `
           }),
         });
 
         if (!emailResponse.ok) {
-          console.error('Error sending email notification to company:', await emailResponse.text());
+          console.error(`Error sending email to ${company_name}:`, await emailResponse.text());
         } else {
-          // Log successful email send
+          console.log(`Successfully sent email to ${company_name}`);
           await supabase
             .from('rate_limit_logs')
             .insert({
@@ -140,13 +165,13 @@ serve(async (req) => {
             });
         }
       } catch (emailError) {
-        console.error('Error sending email:', emailError);
+        console.error(`Failed to send email to ${company_name}:`, emailError);
       }
 
       createdAssignments.push({ ...assignment, distance_km });
     }
 
-    console.log(`Created ${createdAssignments.length} assignments within ${RADIUS_MILES} mile radius`);
+    console.log(`Successfully created ${createdAssignments.length} assignments`);
 
     // If no companies were found within range
     if (createdAssignments.length === 0) {
