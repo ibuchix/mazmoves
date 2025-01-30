@@ -21,6 +21,7 @@ export const HeroSection = ({ moveType, setMoveType, onGetQuotes }: HeroSectionP
             <MoveTypeStep
               value={moveType}
               onChange={(value) => setMoveType(value)}
+              onNext={onGetQuotes}
             />
             <Button 
               className="w-full mt-4 md:mt-6 bg-[#d2491f] hover:bg-[#84d21f] text-white text-base px-6 py-2 transition-colors duration-200"
