@@ -1,24 +1,24 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { verifyOrigin, corsHeaders } from "../_shared/verify-origin.ts";
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')
-const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    if (!RESEND_API_KEY) {
-      throw new Error('RESEND_API_KEY is not configured')
+    // Verify the request origin
+    if (!verifyOrigin(req)) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized origin' }),
+        { 
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     const { email, companyName, confirmationLink } = await req.json()
@@ -26,8 +26,8 @@ serve(async (req) => {
 
     // Initialize Supabase client with service role key
     const supabase = createClient(
-      SUPABASE_URL ?? '',
-      SUPABASE_SERVICE_ROLE_KEY ?? ''
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
     const emailResponse = await fetch('https://api.resend.com/emails', {

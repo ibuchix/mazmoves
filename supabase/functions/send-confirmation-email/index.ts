@@ -1,19 +1,25 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { verifyOrigin, corsHeaders } from "../_shared/verify-origin.ts";
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Verify the request origin
+    if (!verifyOrigin(req)) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized origin' }),
+        { 
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     if (!RESEND_API_KEY) {
       console.error('RESEND_API_KEY is not set');
       throw new Error('RESEND_API_KEY is not configured');

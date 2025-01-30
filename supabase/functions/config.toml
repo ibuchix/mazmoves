@@ -88,3 +88,7 @@ verify_jwt = false
 [[functions]]
 name = "verify-company"
 verify_jwt = true
+
+[[functions]]
+name = "validate-move-request"
+verify_jwt = true

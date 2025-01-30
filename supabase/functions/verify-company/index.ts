@@ -1,14 +1,10 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { verifyOrigin, corsHeaders } from "../_shared/verify-origin.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
 
 interface VerificationRequest {
   companyId: string;
@@ -26,6 +22,17 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Verify the request origin
+    if (!verifyOrigin(req)) {
+      return new Response(
+        JSON.stringify({ error: 'Unauthorized origin' }),
+        { 
+          status: 403,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     const { companyId, verificationNotes } = await req.json() as VerificationRequest;
     console.log(`Processing verification for company ID: ${companyId}`);
 
@@ -92,7 +99,6 @@ const handler = async (req: Request): Promise<Response> => {
         status: 200 
       }
     );
-
   } catch (error) {
     console.error('Error in verify-company function:', error);
     return new Response(
