@@ -3,7 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { MoveRequestForm } from "@/types/move-request";
-import { geocodeAddress, addressToJson } from "@/utils/address";
+import { addressToJson } from "@/utils/address";
+import { checkRateLimit, logRateLimit } from "./move-request/use-rate-limit";
+import { geocodeAddresses } from "./move-request/use-geocoding";
+import { sendConfirmationEmail, notifyCompanies } from "./move-request/use-notifications";
 
 export function useSubmitMoveRequest() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,30 +23,9 @@ export function useSubmitMoveRequest() {
     try {
       console.log("Starting form submission with data:", data);
 
-      // Get client IP for rate limiting
-      const { data: { ip_address } } = await supabase.functions.invoke('get-client-ip');
-      
       // Check rate limits
-      const { data: rateCheck, error: rateError } = await supabase.rpc(
-        'check_rate_limit',
-        { 
-          p_company_id: null, // null for anonymous users
-          p_limit_type: 'hourly'
-        }
-      );
-
-      if (rateError) {
-        throw rateError;
-      }
-
-      if (!rateCheck) {
-        toast({
-          title: "Rate Limit Exceeded",
-          description: "You've submitted too many requests. Please try again later.",
-          variant: "destructive"
-        });
-        return;
-      }
+      const isWithinLimits = await checkRateLimit();
+      if (!isWithinLimits) return;
 
       // Validate request
       const { data: validationResponse, error: validationError } = await supabase.functions.invoke(
@@ -51,7 +33,7 @@ export function useSubmitMoveRequest() {
         {
           body: { 
             moveRequest: data,
-            clientIp: ip_address
+            clientIp: null // Will be handled by edge function
           }
         }
       );
@@ -71,15 +53,13 @@ export function useSubmitMoveRequest() {
 
       const sanitizedData = validationResponse.data;
       
-      // Geocode pickup address
-      setIsGeocodingPickup(true);
-      const pickupCoords = await geocodeAddress(sanitizedData.pickupAddress);
-      setIsGeocodingPickup(false);
-
-      // Geocode delivery address
-      setIsGeocodingDelivery(true);
-      const deliveryCoords = await geocodeAddress(sanitizedData.deliveryAddress);
-      setIsGeocodingDelivery(false);
+      // Geocode addresses
+      const { pickupCoords, deliveryCoords } = await geocodeAddresses(
+        sanitizedData.pickupAddress,
+        sanitizedData.deliveryAddress,
+        setIsGeocodingPickup,
+        setIsGeocodingDelivery
+      );
 
       console.log("Geocoding results:", { pickupCoords, deliveryCoords });
 
@@ -108,32 +88,12 @@ export function useSubmitMoveRequest() {
         throw moveRequestError;
       }
 
-      // Send confirmation email
-      const { error: confirmationError } = await supabase.functions.invoke('send-confirmation-email', {
-        body: { 
-          customerEmail: sanitizedData.email,
-          customerName: sanitizedData.fullName
-        }
-      });
-
-      if (confirmationError) {
-        console.error("Error sending confirmation email:", confirmationError);
-      }
-
-      // Notify companies
-      const { error: notifyError } = await supabase.functions.invoke('notify-companies', {
-        body: { requestId: moveRequest.id }
-      });
-
-      if (notifyError) {
-        throw notifyError;
-      }
+      // Send notifications
+      await sendConfirmationEmail(sanitizedData.email, sanitizedData.fullName);
+      await notifyCompanies(moveRequest.id);
 
       // Log the rate limit usage
-      await supabase.from('rate_limit_logs').insert({
-        company_id: null, // null for anonymous users
-        limit_type: 'hourly'
-      });
+      await logRateLimit();
 
       setShowSuccess(true);
       toast({
