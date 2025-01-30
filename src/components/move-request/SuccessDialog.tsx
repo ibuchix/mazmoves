@@ -24,7 +24,7 @@ export function SuccessDialog({ isOpen, onClose }: SuccessDialogProps) {
         </DialogHeader>
         <div className="text-center space-y-4">
           <p className="text-gray-600">
-            Thank you for submitting your move request. We will contact you shortly with quotes from our verified moving companies.
+            Thank you for submitting your move request. Our verified moving companies within 25 miles of your pickup or delivery location will receive your request details and contact you directly with their best quotes. Expect calls from local movers shortly to discuss your requirements and pricing.
           </p>
           <Button onClick={onClose} className="bg-[#040480] hover:bg-[#1f3dd2] text-white">
             Close
