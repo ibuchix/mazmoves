@@ -12,7 +12,9 @@ export function AddressSection({ register, errors }: AddressSectionProps) {
       <h3 className="text-lg font-semibold text-[#040480]">Business Address</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="street" className="text-sm font-medium text-[#040480]">Street Address</Label>
+          <Label htmlFor="street" className="text-sm font-medium text-[#040480]">
+            Street Address <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="street"
             {...register("address.street", { required: "Street address is required" })}
@@ -23,7 +25,9 @@ export function AddressSection({ register, errors }: AddressSectionProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="city" className="text-sm font-medium text-[#040480]">City</Label>
+          <Label htmlFor="city" className="text-sm font-medium text-[#040480]">
+            City <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="city"
             {...register("address.city", { required: "City is required" })}
@@ -34,7 +38,9 @@ export function AddressSection({ register, errors }: AddressSectionProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="state" className="text-sm font-medium text-[#040480]">State/Province</Label>
+          <Label htmlFor="state" className="text-sm font-medium text-[#040480]">
+            State/Province <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="state"
             {...register("address.state", { required: "State is required" })}
@@ -45,7 +51,9 @@ export function AddressSection({ register, errors }: AddressSectionProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="zipCode" className="text-sm font-medium text-[#040480]">Postal Code</Label>
+          <Label htmlFor="zipCode" className="text-sm font-medium text-[#040480]">
+            Postal Code <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="zipCode"
             {...register("address.zipCode", { required: "Postal code is required" })}

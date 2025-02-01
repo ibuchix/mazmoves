@@ -21,7 +21,9 @@ export function CompanyDetailsSection({ register, errors }: CompanyDetailsSectio
       <h3 className="text-lg font-semibold text-[#040480]">Company Information</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="name" className="text-sm font-medium text-[#040480]">Company Name</Label>
+          <Label htmlFor="name" className="text-sm font-medium text-[#040480]">
+            Company Name <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="name"
             {...register("name", { required: "Company name is required" })}
@@ -33,8 +35,7 @@ export function CompanyDetailsSection({ register, errors }: CompanyDetailsSectio
 
         <div className="space-y-2">
           <Label htmlFor="registrationNumber" className="text-sm font-medium text-[#040480]">
-            Company Registration Number
-            <span className="text-red-500 ml-1">*</span>
+            Company Registration Number <span className="text-red-500">*</span>
           </Label>
           <Input
             id="registrationNumber"
@@ -47,8 +48,7 @@ export function CompanyDetailsSection({ register, errors }: CompanyDetailsSectio
 
         <div className="space-y-2">
           <Label htmlFor="country" className="text-sm font-medium text-[#040480]">
-            Country
-            <span className="text-red-500 ml-1">*</span>
+            Country <span className="text-red-500">*</span>
           </Label>
           <select 
             {...register("country", { required: "Country is required" })}

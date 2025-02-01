@@ -12,7 +12,9 @@ export function ContactDetailsSection({ register, errors }: ContactDetailsSectio
       <h3 className="text-lg font-semibold text-[#040480]">Contact Information</h3>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-sm font-medium text-[#040480]">Business Email</Label>
+          <Label htmlFor="email" className="text-sm font-medium text-[#040480]">
+            Business Email <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="email"
             type="email"
@@ -38,7 +40,9 @@ export function ContactDetailsSection({ register, errors }: ContactDetailsSectio
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-sm font-medium text-[#040480]">Password</Label>
+          <Label htmlFor="password" className="text-sm font-medium text-[#040480]">
+            Password <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="password"
             type="password"
@@ -56,7 +60,9 @@ export function ContactDetailsSection({ register, errors }: ContactDetailsSectio
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone" className="text-sm font-medium text-[#040480]">Business Phone</Label>
+          <Label htmlFor="phone" className="text-sm font-medium text-[#040480]">
+            Business Phone <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="phone"
             type="tel"
@@ -68,7 +74,9 @@ export function ContactDetailsSection({ register, errors }: ContactDetailsSectio
         </div>
 
         <div className="space-y-2 md:col-span-2">
-          <Label htmlFor="managerName" className="text-sm font-medium text-[#040480]">Account Manager Name</Label>
+          <Label htmlFor="managerName" className="text-sm font-medium text-[#040480]">
+            Account Manager Name <span className="text-red-500">*</span>
+          </Label>
           <Input
             id="managerName"
             {...register("managerName", { required: "Manager name is required" })}
