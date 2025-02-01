@@ -2245,6 +2245,12 @@ export type Database = {
         }
         Returns: unknown
       }
+      is_admin: {
+        Args: {
+          user_id: string
+        }
+        Returns: boolean
+      }
       is_country_allowed: {
         Args: {
           check_code: string
