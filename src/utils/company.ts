@@ -7,22 +7,6 @@ import { uploadCompanyDocument } from "@/utils/fileUpload";
 export async function createCompanyRecord(data: CompanyRegistrationForm, authUserId: string) {
   console.log('Starting company record creation for auth user:', authUserId);
 
-  const transitInsuranceInput = document.getElementById('transitInsurance') as HTMLInputElement;
-  const liabilityInsuranceInput = document.getElementById('liabilityInsurance') as HTMLInputElement;
-  
-  console.log('Checking insurance documents...');
-  if (!transitInsuranceInput?.files?.length || !liabilityInsuranceInput?.files?.length) {
-    throw new Error('Insurance documents are required');
-  }
-
-  // Upload documents in parallel
-  const [transitInsurancePath, liabilityInsurancePath] = await Promise.all([
-    uploadCompanyDocument(transitInsuranceInput.files[0], 'transit'),
-    uploadCompanyDocument(liabilityInsuranceInput.files[0], 'liability')
-  ]);
-
-  console.log('Insurance documents uploaded');
-
   // Create user record first
   const { error: userError } = await supabase
     .from('users')
@@ -45,26 +29,30 @@ export async function createCompanyRecord(data: CompanyRegistrationForm, authUse
   const coordinates = await geocodeAddress(data.address);
   console.log('Address geocoded:', coordinates);
 
+  // Prepare company data
+  const companyData = {
+    name: data.name,
+    registration_number: data.registrationNumber,
+    vat_number: data.vatNumber || null,
+    contact_email: data.email,
+    contact_phone: data.phone,
+    business_address: data.address,
+    manager_name: data.managerName,
+    country_code: data.country_code,
+    country_name: data.country_name,
+    latitude: coordinates?.latitude,
+    longitude: coordinates?.longitude,
+    auth_user_id: authUserId,
+    registration_status: 'pending'
+  };
+
   console.log('Creating company record in database...');
-  const { error: insertError } = await supabase
-    .from('companies')
-    .insert({
-      name: data.name,
-      registration_number: data.registrationNumber,
-      vat_number: data.vatNumber || null,
-      contact_email: data.email,
-      contact_phone: data.phone,
-      business_address: data.address,
-      manager_name: data.managerName,
-      insurance_docs: [
-        { type: 'transit', path: transitInsurancePath },
-        { type: 'liability', path: liabilityInsurancePath }
-      ],
-      latitude: coordinates.latitude,
-      longitude: coordinates.longitude,
-      auth_user_id: authUserId,
-      registration_status: 'pending'
-    });
+  const { error: insertError } = await supabase.functions.invoke('register-company', {
+    body: {
+      companyData,
+      insuranceDocs: data.insurance_docs
+    }
+  });
 
   if (insertError) {
     console.error('Company creation error:', insertError);
