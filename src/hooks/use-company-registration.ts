@@ -11,33 +11,25 @@ export function useCompanyRegistration() {
     try {
       setUploading(true);
       console.log('Starting registration process with data:', data);
-      
-      // Get file inputs
-      const transitInsuranceInput = document.getElementById('insurance_transit') as HTMLInputElement;
-      const liabilityInsuranceInput = document.getElementById('insurance_liability') as HTMLInputElement;
-      
-      if (!transitInsuranceInput?.files?.length || !liabilityInsuranceInput?.files?.length) {
-        throw new Error('Insurance documents are required');
-      }
 
-      // Create form data
-      const formData = new FormData();
-      formData.append('email', data.email);
-      formData.append('password', data.password);
-      formData.append('name', data.name);
-      formData.append('registrationNumber', data.registrationNumber);
-      formData.append('vatNumber', data.vatNumber || '');
-      formData.append('phone', data.phone);
-      formData.append('managerName', data.managerName);
-      formData.append('address', JSON.stringify(data.address));
-      formData.append('transitInsurance', transitInsuranceInput.files[0]);
-      formData.append('liabilityInsurance', liabilityInsuranceInput.files[0]);
-      formData.append('country', data.country);
+      // Create form data for API
+      const companyData = {
+        name: data.name,
+        registration_number: data.registrationNumber,
+        vat_number: data.vatNumber || null,
+        contact_email: data.email,
+        contact_phone: data.phone,
+        business_address: data.address,
+        manager_name: data.managerName,
+        country_code: data.country_code,
+        country_name: data.country_name,
+        registration_status: 'pending'
+      };
 
       // Call the registration edge function
-      const { data: response, error } = await supabase.functions.invoke('register-company', {
-        body: formData,
-      });
+      const { data: response, error } = await supabase
+        .from('companies')
+        .insert(companyData);
 
       if (error) {
         // Check if the error is about existing email
@@ -60,8 +52,6 @@ export function useCompanyRegistration() {
         errorMessage += "There was an issue creating your account. ";
       } else if (error.message.includes('already exists')) {
         errorMessage += "An account with this email already exists. Please use a different email or login. ";
-      } else if (error.message.includes('Insurance')) {
-        errorMessage += "Please ensure all required insurance documents are uploaded. ";
       } else if (error.message.includes('Registration is not available in this country')) {
         errorMessage += error.message;
       } else {
