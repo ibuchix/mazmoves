@@ -34,7 +34,9 @@ export function ContactDetailsSection({ register, errors, getValues }: ContactDe
                 }
               }
             })}
-            className="h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300"
+            className={`h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 ${
+              errors.email ? 'border-red-500' : ''
+            }`}
             placeholder="Enter business email address"
           />
           {errors.email && (
@@ -60,7 +62,9 @@ export function ContactDetailsSection({ register, errors, getValues }: ContactDe
                 return value === email || "Email addresses do not match";
               }
             })}
-            className="h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300"
+            className={`h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 ${
+              errors.confirmEmail ? 'border-red-500' : ''
+            }`}
             placeholder="Confirm business email address"
           />
           {errors.confirmEmail && (
@@ -83,7 +87,9 @@ export function ContactDetailsSection({ register, errors, getValues }: ContactDe
                   message: "Password must be at least 8 characters"
                 }
               })}
-              className="h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 pr-10"
+              className={`h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 pr-10 ${
+                errors.password ? 'border-red-500' : ''
+              }`}
               placeholder="Create a secure password"
             />
             <Button
@@ -114,7 +120,9 @@ export function ContactDetailsSection({ register, errors, getValues }: ContactDe
                   return value === password || "Passwords do not match";
                 }
               })}
-              className="h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 pr-10"
+              className={`h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 pr-10 ${
+                errors.confirmPassword ? 'border-red-500' : ''
+              }`}
               placeholder="Confirm your password"
             />
             <Button
@@ -140,7 +148,9 @@ export function ContactDetailsSection({ register, errors, getValues }: ContactDe
             id="phone"
             type="tel"
             {...register("phone", { required: "Phone number is required" })}
-            className="h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300"
+            className={`h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 ${
+              errors.phone ? 'border-red-500' : ''
+            }`}
             placeholder="Enter business phone number"
           />
           {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
@@ -153,7 +163,9 @@ export function ContactDetailsSection({ register, errors, getValues }: ContactDe
           <Input
             id="managerName"
             {...register("managerName", { required: "Manager name is required" })}
-            className="h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300"
+            className={`h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 ${
+              errors.managerName ? 'border-red-500' : ''
+            }`}
             placeholder="Enter account manager's full name"
           />
           {errors.managerName && <p className="text-red-500 text-sm mt-1">{errors.managerName.message}</p>}
