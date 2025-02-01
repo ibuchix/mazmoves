@@ -11,7 +11,7 @@ export function ContactInfoSection({ register, errors }: ContactInfoSectionProps
     <>
       <div className="space-y-2">
         <Label htmlFor="phone" className="text-sm font-medium text-[#040480]">
-          Business Phone <span className="text-red-500">*</span>
+          Phone Number <span className="text-red-500">*</span>
         </Label>
         <Input
           id="phone"
@@ -25,17 +25,17 @@ export function ContactInfoSection({ register, errors }: ContactInfoSectionProps
         {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>}
       </div>
 
-      <div className="space-y-2 md:col-span-2">
+      <div className="space-y-2">
         <Label htmlFor="managerName" className="text-sm font-medium text-[#040480]">
           Account Manager Name <span className="text-red-500">*</span>
         </Label>
         <Input
           id="managerName"
-          {...register("managerName", { required: "Manager name is required" })}
+          {...register("managerName", { required: "Account manager name is required" })}
           className={`h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 ${
             errors.managerName ? 'border-red-500' : ''
           }`}
-          placeholder="Enter account manager's full name"
+          placeholder="Enter account manager's name"
         />
         {errors.managerName && <p className="text-red-500 text-sm mt-1">{errors.managerName.message}</p>}
       </div>
