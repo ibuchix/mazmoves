@@ -204,7 +204,7 @@ export type Database = {
           business_address: Json
           contact_email: string
           contact_phone: string | null
-          country_code: string | null
+          country_code: string
           country_name: string | null
           created_at: string | null
           description: string | null
@@ -223,6 +223,7 @@ export type Database = {
           longitude: number | null
           manager_name: string | null
           name: string
+          password_hash: string | null
           public_access_token: string
           rating: number | null
           registration_date: string | null
@@ -242,7 +243,7 @@ export type Database = {
           business_address: Json
           contact_email: string
           contact_phone?: string | null
-          country_code?: string | null
+          country_code: string
           country_name?: string | null
           created_at?: string | null
           description?: string | null
@@ -261,6 +262,7 @@ export type Database = {
           longitude?: number | null
           manager_name?: string | null
           name: string
+          password_hash?: string | null
           public_access_token?: string
           rating?: number | null
           registration_date?: string | null
@@ -280,7 +282,7 @@ export type Database = {
           business_address?: Json
           contact_email?: string
           contact_phone?: string | null
-          country_code?: string | null
+          country_code?: string
           country_name?: string | null
           created_at?: string | null
           description?: string | null
@@ -299,6 +301,7 @@ export type Database = {
           longitude?: number | null
           manager_name?: string | null
           name?: string
+          password_hash?: string | null
           public_access_token?: string
           rating?: number | null
           registration_date?: string | null

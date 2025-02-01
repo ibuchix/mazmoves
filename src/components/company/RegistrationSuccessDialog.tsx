@@ -37,12 +37,12 @@ export function RegistrationSuccessDialog({
             <div className="flex flex-col items-center gap-2">
               <Mail className="h-12 w-12 text-[#d2491f]" />
               <p>
-                Please check your email to confirm your address. We've sent you a confirmation link.
+                Please check your email to confirm your address and complete your registration process.
               </p>
             </div>
             <div className="rounded-lg bg-blue-50 p-4 text-sm text-[#040480]">
               <p>
-                After confirming your email, you can log in to your dashboard. Our team will review your application and verify your details shortly.
+                After confirming your email, you'll receive instructions about uploading your insurance documents and completing your company verification.
               </p>
             </div>
           </DialogDescription>
