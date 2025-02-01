@@ -13,8 +13,9 @@ export interface CompanyRegistrationForm {
   };
   managerName: string;
   country: string; // JSON string containing {code: string, name: string}
-  country_code?: string; // Added for database compatibility
-  country_name?: string; // Added for database compatibility
+  country_code?: string;
+  country_name?: string;
+  insurance_docs?: Record<string, File>;
 }
 
 export interface CompanyDashboardStats {
