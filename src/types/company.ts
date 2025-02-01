@@ -13,6 +13,8 @@ export interface CompanyRegistrationForm {
   };
   managerName: string;
   country: string; // JSON string containing {code: string, name: string}
+  country_code?: string; // Added for database compatibility
+  country_name?: string; // Added for database compatibility
   [key: string]: any; // More flexible index signature to handle both File and other types
 }
 
