@@ -11,7 +11,7 @@ import { CompanyRegistrationForm } from "@/types/company";
 import { useState, useEffect } from "react";
 
 export function RegisterCompanyForm() {
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<CompanyRegistrationForm>();
+  const { register, handleSubmit, watch, getValues, formState: { errors } } = useForm<CompanyRegistrationForm>();
   const { uploading, showSuccessDialog, setShowSuccessDialog, handleRegistration } = useCompanyRegistration();
   const [selectedCountry, setSelectedCountry] = useState<{code: string, name: string}>();
   
@@ -24,7 +24,7 @@ export function RegisterCompanyForm() {
       try {
         const countryData = JSON.parse(countryValue);
         setSelectedCountry(countryData);
-        console.log("Selected country:", countryData); // Debug log
+        console.log("Selected country:", countryData);
       } catch (e) {
         console.error('Error parsing country data:', e);
       }
@@ -46,7 +46,7 @@ export function RegisterCompanyForm() {
           <div className="space-y-8">
             <CompanyDetailsSection register={register} errors={errors} />
             <Separator className="my-8" />
-            <ContactDetailsSection register={register} errors={errors} />
+            <ContactDetailsSection register={register} errors={errors} getValues={getValues} />
             <Separator className="my-8" />
             <AddressSection register={register} errors={errors} />
           </div>
