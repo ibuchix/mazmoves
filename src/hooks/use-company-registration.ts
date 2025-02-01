@@ -13,15 +13,12 @@ export function useCompanyRegistration() {
       console.log('Starting registration process with data:', data);
       
       // Get file inputs
-      const transitInsuranceInput = document.getElementById('transitInsurance') as HTMLInputElement;
-      const liabilityInsuranceInput = document.getElementById('liabilityInsurance') as HTMLInputElement;
+      const transitInsuranceInput = document.getElementById('insurance_transit') as HTMLInputElement;
+      const liabilityInsuranceInput = document.getElementById('insurance_liability') as HTMLInputElement;
       
       if (!transitInsuranceInput?.files?.length || !liabilityInsuranceInput?.files?.length) {
         throw new Error('Insurance documents are required');
       }
-
-      // Parse country data
-      const countryData = JSON.parse(data.country);
 
       // Create form data
       const formData = new FormData();
@@ -35,8 +32,7 @@ export function useCompanyRegistration() {
       formData.append('address', JSON.stringify(data.address));
       formData.append('transitInsurance', transitInsuranceInput.files[0]);
       formData.append('liabilityInsurance', liabilityInsuranceInput.files[0]);
-      formData.append('countryCode', countryData.code);
-      formData.append('countryName', countryData.name);
+      formData.append('country', data.country);
 
       // Call the registration edge function
       const { data: response, error } = await supabase.functions.invoke('register-company', {
@@ -46,19 +42,15 @@ export function useCompanyRegistration() {
       if (error) {
         // Check if the error is about existing email
         if (error.message.includes('already exists')) {
-          toast.error("This email is already registered. Please use a different email or login to your existing account.", {
-            duration: 6000
-          });
+          toast.error("This email is already registered. Please use a different email or login to your existing account.");
           return;
         }
         throw error;
       }
 
-      // Show success immediately
+      // Show success dialog and toast
       setShowSuccessDialog(true);
-      toast.success("Registration successful! Please check your email to confirm your address.", {
-        duration: 6000
-      });
+      toast.success("Registration successful! Please check your email to confirm your address.");
 
     } catch (error: any) {
       console.error("Registration error:", error);
@@ -76,9 +68,7 @@ export function useCompanyRegistration() {
         errorMessage += "Please try again or contact support if the issue persists. ";
       }
       
-      toast.error(errorMessage, {
-        duration: 6000
-      });
+      toast.error(errorMessage);
     } finally {
       setUploading(false);
     }
