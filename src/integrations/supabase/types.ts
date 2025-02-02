@@ -82,13 +82,6 @@ export type Database = {
             foreignKeyName: "au_companies_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: true
-            referencedRelation: "company_documents_view"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "au_companies_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
             referencedRelation: "scheduled_moves_view"
             referencedColumns: ["company_id"]
           },
@@ -185,13 +178,6 @@ export type Database = {
             foreignKeyName: "ca_companies_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: true
-            referencedRelation: "company_documents_view"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "ca_companies_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
             referencedRelation: "scheduled_moves_view"
             referencedColumns: ["company_id"]
           },
@@ -214,7 +200,6 @@ export type Database = {
           encrypted_vat_number: string | null
           free_assignments_remaining: number | null
           id: string
-          insurance_docs: Json | null
           is_active: boolean | null
           is_verified: boolean | null
           last_payment_date: string | null
@@ -253,7 +238,6 @@ export type Database = {
           encrypted_vat_number?: string | null
           free_assignments_remaining?: number | null
           id?: string
-          insurance_docs?: Json | null
           is_active?: boolean | null
           is_verified?: boolean | null
           last_payment_date?: string | null
@@ -292,7 +276,6 @@ export type Database = {
           encrypted_vat_number?: string | null
           free_assignments_remaining?: number | null
           id?: string
-          insurance_docs?: Json | null
           is_active?: boolean | null
           is_verified?: boolean | null
           last_payment_date?: string | null
@@ -316,68 +299,6 @@ export type Database = {
           verification_notes?: string | null
         }
         Relationships: []
-      }
-      company_insurance_documents: {
-        Row: {
-          company_id: string | null
-          created_at: string | null
-          document_path: string
-          expires_at: string | null
-          id: string
-          insurance_type_id: string | null
-          updated_at: string | null
-          verified: boolean | null
-        }
-        Insert: {
-          company_id?: string | null
-          created_at?: string | null
-          document_path: string
-          expires_at?: string | null
-          id?: string
-          insurance_type_id?: string | null
-          updated_at?: string | null
-          verified?: boolean | null
-        }
-        Update: {
-          company_id?: string | null
-          created_at?: string | null
-          document_path?: string
-          expires_at?: string | null
-          id?: string
-          insurance_type_id?: string | null
-          updated_at?: string | null
-          verified?: boolean | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "company_insurance_documents_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "company_insurance_documents_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "company_documents_view"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "company_insurance_documents_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "scheduled_moves_view"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "company_insurance_documents_insurance_type_id_fkey"
-            columns: ["insurance_type_id"]
-            isOneToOne: false
-            referencedRelation: "insurance_types"
-            referencedColumns: ["id"]
-          },
-        ]
       }
       company_invoices: {
         Row: {
@@ -447,13 +368,6 @@ export type Database = {
             foreignKeyName: "company_invoices_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
-            referencedRelation: "company_documents_view"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "company_invoices_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
             referencedRelation: "scheduled_moves_view"
             referencedColumns: ["company_id"]
           },
@@ -505,13 +419,6 @@ export type Database = {
             foreignKeyName: "company_payments_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
-            referencedRelation: "company_documents_view"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "company_payments_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
             referencedRelation: "scheduled_moves_view"
             referencedColumns: ["company_id"]
           },
@@ -557,13 +464,6 @@ export type Database = {
             foreignKeyName: "document_access_logs_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
-            referencedRelation: "company_documents_view"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "document_access_logs_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
             referencedRelation: "scheduled_moves_view"
             referencedColumns: ["company_id"]
           },
@@ -573,13 +473,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "document_access_logs_company_id_fkey1"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "company_documents_view"
-            referencedColumns: ["company_id"]
           },
           {
             foreignKeyName: "document_access_logs_company_id_fkey1"
@@ -648,41 +541,10 @@ export type Database = {
             foreignKeyName: "gb_companies_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: true
-            referencedRelation: "company_documents_view"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "gb_companies_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
             referencedRelation: "scheduled_moves_view"
             referencedColumns: ["company_id"]
           },
         ]
-      }
-      insurance_types: {
-        Row: {
-          country_code: string
-          created_at: string | null
-          description: string | null
-          id: string
-          name: string
-        }
-        Insert: {
-          country_code: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          name: string
-        }
-        Update: {
-          country_code?: string
-          created_at?: string | null
-          description?: string | null
-          id?: string
-          name?: string
-        }
-        Relationships: []
       }
       invoice_items: {
         Row: {
@@ -786,13 +648,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "move_assignments_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "company_documents_view"
-            referencedColumns: ["company_id"]
           },
           {
             foreignKeyName: "move_assignments_company_id_fkey"
@@ -920,13 +775,6 @@ export type Database = {
             foreignKeyName: "notification_logs_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
-            referencedRelation: "company_documents_view"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "notification_logs_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
             referencedRelation: "scheduled_moves_view"
             referencedColumns: ["company_id"]
           },
@@ -955,13 +803,6 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "companies"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nz_companies_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
-            referencedRelation: "company_documents_view"
-            referencedColumns: ["company_id"]
           },
           {
             foreignKeyName: "nz_companies_company_id_fkey"
@@ -1025,13 +866,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "rate_limit_logs_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "company_documents_view"
-            referencedColumns: ["company_id"]
           },
           {
             foreignKeyName: "rate_limit_logs_company_id_fkey"
@@ -1163,13 +997,6 @@ export type Database = {
             foreignKeyName: "us_companies_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: true
-            referencedRelation: "company_documents_view"
-            referencedColumns: ["company_id"]
-          },
-          {
-            foreignKeyName: "us_companies_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
             referencedRelation: "scheduled_moves_view"
             referencedColumns: ["company_id"]
           },
@@ -1246,39 +1073,6 @@ export type Database = {
           rejected_companies: number | null
           total_companies: number | null
           verified_companies: number | null
-        }
-        Relationships: []
-      }
-      company_documents_view: {
-        Row: {
-          company_id: string | null
-          company_name: string | null
-          contact_email: string | null
-          insurance_docs: Json | null
-          is_verified: boolean | null
-          registration_status: string | null
-          verification_date: string | null
-          verification_notes: string | null
-        }
-        Insert: {
-          company_id?: string | null
-          company_name?: string | null
-          contact_email?: string | null
-          insurance_docs?: Json | null
-          is_verified?: boolean | null
-          registration_status?: string | null
-          verification_date?: string | null
-          verification_notes?: string | null
-        }
-        Update: {
-          company_id?: string | null
-          company_name?: string | null
-          contact_email?: string | null
-          insurance_docs?: Json | null
-          is_verified?: boolean | null
-          registration_status?: string | null
-          verification_date?: string | null
-          verification_notes?: string | null
         }
         Relationships: []
       }

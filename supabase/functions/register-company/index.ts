@@ -1,7 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { validateRegistrationData } from './validation.ts'
-import { uploadInsuranceDocuments } from './file-handler.ts'
 import { handleAuthentication } from './auth-service.ts'
 import { createCompanyRecord, createUserRecord } from './company-service.ts'
 import { checkRateLimits, recordSuccessfulAttempt } from './rate-limit-service.ts'
@@ -52,14 +51,6 @@ serve(async (req) => {
       existingUsers
     );
 
-    // Upload insurance documents
-    const { transitPath, liabilityPath } = await uploadInsuranceDocuments(
-      supabase,
-      registrationData.transitInsurance,
-      registrationData.liabilityInsurance,
-      userId
-    );
-
     // Create user record
     await createUserRecord(
       supabase,
@@ -78,10 +69,6 @@ serve(async (req) => {
       contact_phone: registrationData.phone,
       business_address: registrationData.address,
       manager_name: registrationData.managerName,
-      insurance_docs: [
-        { type: 'transit', path: transitPath },
-        { type: 'liability', path: liabilityPath }
-      ],
       latitude: registrationData.latitude,
       longitude: registrationData.longitude,
       auth_user_id: userId,
