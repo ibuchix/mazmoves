@@ -1,64 +1,61 @@
 import { useState } from "react";
-import { toast } from "sonner";
 import { CompanyRegistrationForm } from "@/types/company";
-import { supabase } from "@/integrations/supabase/client";
+import { createCompanyRecord } from "@/utils/company";
+import { useToast } from "@/hooks/use-toast";
 
 export function useCompanyRegistration() {
   const [uploading, setUploading] = useState(false);
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [rateLimitExceeded, setRateLimitExceeded] = useState(false);
+  const { toast } = useToast();
 
   const handleRegistration = async (data: CompanyRegistrationForm) => {
+    setError(null);
+    setUploading(true);
+    
     try {
-      setUploading(true);
-      console.log('Starting registration process with data:', data);
-
-      // Create form data for API
-      const companyData = {
-        name: data.name,
-        registration_number: data.registrationNumber,
-        vat_number: data.vatNumber || null,
-        contact_email: data.email,
-        contact_phone: data.phone,
-        business_address: data.address,
-        manager_name: data.managerName,
-        country_code: data.country_code,
-        country_name: data.country_name,
-        registration_status: 'pending'
-      };
-
-      // Call the registration edge function
-      const { data: response, error } = await supabase.functions.invoke('register-company', {
-        body: { companyData }
-      });
-
-      if (error) {
-        // Check if the error is about existing email
-        if (error.message.includes('already exists')) {
-          toast.error("This email is already registered. Please use a different email or login to your existing account.");
-          return;
-        }
-        throw error;
-      }
-
-      // Show success dialog and toast
+      console.log('Starting company registration process...');
+      const response = await createCompanyRecord(data);
+      
+      console.log('Registration successful:', response);
       setShowSuccessDialog(true);
-      toast.success("Registration successful! Please check your email to confirm your address.");
-
-    } catch (error: any) {
-      console.error("Registration error:", error);
-      let errorMessage = "Registration failed. ";
+      toast({
+        title: "Registration Successful",
+        description: "Please check your email to verify your account.",
+      });
+    } catch (err: any) {
+      console.error('Registration error:', err);
       
-      if (error.message.includes('auth')) {
-        errorMessage += "There was an issue creating your account. ";
-      } else if (error.message.includes('already exists')) {
-        errorMessage += "An account with this email already exists. Please use a different email or login. ";
-      } else if (error.message.includes('Registration is not available in this country')) {
-        errorMessage += error.message;
-      } else {
-        errorMessage += "Please try again or contact support if the issue persists. ";
+      if (err.message?.includes('rate limit')) {
+        setRateLimitExceeded(true);
+        setError('rate_limit');
+        toast({
+          variant: "destructive",
+          title: "Rate Limit Exceeded",
+          description: "Too many registration attempts. Please try again later.",
+        });
+        
+        // Reset rate limit after 5 minutes
+        setTimeout(() => {
+          setRateLimitExceeded(false);
+          setError(null);
+        }, 5 * 60 * 1000);
       }
-      
-      toast.error(errorMessage);
+      else if (err.message?.includes('already exists')) {
+        setError('duplicate_email');
+      }
+      else if (err.message?.includes('country')) {
+        setError('country_not_supported');
+      }
+      else {
+        setError('unknown');
+        toast({
+          variant: "destructive",
+          title: "Registration Failed",
+          description: "An error occurred during registration. Please try again.",
+        });
+      }
     } finally {
       setUploading(false);
     }
@@ -68,6 +65,8 @@ export function useCompanyRegistration() {
     uploading,
     showSuccessDialog,
     setShowSuccessDialog,
-    handleRegistration
+    handleRegistration,
+    error,
+    rateLimitExceeded
   };
 }
