@@ -61,7 +61,6 @@ serve(async (req) => {
       .from('companies')
       .select('id, contact_email')
       .eq('contact_email', companyData.contact_email.toLowerCase())
-      .is('deleted_at', null)
       .single();
 
     console.log('Existing company check result:', { existingCompany, queryError });
