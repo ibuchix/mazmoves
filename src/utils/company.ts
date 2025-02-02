@@ -6,17 +6,16 @@ import { geocodeAddress } from "@/utils/geocoding";
 export async function createCompanyRecord(data: CompanyRegistrationForm, authUserId: string) {
   console.log('Starting company record creation for auth user:', authUserId);
 
-  // Create user record first
-  const { error: userError } = await supabase
-    .from('users')
-    .insert({
-      id: authUserId,
-      email: data.email,
-      full_name: data.managerName,
-      role: 'company',
-      phone: data.phone,
-      address: data.address
-    });
+  // Create user record using the secure function
+  const { error: userError } = await supabase.rpc(
+    'create_new_user',
+    {
+      user_id: authUserId,
+      user_email: data.email,
+      user_full_name: data.managerName,
+      user_role: 'company'
+    }
+  );
 
   if (userError) {
     console.error('Error creating user record:', userError);

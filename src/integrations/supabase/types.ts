@@ -1499,6 +1499,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      create_new_user: {
+        Args: {
+          user_id: string
+          user_email: string
+          user_full_name: string
+          user_role?: Database["public"]["Enums"]["user_role"]
+        }
+        Returns: undefined
+      }
       decrypt_sensitive_data: {
         Args: {
           encrypted_data: string
