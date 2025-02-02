@@ -2,6 +2,7 @@ import { useState } from "react";
 import { CompanyRegistrationForm } from "@/types/company";
 import { createCompanyRecord } from "@/utils/company";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useCompanyRegistration() {
   const [uploading, setUploading] = useState(false);
