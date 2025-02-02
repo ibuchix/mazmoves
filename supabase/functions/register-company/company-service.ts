@@ -1,24 +1,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-interface CompanyData {
-  name: string;
-  registration_number: string;
-  contact_email: string;
-  contact_phone: string;
-  business_address: any;
-  manager_name: string;
-  latitude?: number;
-  longitude?: number;
-  auth_user_id: string;
-  registration_status: string;
-  country_code: string;
-  country_name: string;
-  vat_number?: string | null;
-}
-
 export async function createCompanyRecord(
   supabase: any,
-  companyData: CompanyData
+  companyData: any
 ) {
   console.log('Creating company record with data:', {
     ...companyData,
