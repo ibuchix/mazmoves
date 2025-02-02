@@ -46,37 +46,21 @@ export async function createCompanyRecord(data: CompanyRegistrationForm, authUse
   };
 
   console.log('Creating company record in database...');
-  const { error: insertError } = await supabase.functions.invoke('register-company', {
-    body: {
-      companyData
-    }
+  const { data: response, error: insertError } = await supabase.functions.invoke('register-company', {
+    body: { companyData }
   });
 
   if (insertError) {
     console.error('Company creation error:', insertError);
+    // Check for specific error types
+    if (insertError.message.includes('already exists')) {
+      throw new Error('A company with this email already exists');
+    } else if (insertError.message.includes('validation')) {
+      throw new Error('Invalid company data provided');
+    }
     throw insertError;
   }
   
-  console.log('Company record created successfully');
-}
-
-export async function sendWelcomeEmail(email: string, companyName: string): Promise<{ success: boolean }> {
-  try {
-    const { error } = await supabase.functions.invoke('send-welcome-email', {
-      body: { 
-        email,
-        companyName
-      }
-    });
-
-    if (error) {
-      console.error("Error sending welcome email:", error);
-      return { success: false };
-    }
-
-    return { success: true };
-  } catch (error) {
-    console.error("Error sending welcome email:", error);
-    return { success: false };
-  }
+  console.log('Company record created successfully:', response);
+  return response;
 }

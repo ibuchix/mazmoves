@@ -17,13 +17,15 @@ serve(async (req) => {
   }
 
   try {
-    const formData = await req.formData()
-    const registrationData = validateRegistrationData(formData);
+    console.log('Starting company registration process...');
+    const { companyData } = await req.json();
     
-    if (!registrationData) {
+    if (!companyData) {
+      console.error('Missing company data in request');
       return new Response(
         JSON.stringify({ 
-          error: 'Missing required fields',
+          error: 'Invalid request data',
+          details: 'Company data is required',
           status: 400
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
@@ -35,63 +37,65 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Get client IP address
+    // Get client IP address for rate limiting
     const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
-    console.log('Checking rate limit for IP:', clientIP)
+    console.log('Processing request from IP:', clientIP)
 
     // Check rate limits
-    await checkRateLimits(supabase, clientIP, registrationData.email);
-
-    // Check existing users and handle authentication
-    const { data: existingUsers } = await supabase.auth.admin.listUsers();
-    const { userId } = await handleAuthentication(
-      supabase, 
-      registrationData.email, 
-      registrationData.password,
-      existingUsers
-    );
-
-    // Create user record
-    await createUserRecord(
-      supabase,
-      userId,
-      registrationData.email,
-      registrationData.managerName,
-      registrationData.phone,
-      registrationData.address
-    );
+    try {
+      await checkRateLimits(supabase, clientIP, companyData.contact_email);
+    } catch (error) {
+      console.error('Rate limit exceeded:', error);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Too many requests',
+          details: 'Please try again later',
+          status: 429
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 429 }
+      )
+    }
 
     // Create company record
-    await createCompanyRecord(supabase, {
-      name: registrationData.companyName,
-      registration_number: registrationData.registrationNumber,
-      contact_email: registrationData.email,
-      contact_phone: registrationData.phone,
-      business_address: registrationData.address,
-      manager_name: registrationData.managerName,
-      latitude: registrationData.latitude,
-      longitude: registrationData.longitude,
-      auth_user_id: userId,
-      registration_status: 'pending'
-    });
+    try {
+      await createCompanyRecord(supabase, companyData);
+    } catch (error) {
+      console.error('Error creating company record:', error);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Company creation failed',
+          details: error.message,
+          status: 400
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      )
+    }
 
     // Record successful registration
-    await recordSuccessfulAttempt(supabase, clientIP, registrationData.email);
+    await recordSuccessfulAttempt(supabase, clientIP, companyData.contact_email);
 
     // Generate and send confirmation email
-    const confirmData = await generateConfirmationLink(supabase, registrationData.email);
-    await sendWelcomeEmail(
-      supabase,
-      registrationData.email,
-      registrationData.companyName,
-      confirmData.properties.action_link
-    );
+    try {
+      const confirmData = await generateConfirmationLink(supabase, companyData.contact_email);
+      await sendWelcomeEmail(
+        supabase,
+        companyData.contact_email,
+        companyData.name,
+        confirmData.properties.action_link
+      );
+    } catch (error) {
+      console.error('Error sending welcome email:', error);
+      // Don't fail the registration if email fails
+    }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Company registered successfully',
-        userId: userId 
+        company: {
+          name: companyData.name,
+          email: companyData.contact_email
+        }
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )
