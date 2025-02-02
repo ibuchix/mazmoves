@@ -15,7 +15,6 @@ export interface CompanyRegistrationForm {
   country: string; // JSON string containing {code: string, name: string}
   country_code?: string;
   country_name?: string;
-  insurance_docs?: Record<string, File>;
 }
 
 export interface CompanyDashboardStats {

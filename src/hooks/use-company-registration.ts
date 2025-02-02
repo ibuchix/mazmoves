@@ -23,16 +23,12 @@ export function useCompanyRegistration() {
         manager_name: data.managerName,
         country_code: data.country_code,
         country_name: data.country_name,
-        registration_status: 'pending',
-        insurance_docs: [] // Will be populated by the edge function
+        registration_status: 'pending'
       };
 
       // Call the registration edge function
       const { data: response, error } = await supabase.functions.invoke('register-company', {
-        body: {
-          companyData,
-          insuranceDocs: data.insurance_docs
-        }
+        body: { companyData }
       });
 
       if (error) {

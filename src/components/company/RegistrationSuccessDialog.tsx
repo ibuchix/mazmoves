@@ -42,7 +42,7 @@ export function RegistrationSuccessDialog({
             </div>
             <div className="rounded-lg bg-blue-50 p-4 text-sm text-[#040480]">
               <p>
-                After confirming your email, you'll receive instructions about uploading your insurance documents and completing your company verification.
+                After confirming your email, you will receive instructions about uploading your insurance documents for company verification.
               </p>
             </div>
           </DialogDescription>
