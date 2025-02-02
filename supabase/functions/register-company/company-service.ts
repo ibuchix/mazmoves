@@ -10,6 +10,18 @@ export async function createCompanyRecord(
     registration_number: '[REDACTED]'
   });
 
+  // Check for existing admin company
+  const { data: existingAdmin } = await supabase
+    .from('companies')
+    .select('id')
+    .eq('contact_email', companyData.contact_email.toLowerCase())
+    .eq('registration_status', 'admin')
+    .single();
+
+  if (existingAdmin) {
+    throw new Error('A company with this email already exists');
+  }
+
   const { error: companyError } = await supabase.rpc('create_company_bypass_rls', {
     company_data: companyData
   });

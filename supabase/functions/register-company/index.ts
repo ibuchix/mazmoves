@@ -56,25 +56,15 @@ serve(async (req) => {
       )
     }
 
-    // Check for existing company with same email - with detailed logging
-    const { data: existingCompany, error: queryError } = await supabase
+    // First clean up any existing non-admin company records with this email
+    const { error: deleteError } = await supabase
       .from('companies')
-      .select('id, contact_email')
+      .delete()
       .eq('contact_email', companyData.contact_email.toLowerCase())
-      .single();
+      .neq('registration_status', 'admin');
 
-    console.log('Existing company check result:', { existingCompany, queryError });
-
-    if (existingCompany) {
-      console.error('Duplicate company found:', existingCompany);
-      return new Response(
-        JSON.stringify({ 
-          error: 'Company creation failed',
-          details: 'A company with this email already exists',
-          status: 400
-        }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
-      )
+    if (deleteError) {
+      console.error('Error cleaning up existing company:', deleteError);
     }
 
     // Create company record
