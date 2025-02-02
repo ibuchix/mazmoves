@@ -56,7 +56,7 @@ serve(async (req) => {
       )
     }
 
-    // Check for existing company with same email
+    // Check for existing company with same email - with detailed logging
     const { data: existingCompany, error: queryError } = await supabase
       .from('companies')
       .select('id, contact_email')
@@ -80,6 +80,7 @@ serve(async (req) => {
     // Create company record
     try {
       await createCompanyRecord(supabase, companyData);
+      console.log('Company record created successfully');
     } catch (error) {
       console.error('Error creating company record:', error);
       return new Response(
