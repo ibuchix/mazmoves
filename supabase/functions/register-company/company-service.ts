@@ -7,7 +7,6 @@ interface CompanyData {
   contact_phone: string;
   business_address: any;
   manager_name: string;
-  insurance_docs: any[];
   latitude?: number;
   longitude?: number;
   auth_user_id: string;

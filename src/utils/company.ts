@@ -2,7 +2,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { CompanyRegistrationForm } from "@/types/company";
 import { createAuthUser } from "@/utils/auth";
 import { geocodeAddress } from "@/utils/geocoding";
-import { uploadCompanyDocument } from "@/utils/fileUpload";
 
 export async function createCompanyRecord(data: CompanyRegistrationForm, authUserId: string) {
   console.log('Starting company record creation for auth user:', authUserId);
@@ -49,8 +48,7 @@ export async function createCompanyRecord(data: CompanyRegistrationForm, authUse
   console.log('Creating company record in database...');
   const { error: insertError } = await supabase.functions.invoke('register-company', {
     body: {
-      companyData,
-      insuranceDocs: data.insurance_docs
+      companyData
     }
   });
 
