@@ -16,8 +16,23 @@ export function useCompanyRegistration() {
     
     try {
       console.log('Starting company registration process...');
-      // Pass null as authUserId since it will be created during registration
-      const response = await createCompanyRecord(data, null);
+      // Create auth user first
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            full_name: data.managerName,
+            role: 'company'
+          }
+        }
+      });
+
+      if (authError) throw authError;
+      if (!authData.user) throw new Error('No user returned from auth signup');
+
+      // Now create the company record with the new auth user ID
+      const response = await createCompanyRecord(data, authData.user.id);
       
       console.log('Registration successful:', response);
       setShowSuccessDialog(true);

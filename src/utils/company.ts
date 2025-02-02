@@ -3,7 +3,7 @@ import { CompanyRegistrationForm } from "@/types/company";
 import { createAuthUser } from "@/utils/auth";
 import { geocodeAddress } from "@/utils/geocoding";
 
-export async function createCompanyRecord(data: CompanyRegistrationForm, authUserId: string) {
+export async function createCompanyRecord(data: CompanyRegistrationForm, authUserId: string | null) {
   console.log('Starting company record creation for auth user:', authUserId);
 
   // Create user record using the secure function
