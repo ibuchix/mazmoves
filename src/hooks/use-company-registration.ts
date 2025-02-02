@@ -32,6 +32,9 @@ export function useCompanyRegistration() {
       if (authError) throw authError;
       if (!authData.user) throw new Error('No user returned from auth signup');
 
+      // Wait a short moment to ensure the auth user is fully created
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
       // Now create the company record with the new auth user ID
       const response = await createCompanyRecord(data, authData.user.id);
       
@@ -61,9 +64,19 @@ export function useCompanyRegistration() {
       }
       else if (err.message?.includes('already exists')) {
         setError('duplicate_email');
+        toast({
+          variant: "destructive",
+          title: "Registration Failed",
+          description: "An account with this email already exists.",
+        });
       }
       else if (err.message?.includes('country')) {
         setError('country_not_supported');
+        toast({
+          variant: "destructive",
+          title: "Registration Failed",
+          description: "Registration is not available in your country.",
+        });
       }
       else {
         setError('unknown');
