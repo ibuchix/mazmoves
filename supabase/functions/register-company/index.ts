@@ -56,17 +56,6 @@ serve(async (req) => {
       )
     }
 
-    // First clean up any existing non-admin company records with this email
-    const { error: deleteError } = await supabase
-      .from('companies')
-      .delete()
-      .eq('contact_email', companyData.contact_email.toLowerCase())
-      .neq('registration_status', 'admin');
-
-    if (deleteError) {
-      console.error('Error cleaning up existing company:', deleteError);
-    }
-
     // Create company record
     try {
       await createCompanyRecord(supabase, companyData);

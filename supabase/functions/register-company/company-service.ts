@@ -22,6 +22,18 @@ export async function createCompanyRecord(
     throw new Error('A company with this email already exists');
   }
 
+  // Clean up any existing non-admin company records
+  const { error: cleanupError } = await supabase
+    .from('companies')
+    .delete()
+    .eq('contact_email', companyData.contact_email.toLowerCase())
+    .neq('registration_status', 'admin');
+
+  if (cleanupError) {
+    console.error('Error cleaning up existing company:', cleanupError);
+    // Continue anyway as this is not critical
+  }
+
   const { error: companyError } = await supabase.rpc('create_company_bypass_rls', {
     company_data: companyData
   });
