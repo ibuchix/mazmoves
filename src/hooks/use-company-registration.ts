@@ -16,7 +16,8 @@ export function useCompanyRegistration() {
     
     try {
       console.log('Starting company registration process...');
-      const response = await createCompanyRecord(data);
+      // Pass null as authUserId since it will be created during registration
+      const response = await createCompanyRecord(data, null);
       
       console.log('Registration successful:', response);
       setShowSuccessDialog(true);
