@@ -8,7 +8,7 @@ import { RegistrationSuccessDialog } from "./RegistrationSuccessDialog";
 import { useCompanyRegistration } from "@/hooks/company/use-company-registration";
 import { CompanyRegistrationForm } from "@/types/company";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { RegistrationAlert } from "./form/registration/RegistrationAlert";
 import { RegistrationSubmitButton } from "./form/registration/RegistrationSubmitButton";
 
@@ -23,13 +23,10 @@ export function RegisterCompanyForm() {
     rateLimitExceeded 
   } = useCompanyRegistration();
   const [selectedCountry, setSelectedCountry] = useState<{code: string, name: string}>();
-  const { toast } = useToast();
 
   const onSubmit = async (data: CompanyRegistrationForm) => {
     if (rateLimitExceeded) {
-      toast({
-        variant: "destructive",
-        title: "Rate Limit Exceeded",
+      toast.error("Rate Limit Exceeded", {
         description: "Please wait a few minutes before trying again."
       });
       return;

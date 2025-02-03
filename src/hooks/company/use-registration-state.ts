@@ -1,10 +1,10 @@
 import { useState } from "react";
 
 export function useRegistrationState() {
-  const [uploading, setUploading] = useState(false);
-  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [uploading, setUploading] = useState<boolean>(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [rateLimitExceeded, setRateLimitExceeded] = useState(false);
+  const [rateLimitExceeded, setRateLimitExceeded] = useState<boolean>(false);
 
   const resetError = () => setError(null);
   const resetRateLimit = () => setRateLimitExceeded(false);
