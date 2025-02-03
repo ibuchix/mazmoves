@@ -2366,6 +2366,15 @@ export type Database = {
         }
         Returns: undefined
       }
+      register_company: {
+        Args: {
+          company_data: Json
+          auth_user_id: string
+          user_email: string
+          user_full_name: string
+        }
+        Returns: string
+      }
       send_verification_email: {
         Args: {
           company_name: string

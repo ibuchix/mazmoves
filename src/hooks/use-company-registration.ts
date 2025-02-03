@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { CompanyRegistrationForm } from "@/types/company";
-import { createCompanyRecord } from "@/utils/company";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -35,8 +34,26 @@ export function useCompanyRegistration() {
       // Wait a short moment to ensure the auth user is fully created
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Now create the company record with the new auth user ID
-      const response = await createCompanyRecord(data, authData.user.id);
+      // Now register the company using our new function
+      const { data: response, error: registerError } = await supabase.rpc(
+        'register_company',
+        {
+          company_data: {
+            name: data.name,
+            registration_number: data.registrationNumber,
+            contact_phone: data.phone,
+            business_address: data.address,
+            manager_name: data.managerName,
+            country_code: data.country_code,
+            country_name: data.country_name,
+            latitude: null, // Will be set by geocoding trigger
+            longitude: null // Will be set by geocoding trigger
+          },
+          auth_user_id: authData.user.id,
+          user_email: data.email,
+          user_full_name: data.managerName
+        }
+      );
       
       console.log('Registration successful:', response);
       setShowSuccessDialog(true);
