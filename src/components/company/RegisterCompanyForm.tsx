@@ -6,7 +6,7 @@ import { ContactDetailsSection } from "./form/ContactDetailsSection";
 import { AddressSection } from "./form/AddressSection";
 import { Separator } from "@/components/ui/separator";
 import { RegistrationSuccessDialog } from "./RegistrationSuccessDialog";
-import { useCompanyRegistration } from "@/hooks/use-company-registration";
+import { useCompanyRegistration } from "@/hooks/company/use-company-registration";
 import { CompanyRegistrationForm } from "@/types/company";
 import { useState, useEffect } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -15,7 +15,14 @@ import { useToast } from "@/hooks/use-toast";
 
 export function RegisterCompanyForm() {
   const { register, handleSubmit, watch, getValues, formState: { errors } } = useForm<CompanyRegistrationForm>();
-  const { uploading, showSuccessDialog, setShowSuccessDialog, handleRegistration, error, rateLimitExceeded } = useCompanyRegistration();
+  const { 
+    uploading, 
+    showSuccessDialog, 
+    setShowSuccessDialog, 
+    handleRegistration, 
+    error, 
+    rateLimitExceeded 
+  } = useCompanyRegistration();
   const [selectedCountry, setSelectedCountry] = useState<{code: string, name: string}>();
   const { toast } = useToast();
   
@@ -28,7 +35,6 @@ export function RegisterCompanyForm() {
       try {
         const countryData = JSON.parse(countryValue);
         setSelectedCountry(countryData);
-        console.log("Selected country:", countryData);
       } catch (e) {
         console.error('Error parsing country data:', e);
       }
