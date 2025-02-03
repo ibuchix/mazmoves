@@ -34,7 +34,7 @@ export function useCompanyRegistration() {
       // Wait a short moment to ensure the auth user is fully created
       await new Promise(resolve => setTimeout(resolve, 1000));
 
-      // Now register the company using our new function
+      // Register the company using our secure function
       const { data: response, error: registerError } = await supabase.rpc(
         'register_company',
         {
@@ -55,7 +55,23 @@ export function useCompanyRegistration() {
         }
       );
       
-      console.log('Registration successful:', response);
+      if (registerError) throw registerError;
+      
+      // Verify registration completion
+      const { data: verificationData, error: verificationError } = await supabase.rpc(
+        'verify_registration_completion',
+        {
+          p_auth_user_id: authData.user.id,
+          p_company_id: response.company_id
+        }
+      );
+
+      if (verificationError) throw verificationError;
+      if (!verificationData) {
+        throw new Error('Registration verification failed - some components were not created properly');
+      }
+
+      console.log('Registration successful and verified:', response);
       setShowSuccessDialog(true);
       toast({
         title: "Registration Successful",

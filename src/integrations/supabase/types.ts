@@ -4319,6 +4319,13 @@ export type Database = {
         }
         Returns: string
       }
+      verify_registration_completion: {
+        Args: {
+          p_auth_user_id: string
+          p_company_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       assignment_status: "active" | "completed" | "cancelled" | "accepted"
