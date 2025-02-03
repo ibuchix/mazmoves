@@ -29,24 +29,7 @@ export function useCompanyRegistration() {
     
     try {
       console.log('Starting company registration process...');
-      // Check rate limit before proceeding
-      const { data: rateLimitCheck, error: rateLimitError } = await supabase.rpc(
-        'check_registration_limit',
-        { 
-          check_ip: 'client',
-          check_email: data.email 
-        }
-      );
-
-      if (rateLimitError || !rateLimitCheck) {
-        setRateLimitExceeded(true);
-        setError(REGISTRATION_ERROR_CODES.RATE_LIMIT);
-        toast.error("Rate Limit Exceeded", {
-          description: "Too many registration attempts. Please try again later."
-        });
-        return;
-      }
-
+      
       // Create auth user first
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: data.email,
@@ -87,13 +70,6 @@ export function useCompanyRegistration() {
       );
       
       if (registerError) throw registerError;
-      
-      // Record successful registration attempt
-      await supabase.rpc('record_registration_attempt', {
-        attempt_ip: 'client',
-        attempt_email: data.email,
-        was_successful: true
-      });
 
       console.log('Registration successful:', response);
       setShowSuccessDialog(true);
@@ -102,13 +78,6 @@ export function useCompanyRegistration() {
       });
     } catch (err: any) {
       console.error('Registration error:', err);
-      
-      // Record failed attempt
-      await supabase.rpc('record_registration_attempt', {
-        attempt_ip: 'client',
-        attempt_email: data.email,
-        was_successful: false
-      });
       
       const registrationError = handleRegistrationError(err);
       setError(registrationError.code);
