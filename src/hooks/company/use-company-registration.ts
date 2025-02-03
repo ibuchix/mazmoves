@@ -1,13 +1,11 @@
 import { CompanyRegistrationForm } from "@/types/company";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useRegistrationState } from "./use-registration-state";
 import { registerCompany } from "@/services/company/registration.service";
-import { verifyRegistration } from "@/services/company/verification.service";
 import { validateRegistration } from "./use-registration-validation";
-import { handleRegistrationError, REGISTRATION_ERROR_CODES } from "@/utils/error/registration-errors";
+import { REGISTRATION_ERROR_CODES, handleRegistrationError } from "@/utils/error/registration-errors";
 
 export function useCompanyRegistration() {
-  const { toast } = useToast();
   const {
     uploading,
     setUploading,
@@ -21,9 +19,7 @@ export function useCompanyRegistration() {
 
   const handleRegistration = async (data: CompanyRegistrationForm) => {
     if (rateLimitExceeded) {
-      toast({
-        variant: "destructive",
-        title: "Rate Limit Exceeded",
+      toast.error("Rate Limit Exceeded", {
         description: "Please wait a few minutes before trying again."
       });
       return;
@@ -39,13 +35,9 @@ export function useCompanyRegistration() {
       // Register company
       const { authData, response } = await registerCompany(data);
 
-      // Verify registration completion
-      await verifyRegistration(authData.user.id, response.company_id);
-
-      console.log('Registration successful and verified:', response);
+      console.log('Registration successful:', response);
       setShowSuccessDialog(true);
-      toast({
-        title: "Registration Successful",
+      toast.success("Registration Successful", {
         description: "Please check your email to verify your account.",
       });
     } catch (err: any) {
@@ -63,9 +55,7 @@ export function useCompanyRegistration() {
         }, 5 * 60 * 1000);
       }
 
-      toast({
-        variant: "destructive",
-        title: "Registration Failed",
+      toast.error("Registration Failed", {
         description: registrationError.message
       });
     } finally {
