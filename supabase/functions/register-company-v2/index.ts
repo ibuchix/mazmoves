@@ -4,6 +4,54 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from "../_shared/cors.ts"
 import { verifyOrigin } from "../_shared/verify-origin.ts"
 
+interface CompanyRegistrationData {
+  name: string
+  registration_number: string
+  contact_email: string
+  contact_phone: string
+  business_address: string
+  manager_name: string
+  password: string
+  auth_user_id?: string
+  latitude?: number | null
+  longitude?: number | null
+}
+
+function validateCompanyData(data: Partial<CompanyRegistrationData>): { isValid: boolean; errors: string[] } {
+  const errors: string[] = [];
+
+  // Required field checks
+  if (!data.name?.trim()) errors.push("Company name is required");
+  if (!data.registration_number?.trim()) errors.push("Registration number is required");
+  if (!data.contact_email?.trim()) errors.push("Contact email is required");
+  if (!data.contact_phone?.trim()) errors.push("Contact phone is required");
+  if (!data.business_address?.trim()) errors.push("Business address is required");
+  if (!data.manager_name?.trim()) errors.push("Manager name is required");
+  if (!data.password?.trim()) errors.push("Password is required");
+
+  // Email format validation
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (data.contact_email && !emailRegex.test(data.contact_email)) {
+    errors.push("Invalid email format");
+  }
+
+  // Password strength validation
+  if (data.password && data.password.length < 8) {
+    errors.push("Password must be at least 8 characters long");
+  }
+
+  // Phone number format validation (basic check)
+  const phoneRegex = /^\+?[\d\s-]{8,}$/;
+  if (data.contact_phone && !phoneRegex.test(data.contact_phone)) {
+    errors.push("Invalid phone number format");
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -23,15 +71,33 @@ serve(async (req) => {
       )
     }
 
-    console.log('Starting company registration process v2...');
-    const { companyData } = await req.json();
-    
-    if (!companyData) {
-      console.error('Registration failed: Missing company data in request');
+    // Parse and validate request body
+    let companyData: Partial<CompanyRegistrationData>;
+    try {
+      const body = await req.json();
+      companyData = body.companyData;
+    } catch (error) {
+      console.error('Registration failed: Invalid JSON payload', { error });
       return new Response(
         JSON.stringify({ 
-          error: 'Invalid request data',
-          details: 'Company data is required'
+          error: 'Invalid request format',
+          details: 'Request body must be valid JSON'
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400 
+        }
+      )
+    }
+
+    // Validate company data
+    const { isValid, errors } = validateCompanyData(companyData);
+    if (!isValid) {
+      console.error('Registration failed: Validation errors', { errors });
+      return new Response(
+        JSON.stringify({ 
+          error: 'Validation failed',
+          details: errors
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -57,7 +123,7 @@ serve(async (req) => {
     const { data: existingCompany, error: checkError } = await supabase
       .from('companies')
       .select('id')
-      .eq('contact_email', companyData.contact_email.toLowerCase())
+      .eq('contact_email', companyData.contact_email?.toLowerCase())
       .single();
 
     if (checkError) {
