@@ -17,24 +17,25 @@ export async function registerCompany(data: CompanyRegistrationForm) {
       zipCode: data.address.zipCode
     };
 
+    // Ensure all required fields are included in the correct structure
+    const companyData = {
+      name: data.name,
+      registration_number: data.registrationNumber,
+      contact_email: data.email,
+      contact_phone: data.phone,
+      business_address: formattedAddress,
+      manager_name: data.managerName,
+      password: data.password,
+      auth_user_id: null, // This will be set by the edge function
+      latitude: null,
+      longitude: null
+    };
+
     // Register the company with all required fields
     const { data: response, error: registerError } = await supabase.functions.invoke(
       'register-company-v2',
       {
-        body: {
-          companyData: {
-            name: data.name,
-            registration_number: data.registrationNumber,
-            contact_email: data.email,
-            contact_phone: data.phone,
-            business_address: formattedAddress,
-            manager_name: data.managerName,
-            password: data.password, // Ensure password is included
-            auth_user_id: null, // This will be set by the edge function
-            latitude: null,
-            longitude: null
-          }
-        }
+        body: { companyData }
       }
     );
     
