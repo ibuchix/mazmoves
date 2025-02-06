@@ -17,6 +17,43 @@ interface CompanyRegistrationData {
   longitude?: number | null
 }
 
+const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
+
+async function sendWelcomeEmail(email: string, companyName: string) {
+  try {
+    const emailResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+      },
+      body: JSON.stringify({
+        from: 'MAZ Moves <notifications@mazmoves.com>',
+        to: [email],
+        subject: 'Welcome to MAZ Moves - Please Confirm Your Email',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h1 style="color: #040480;">Welcome to MAZ Moves, ${companyName}!</h1>
+            <p>Thank you for registering with MAZ Moves. We're excited to have you on board!</p>
+            <p>Your application is currently under review by our team. We'll verify your details and get back to you shortly.</p>
+            <p style="margin-top: 20px;">Best regards,<br>MAZ Moves Team</p>
+          </div>
+        `
+      }),
+    });
+
+    if (!emailResponse.ok) {
+      throw new Error(`Failed to send welcome email: ${await emailResponse.text()}`);
+    }
+
+    console.log('Welcome email sent successfully');
+    return true;
+  } catch (error) {
+    console.error('Error sending welcome email:', error);
+    return false;
+  }
+}
+
 function validateCompanyData(data: Partial<CompanyRegistrationData>): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
 
@@ -255,11 +292,23 @@ serve(async (req) => {
       )
     }
 
+    // Only send welcome email after successful registration
+    console.log('Sending welcome email...');
+    const emailSent = await sendWelcomeEmail(
+      companyData.contact_email,
+      companyData.name
+    );
+
+    if (!emailSent) {
+      console.warn('Welcome email could not be sent, but registration was successful');
+    }
+
     // Log successful registration
     console.log('Company registration completed successfully:', {
       companyName: companyData.name,
       userId: authData.user.id,
-      registrationComplete: new Date().toISOString()
+      registrationComplete: new Date().toISOString(),
+      welcomeEmailSent: emailSent
     });
 
     return new Response(
