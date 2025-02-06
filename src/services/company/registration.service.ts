@@ -3,33 +3,12 @@ import { supabase } from "@/integrations/supabase/client";
 import { CompanyRegistrationForm } from "@/types/company";
 
 export async function registerCompany(data: CompanyRegistrationForm) {
-  console.log('Starting company registration process...');
+  console.log('Starting company registration process...', { 
+    name: data.name, 
+    email: data.email 
+  });
   
   try {
-    // Create auth user first
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: data.email,
-      password: data.password,
-      options: {
-        data: {
-          full_name: data.managerName,
-          role: 'company'
-        }
-      }
-    });
-
-    if (authError) {
-      console.error('Auth error:', authError);
-      throw authError;
-    }
-    
-    if (!authData.user) {
-      throw new Error('No user returned from auth signup');
-    }
-
-    // Wait a short moment to ensure the auth user is fully created
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
     // Format the address object correctly
     const formattedAddress = {
       street: data.address.street,
@@ -38,7 +17,7 @@ export async function registerCompany(data: CompanyRegistrationForm) {
       zipCode: data.address.zipCode
     };
 
-    // Register the company using the new v2 endpoint
+    // Register the company with all required fields
     const { data: response, error: registerError } = await supabase.functions.invoke(
       'register-company-v2',
       {
@@ -50,9 +29,10 @@ export async function registerCompany(data: CompanyRegistrationForm) {
             contact_phone: data.phone,
             business_address: formattedAddress,
             manager_name: data.managerName,
-            auth_user_id: authData.user.id,
-            latitude: null, // Will be set by geocoding trigger
-            longitude: null // Will be set by geocoding trigger
+            password: data.password, // Ensure password is included
+            auth_user_id: null, // This will be set by the edge function
+            latitude: null,
+            longitude: null
           }
         }
       }
@@ -64,7 +44,7 @@ export async function registerCompany(data: CompanyRegistrationForm) {
     }
 
     console.log('Registration successful:', response);
-    return { authData, response };
+    return response;
 
   } catch (error: any) {
     console.error('Registration error:', error);
