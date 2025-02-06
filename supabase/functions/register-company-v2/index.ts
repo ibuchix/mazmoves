@@ -9,7 +9,12 @@ interface CompanyRegistrationData {
   registration_number: string
   contact_email: string
   contact_phone: string
-  business_address: string
+  business_address: {
+    street: string
+    city: string
+    state: string
+    zipCode: string
+  }
   manager_name: string
   password: string
   auth_user_id?: string
@@ -25,7 +30,13 @@ function validateCompanyData(data: Partial<CompanyRegistrationData>): { isValid:
   if (!data.registration_number?.trim()) errors.push("Registration number is required");
   if (!data.contact_email?.trim()) errors.push("Contact email is required");
   if (!data.contact_phone?.trim()) errors.push("Contact phone is required");
-  if (!data.business_address?.trim()) errors.push("Business address is required");
+  if (!data.business_address) errors.push("Business address is required");
+  else {
+    if (!data.business_address.street?.trim()) errors.push("Street address is required");
+    if (!data.business_address.city?.trim()) errors.push("City is required");
+    if (!data.business_address.state?.trim()) errors.push("State is required");
+    if (!data.business_address.zipCode?.trim()) errors.push("Zip code is required");
+  }
   if (!data.manager_name?.trim()) errors.push("Manager name is required");
   if (!data.password?.trim()) errors.push("Password is required");
 
