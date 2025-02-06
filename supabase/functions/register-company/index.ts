@@ -34,6 +34,26 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
+    // First check if company already exists
+    const { data: existingCompany } = await supabase
+      .from('companies')
+      .select('id')
+      .eq('contact_email', companyData.contact_email.toLowerCase())
+      .single();
+
+    if (existingCompany) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Registration failed',
+          details: 'A company with this email already exists'
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400 
+        }
+      )
+    }
+
     // Create auth user first
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: companyData.contact_email,
@@ -46,7 +66,7 @@ serve(async (req) => {
       console.error('Auth error:', authError);
       return new Response(
         JSON.stringify({ 
-          error: 'Authentication error',
+          error: 'Registration failed',
           details: authError.message
         }),
         { 
@@ -59,8 +79,8 @@ serve(async (req) => {
     if (!authData.user) {
       return new Response(
         JSON.stringify({ 
-          error: 'User creation failed',
-          details: 'No user returned from auth signup'
+          error: 'Registration failed',
+          details: 'No user data returned from auth signup'
         }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -93,6 +113,10 @@ serve(async (req) => {
       
     if (registerError) {
       console.error('Registration error:', registerError);
+      
+      // Delete the auth user if company creation failed
+      await supabase.auth.admin.deleteUser(authData.user.id);
+      
       return new Response(
         JSON.stringify({ 
           error: 'Registration failed',
