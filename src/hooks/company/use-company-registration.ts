@@ -30,7 +30,7 @@ export function useCompanyRegistration() {
     try {
       console.log('Starting company registration process...');
       
-      // Call the register-company edge function
+      // Call the register-company edge function with authorization
       const { data: response, error: registerError } = await supabase.functions.invoke(
         'register-company',
         {
@@ -44,8 +44,11 @@ export function useCompanyRegistration() {
               manager_name: data.managerName,
               country_code: data.country_code,
               country_name: data.country_name,
-              password: data.password // Will be handled securely by the edge function
+              password: data.password
             }
+          },
+          headers: {
+            Authorization: `Bearer ${process.env.VITE_SUPABASE_ANON_KEY}`
           }
         }
       );
