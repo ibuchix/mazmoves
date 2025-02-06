@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { CompanyRegistrationForm } from "@/types/company";
 
@@ -29,6 +30,14 @@ export async function registerCompany(data: CompanyRegistrationForm) {
     // Wait a short moment to ensure the auth user is fully created
     await new Promise(resolve => setTimeout(resolve, 1000));
 
+    // Format the address object correctly
+    const formattedAddress = {
+      street: data.address.street,
+      city: data.address.city,
+      state: data.address.state,
+      zipCode: data.address.zipCode
+    };
+
     // Register the company using the new v2 endpoint
     const { data: response, error: registerError } = await supabase.functions.invoke(
       'register-company-v2',
@@ -39,7 +48,7 @@ export async function registerCompany(data: CompanyRegistrationForm) {
             registration_number: data.registrationNumber,
             contact_email: data.email,
             contact_phone: data.phone,
-            business_address: data.address,
+            business_address: formattedAddress,
             manager_name: data.managerName,
             auth_user_id: authData.user.id,
             latitude: null, // Will be set by geocoding trigger
