@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { corsHeaders } from "../_shared/cors.ts"
@@ -12,6 +13,10 @@ serve(async (req) => {
   try {
     // Verify request origin
     if (!verifyOrigin(req)) {
+      console.error('Registration failed: Invalid origin', {
+        origin: req.headers.get('origin'),
+        referer: req.headers.get('referer')
+      });
       return new Response(
         JSON.stringify({ error: 'Invalid origin' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -22,6 +27,7 @@ serve(async (req) => {
     const { companyData } = await req.json();
     
     if (!companyData) {
+      console.error('Registration failed: Missing company data in request');
       return new Response(
         JSON.stringify({ 
           error: 'Invalid request data',
@@ -34,19 +40,34 @@ serve(async (req) => {
       )
     }
 
+    // Log incoming registration data (excluding sensitive info)
+    console.log('Processing registration for:', {
+      companyName: companyData.name,
+      email: companyData.contact_email,
+      hasPassword: !!companyData.password,
+      registrationNumber: companyData.registration_number
+    });
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
     // First check if company already exists
-    const { data: existingCompany } = await supabase
+    const { data: existingCompany, error: checkError } = await supabase
       .from('companies')
       .select('id')
       .eq('contact_email', companyData.contact_email.toLowerCase())
       .single();
 
+    if (checkError) {
+      console.error('Error checking existing company:', checkError);
+    }
+
     if (existingCompany) {
+      console.error('Registration failed: Company email already exists', {
+        email: companyData.contact_email
+      });
       return new Response(
         JSON.stringify({ 
           error: 'Registration failed',
@@ -60,6 +81,7 @@ serve(async (req) => {
     }
 
     // Create auth user first
+    console.log('Creating auth user...');
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: companyData.contact_email,
       password: companyData.password,
@@ -68,7 +90,11 @@ serve(async (req) => {
     });
 
     if (authError) {
-      console.error('Auth error:', authError);
+      console.error('Auth creation failed:', {
+        error: authError.message,
+        email: companyData.contact_email,
+        details: authError
+      });
       return new Response(
         JSON.stringify({ 
           error: 'Registration failed',
@@ -82,6 +108,7 @@ serve(async (req) => {
     }
 
     if (!authData.user) {
+      console.error('Auth creation failed: No user data returned');
       return new Response(
         JSON.stringify({ 
           error: 'Registration failed',
@@ -94,7 +121,13 @@ serve(async (req) => {
       )
     }
 
+    console.log('Auth user created successfully:', {
+      userId: authData.user.id,
+      email: authData.user.email
+    });
+
     // Register the company using RPC function
+    console.log('Creating company record...');
     const { data: response, error: registerError } = await supabase.rpc(
       'register_company',
       {
@@ -113,10 +146,22 @@ serve(async (req) => {
     );
       
     if (registerError) {
-      console.error('Registration error:', registerError);
+      console.error('Company creation failed:', {
+        error: registerError.message,
+        companyName: companyData.name,
+        details: registerError
+      });
       
       // Delete the auth user if company creation failed
-      await supabase.auth.admin.deleteUser(authData.user.id);
+      console.log('Rolling back auth user creation...');
+      const { error: deleteError } = await supabase.auth.admin.deleteUser(authData.user.id);
+      
+      if (deleteError) {
+        console.error('Failed to rollback auth user:', {
+          error: deleteError.message,
+          userId: authData.user.id
+        });
+      }
       
       return new Response(
         JSON.stringify({ 
@@ -129,6 +174,11 @@ serve(async (req) => {
         }
       )
     }
+
+    console.log('Company registration completed successfully:', {
+      companyName: companyData.name,
+      userId: authData.user.id
+    });
 
     return new Response(
       JSON.stringify({ 
@@ -146,7 +196,10 @@ serve(async (req) => {
     )
 
   } catch (error) {
-    console.error('Registration error:', error)
+    console.error('Unexpected registration error:', {
+      error: error.message,
+      stack: error.stack
+    });
     return new Response(
       JSON.stringify({ 
         error: 'Registration failed', 
