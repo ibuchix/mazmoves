@@ -86,7 +86,7 @@ export type Database = {
       }
       companies: {
         Row: {
-          auth_user_id: string | null
+          auth_user_id: string
           billing_status: string | null
           business_address: Json
           contact_email: string
@@ -124,7 +124,7 @@ export type Database = {
           welcome_email_sent_at: string | null
         }
         Insert: {
-          auth_user_id?: string | null
+          auth_user_id: string
           billing_status?: string | null
           business_address: Json
           contact_email: string
@@ -162,7 +162,7 @@ export type Database = {
           welcome_email_sent_at?: string | null
         }
         Update: {
-          auth_user_id?: string | null
+          auth_user_id?: string
           billing_status?: string | null
           business_address?: Json
           contact_email?: string
