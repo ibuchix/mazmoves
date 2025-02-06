@@ -16,7 +16,6 @@ export function useCompanyRegistration() {
     try {
       console.log('Starting company registration process...');
       
-      // Call the register-company edge function with anon key
       const { data: response, error: registerError } = await supabase.functions.invoke(
         'register-company',
         {
@@ -28,16 +27,21 @@ export function useCompanyRegistration() {
               contact_phone: data.phone,
               business_address: data.address,
               manager_name: data.managerName,
-              country_code: data.country_code,
-              country_name: data.country_name,
               password: data.password
             }
           }
         }
       );
 
-      if (registerError) throw registerError;
-      if (!response?.success) throw new Error('Registration failed');
+      if (registerError) {
+        console.error('Registration error:', registerError);
+        throw registerError;
+      }
+
+      if (!response?.success) {
+        console.error('Registration failed:', response);
+        throw new Error('Registration failed');
+      }
 
       console.log('Registration successful:', response);
       setShowSuccessDialog(true);
@@ -47,35 +51,39 @@ export function useCompanyRegistration() {
     } catch (err: any) {
       console.error('Registration error:', err);
       
-      if (err.message?.includes('rate limit')) {
+      // Parse error message from response if available
+      let errorMessage = err.message;
+      try {
+        if (err.message && err.message.includes('{')) {
+          const errorBody = JSON.parse(err.message);
+          errorMessage = errorBody.details || errorBody.error || err.message;
+        }
+      } catch (e) {
+        // If parsing fails, use original message
+      }
+      
+      if (errorMessage?.includes('rate limit')) {
         setRateLimitExceeded(true);
         setError('rate_limit');
         toast.error("Rate Limit Exceeded", {
           description: "Too many registration attempts. Please try again later."
         });
         
-        // Reset rate limit after 5 minutes
         setTimeout(() => {
           setRateLimitExceeded(false);
           setError(null);
         }, 5 * 60 * 1000);
       }
-      else if (err.message?.includes('already exists')) {
+      else if (errorMessage?.includes('already exists')) {
         setError('duplicate_email');
         toast.error("Registration Failed", {
           description: "An account with this email already exists."
         });
       }
-      else if (err.message?.includes('country')) {
-        setError('country_not_supported');
-        toast.error("Registration Failed", {
-          description: "Registration is not available in your country."
-        });
-      }
       else {
         setError('unknown');
         toast.error("Registration Failed", {
-          description: "An error occurred during registration. Please try again."
+          description: errorMessage || "An error occurred during registration. Please try again."
         });
       }
     } finally {
