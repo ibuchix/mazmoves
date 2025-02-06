@@ -32,12 +32,22 @@ export function useCompanyRegistration() {
               country_name: data.country_name,
               password: data.password
             }
+          },
+          headers: {
+            Authorization: `Bearer ${supabase.supabaseKey}`
           }
         }
       );
 
-      if (registerError) throw registerError;
-      if (!response?.success) throw new Error('Registration failed');
+      if (registerError) {
+        console.error('Registration error:', registerError);
+        throw registerError;
+      }
+      
+      if (!response?.success) {
+        console.error('Registration failed:', response);
+        throw new Error('Registration failed');
+      }
 
       console.log('Registration successful:', response);
       setShowSuccessDialog(true);
