@@ -2,16 +2,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UseFormRegister, UseFormWatch } from "react-hook-form";
 import { CompanyRegistrationForm } from "@/types/company";
-import { CountrySelector } from "./registration/CountrySelector";
 
 interface CompanyDetailsSectionProps {
   register: UseFormRegister<CompanyRegistrationForm>;
   watch: UseFormWatch<CompanyRegistrationForm>;
   errors: any;
-  onCountryChange: (country: { code: string; name: string } | undefined) => void;
 }
 
-export function CompanyDetailsSection({ register, watch, errors, onCountryChange }: CompanyDetailsSectionProps) {
+export function CompanyDetailsSection({ register, errors }: CompanyDetailsSectionProps) {
   return (
     <div className="space-y-6">
       <h3 className="text-lg font-semibold text-[#040480]">Company Information</h3>
@@ -40,19 +38,6 @@ export function CompanyDetailsSection({ register, watch, errors, onCountryChange
             placeholder="Enter official registration number"
           />
           {errors.registrationNumber && <p className="text-red-500 text-sm mt-1">{errors.registrationNumber.message}</p>}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="country" className="text-sm font-medium text-[#040480]">
-            Country <span className="text-sm text-muted-foreground font-normal">(Optional)</span>
-          </Label>
-          <CountrySelector
-            register={register}
-            watch={watch}
-            errors={errors}
-            onCountryChange={onCountryChange}
-          />
-          {errors.country && <p className="text-red-500 text-sm mt-1">{errors.country.message}</p>}
         </div>
 
         <div className="space-y-2">

@@ -7,7 +7,6 @@ import { Separator } from "@/components/ui/separator";
 import { RegistrationSuccessDialog } from "./RegistrationSuccessDialog";
 import { useCompanyRegistration } from "@/hooks/company/use-company-registration";
 import { CompanyRegistrationForm } from "@/types/company";
-import { useState } from "react";
 import { toast } from "sonner";
 import { RegistrationAlert } from "./form/registration/RegistrationAlert";
 import { RegistrationSubmitButton } from "./form/registration/RegistrationSubmitButton";
@@ -22,7 +21,6 @@ export function RegisterCompanyForm() {
     error, 
     rateLimitExceeded 
   } = useCompanyRegistration();
-  const [selectedCountry, setSelectedCountry] = useState<{code: string, name: string}>();
 
   const onSubmit = async (data: CompanyRegistrationForm) => {
     if (rateLimitExceeded) {
@@ -32,10 +30,6 @@ export function RegisterCompanyForm() {
       return;
     }
 
-    if (selectedCountry) {
-      data.country_code = selectedCountry.code;
-      data.country_name = selectedCountry.name;
-    }
     await handleRegistration(data);
   };
 
@@ -50,7 +44,6 @@ export function RegisterCompanyForm() {
               register={register} 
               errors={errors} 
               watch={watch}
-              onCountryChange={setSelectedCountry}
             />
             <Separator className="my-8" />
             <ContactDetailsSection register={register} errors={errors} getValues={getValues} />

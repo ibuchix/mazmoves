@@ -9,33 +9,6 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      allowed_countries: {
-        Row: {
-          country_code: string
-          country_name: string
-          created_at: string | null
-          id: string
-          is_active: boolean | null
-          updated_at: string | null
-        }
-        Insert: {
-          country_code: string
-          country_name: string
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          updated_at?: string | null
-        }
-        Update: {
-          country_code?: string
-          country_name?: string
-          created_at?: string | null
-          id?: string
-          is_active?: boolean | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       app_settings: {
         Row: {
           key: string
@@ -50,42 +23,6 @@ export type Database = {
           value?: string
         }
         Relationships: []
-      }
-      au_companies: {
-        Row: {
-          abn: string | null
-          company_id: string
-          created_at: string | null
-          state: string | null
-        }
-        Insert: {
-          abn?: string | null
-          company_id: string
-          created_at?: string | null
-          state?: string | null
-        }
-        Update: {
-          abn?: string | null
-          company_id?: string
-          created_at?: string | null
-          state?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "au_companies_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "au_companies_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
-            referencedRelation: "scheduled_moves_view"
-            referencedColumns: ["company_id"]
-          },
-        ]
       }
       auth_rate_limits: {
         Row: {
@@ -147,42 +84,6 @@ export type Database = {
         }
         Relationships: []
       }
-      ca_companies: {
-        Row: {
-          business_number: string | null
-          company_id: string
-          created_at: string | null
-          province: string | null
-        }
-        Insert: {
-          business_number?: string | null
-          company_id: string
-          created_at?: string | null
-          province?: string | null
-        }
-        Update: {
-          business_number?: string | null
-          company_id?: string
-          created_at?: string | null
-          province?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "ca_companies_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "ca_companies_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
-            referencedRelation: "scheduled_moves_view"
-            referencedColumns: ["company_id"]
-          },
-        ]
-      }
       companies: {
         Row: {
           auth_user_id: string | null
@@ -190,8 +91,6 @@ export type Database = {
           business_address: Json
           contact_email: string
           contact_phone: string | null
-          country_code: string | null
-          country_name: string | null
           created_at: string | null
           description: string | null
           email_verified: boolean | null
@@ -228,8 +127,6 @@ export type Database = {
           business_address: Json
           contact_email: string
           contact_phone?: string | null
-          country_code?: string | null
-          country_name?: string | null
           created_at?: string | null
           description?: string | null
           email_verified?: boolean | null
@@ -266,8 +163,6 @@ export type Database = {
           business_address?: Json
           contact_email?: string
           contact_phone?: string | null
-          country_code?: string | null
-          country_name?: string | null
           created_at?: string | null
           description?: string | null
           email_verified?: boolean | null
@@ -510,42 +405,6 @@ export type Database = {
         }
         Relationships: []
       }
-      gb_companies: {
-        Row: {
-          companies_house_number: string | null
-          company_id: string
-          created_at: string | null
-          vat_registered: boolean | null
-        }
-        Insert: {
-          companies_house_number?: string | null
-          company_id: string
-          created_at?: string | null
-          vat_registered?: boolean | null
-        }
-        Update: {
-          companies_house_number?: string | null
-          company_id?: string
-          created_at?: string | null
-          vat_registered?: boolean | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "gb_companies_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "gb_companies_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
-            referencedRelation: "scheduled_moves_view"
-            referencedColumns: ["company_id"]
-          },
-        ]
-      }
       invoice_items: {
         Row: {
           amount: number
@@ -780,39 +639,6 @@ export type Database = {
           },
         ]
       }
-      nz_companies: {
-        Row: {
-          company_id: string
-          created_at: string | null
-          nzbn: string | null
-        }
-        Insert: {
-          company_id: string
-          created_at?: string | null
-          nzbn?: string | null
-        }
-        Update: {
-          company_id?: string
-          created_at?: string | null
-          nzbn?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "nz_companies_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "nz_companies_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
-            referencedRelation: "scheduled_moves_view"
-            referencedColumns: ["company_id"]
-          },
-        ]
-      }
       rate_limit_configs: {
         Row: {
           created_at: string | null
@@ -965,42 +791,6 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
-      }
-      us_companies: {
-        Row: {
-          company_id: string
-          created_at: string | null
-          ein: string | null
-          state: string | null
-        }
-        Insert: {
-          company_id: string
-          created_at?: string | null
-          ein?: string | null
-          state?: string | null
-        }
-        Update: {
-          company_id?: string
-          created_at?: string | null
-          ein?: string | null
-          state?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "us_companies_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "us_companies_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: true
-            referencedRelation: "scheduled_moves_view"
-            referencedColumns: ["company_id"]
-          },
-        ]
       }
       users: {
         Row: {
