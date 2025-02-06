@@ -32,9 +32,6 @@ export function useCompanyRegistration() {
               country_name: data.country_name,
               password: data.password
             }
-          },
-          headers: {
-            Authorization: `Bearer ${supabase.supabaseKey}`
           }
         }
       );
