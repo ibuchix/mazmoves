@@ -76,8 +76,17 @@ serve(async (req) => {
     try {
       const body = await req.json();
       companyData = body.companyData;
+      
+      console.log('Received registration request:', {
+        companyName: companyData.name,
+        email: companyData.contact_email,
+        registrationTime: new Date().toISOString()
+      });
     } catch (error) {
-      console.error('Registration failed: Invalid JSON payload', { error });
+      console.error('Registration failed: Invalid JSON payload', { 
+        error,
+        body: await req.text()
+      });
       return new Response(
         JSON.stringify({ 
           error: 'Invalid request format',
@@ -93,7 +102,11 @@ serve(async (req) => {
     // Validate company data
     const { isValid, errors } = validateCompanyData(companyData);
     if (!isValid) {
-      console.error('Registration failed: Validation errors', { errors });
+      console.error('Registration failed: Validation errors', { 
+        errors,
+        companyName: companyData.name,
+        email: companyData.contact_email 
+      });
       return new Response(
         JSON.stringify({ 
           error: 'Validation failed',
@@ -106,20 +119,17 @@ serve(async (req) => {
       )
     }
 
-    // Log incoming registration data (excluding sensitive info)
-    console.log('Processing registration for:', {
-      companyName: companyData.name,
-      email: companyData.contact_email,
-      hasPassword: !!companyData.password,
-      registrationNumber: companyData.registration_number
-    });
-
+    // Initialize Supabase client
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // First check if company already exists
+    // Check for existing company
+    console.log('Checking for existing company:', {
+      email: companyData.contact_email?.toLowerCase()
+    });
+
     const { data: existingCompany, error: checkError } = await supabase
       .from('companies')
       .select('id')
@@ -146,8 +156,11 @@ serve(async (req) => {
       )
     }
 
-    // Create auth user first
-    console.log('Creating auth user...');
+    // Create auth user
+    console.log('Creating auth user for:', {
+      email: companyData.contact_email
+    });
+
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: companyData.contact_email,
       password: companyData.password,
@@ -156,7 +169,7 @@ serve(async (req) => {
     });
 
     if (authError) {
-      console.error('Auth creation failed:', {
+      console.error('Auth user creation failed:', {
         error: authError.message,
         email: companyData.contact_email,
         details: authError
@@ -215,6 +228,7 @@ serve(async (req) => {
       console.error('Company creation failed:', {
         error: registerError.message,
         companyName: companyData.name,
+        userId: authData.user.id,
         details: registerError
       });
       
@@ -241,9 +255,11 @@ serve(async (req) => {
       )
     }
 
+    // Log successful registration
     console.log('Company registration completed successfully:', {
       companyName: companyData.name,
-      userId: authData.user.id
+      userId: authData.user.id,
+      registrationComplete: new Date().toISOString()
     });
 
     return new Response(
@@ -262,9 +278,11 @@ serve(async (req) => {
     )
 
   } catch (error) {
+    // Log unexpected errors
     console.error('Unexpected registration error:', {
       error: error.message,
-      stack: error.stack
+      stack: error.stack,
+      timestamp: new Date().toISOString()
     });
     return new Response(
       JSON.stringify({ 
