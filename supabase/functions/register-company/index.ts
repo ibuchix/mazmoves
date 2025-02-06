@@ -100,8 +100,6 @@ serve(async (req) => {
           contact_phone: companyData.contact_phone,
           business_address: companyData.business_address,
           manager_name: companyData.manager_name,
-          country_code: companyData.country_code,
-          country_name: companyData.country_name,
           latitude: null,
           longitude: null
         },
