@@ -53,26 +53,36 @@ export function useCompanyRegistration() {
     } catch (err: any) {
       console.error('Registration error:', err);
       
-      if (err.message?.includes('rate limit')) {
+      // Parse error message from response if available
+      let errorMessage = err.message;
+      try {
+        if (err.message && err.message.includes('{')) {
+          const errorBody = JSON.parse(err.message);
+          errorMessage = errorBody.details || errorBody.error || err.message;
+        }
+      } catch (e) {
+        // If parsing fails, use original message
+      }
+      
+      if (errorMessage?.includes('rate limit')) {
         setRateLimitExceeded(true);
         setError('rate_limit');
         toast.error("Rate Limit Exceeded", {
           description: "Too many registration attempts. Please try again later."
         });
         
-        // Reset rate limit after 5 minutes
         setTimeout(() => {
           setRateLimitExceeded(false);
           setError(null);
         }, 5 * 60 * 1000);
       }
-      else if (err.message?.includes('already exists')) {
+      else if (errorMessage?.includes('already exists')) {
         setError('duplicate_email');
         toast.error("Registration Failed", {
           description: "An account with this email already exists."
         });
       }
-      else if (err.message?.includes('country')) {
+      else if (errorMessage?.includes('country')) {
         setError('country_not_supported');
         toast.error("Registration Failed", {
           description: "Registration is not available in your country."
@@ -81,7 +91,7 @@ export function useCompanyRegistration() {
       else {
         setError('unknown');
         toast.error("Registration Failed", {
-          description: "An error occurred during registration. Please try again."
+          description: errorMessage || "An error occurred during registration. Please try again."
         });
       }
     } finally {
