@@ -29,23 +29,23 @@ export async function registerCompany(data: CompanyRegistrationForm) {
     // Wait a short moment to ensure the auth user is fully created
     await new Promise(resolve => setTimeout(resolve, 1000));
 
-    // Register the company using secure function
-    const { data: response, error: registerError } = await supabase.rpc(
-      'register_company',
+    // Register the company using the new v2 endpoint
+    const { data: response, error: registerError } = await supabase.functions.invoke(
+      'register-company-v2',
       {
-        company_data: {
-          name: data.name,
-          registration_number: data.registrationNumber,
-          contact_email: data.email,
-          contact_phone: data.phone,
-          business_address: data.address,
-          manager_name: data.managerName,
-          latitude: null, // Will be set by geocoding trigger
-          longitude: null // Will be set by geocoding trigger
-        },
-        auth_user_id: authData.user.id,
-        user_email: data.email,
-        user_full_name: data.managerName
+        body: {
+          companyData: {
+            name: data.name,
+            registration_number: data.registrationNumber,
+            contact_email: data.email,
+            contact_phone: data.phone,
+            business_address: data.address,
+            manager_name: data.managerName,
+            auth_user_id: authData.user.id,
+            latitude: null, // Will be set by geocoding trigger
+            longitude: null // Will be set by geocoding trigger
+          }
+        }
       }
     );
     

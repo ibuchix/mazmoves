@@ -35,9 +35,9 @@ export function useCompanyRegistration() {
         throw new Error('No user data returned from auth signup');
       }
 
-      // Then register the company
+      // Then register the company using the new v2 endpoint
       const { data: companyData, error: registerError } = await supabase.functions.invoke(
-        'register-company',
+        'register-company-v2',
         {
           body: {
             companyData: {
