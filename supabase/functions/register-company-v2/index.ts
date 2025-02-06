@@ -17,43 +17,6 @@ interface CompanyRegistrationData {
   longitude?: number | null
 }
 
-const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-
-async function sendWelcomeEmail(email: string, companyName: string) {
-  try {
-    const emailResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify({
-        from: 'MAZ Moves <notifications@mazmoves.com>',
-        to: [email],
-        subject: 'Welcome to MAZ Moves - Please Confirm Your Email',
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h1 style="color: #040480;">Welcome to MAZ Moves, ${companyName}!</h1>
-            <p>Thank you for registering with MAZ Moves. We're excited to have you on board!</p>
-            <p>Your application is currently under review by our team. We'll verify your details and get back to you shortly.</p>
-            <p style="margin-top: 20px;">Best regards,<br>MAZ Moves Team</p>
-          </div>
-        `
-      }),
-    });
-
-    if (!emailResponse.ok) {
-      throw new Error(`Failed to send welcome email: ${await emailResponse.text()}`);
-    }
-
-    console.log('Welcome email sent successfully');
-    return true;
-  } catch (error) {
-    console.error('Error sending welcome email:', error);
-    return false;
-  }
-}
-
 function validateCompanyData(data: Partial<CompanyRegistrationData>): { isValid: boolean; errors: string[] } {
   const errors: string[] = [];
 
@@ -90,13 +53,11 @@ function validateCompanyData(data: Partial<CompanyRegistrationData>): { isValid:
 }
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    // Verify request origin
     if (!verifyOrigin(req)) {
       console.error('Registration failed: Invalid origin', {
         origin: req.headers.get('origin'),
@@ -108,7 +69,6 @@ serve(async (req) => {
       )
     }
 
-    // Parse and validate request body
     let companyData: Partial<CompanyRegistrationData>;
     try {
       const body = await req.json();
@@ -120,83 +80,40 @@ serve(async (req) => {
         registrationTime: new Date().toISOString()
       });
     } catch (error) {
-      console.error('Registration failed: Invalid JSON payload', { 
-        error,
-        body: await req.text()
-      });
+      console.error('Registration failed: Invalid JSON payload', { error });
       return new Response(
-        JSON.stringify({ 
-          error: 'Invalid request format',
-          details: 'Request body must be valid JSON'
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400 
-        }
+        JSON.stringify({ error: 'Invalid request format' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       )
     }
 
-    // Validate company data
     const { isValid, errors } = validateCompanyData(companyData);
     if (!isValid) {
-      console.error('Registration failed: Validation errors', { 
-        errors,
-        companyName: companyData.name,
-        email: companyData.contact_email 
-      });
+      console.error('Registration failed: Validation errors', { errors });
       return new Response(
-        JSON.stringify({ 
-          error: 'Validation failed',
-          details: errors
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400 
-        }
+        JSON.stringify({ error: 'Validation failed', details: errors }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       )
     }
 
-    // Initialize Supabase client
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Check for existing company
-    console.log('Checking for existing company:', {
-      email: companyData.contact_email?.toLowerCase()
-    });
-
-    const { data: existingCompany, error: checkError } = await supabase
+    const { data: existingCompany } = await supabase
       .from('companies')
       .select('id')
       .eq('contact_email', companyData.contact_email?.toLowerCase())
       .single();
 
-    if (checkError) {
-      console.error('Error checking existing company:', checkError);
-    }
-
     if (existingCompany) {
-      console.error('Registration failed: Company email already exists', {
-        email: companyData.contact_email
-      });
+      console.error('Registration failed: Company email already exists');
       return new Response(
-        JSON.stringify({ 
-          error: 'Registration failed',
-          details: 'A company with this email already exists'
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400 
-        }
+        JSON.stringify({ error: 'A company with this email already exists' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       )
     }
-
-    // Create auth user
-    console.log('Creating auth user for:', {
-      email: companyData.contact_email
-    });
 
     const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email: companyData.contact_email,
@@ -205,46 +122,15 @@ serve(async (req) => {
       user_metadata: { role: 'company' }
     });
 
-    if (authError) {
-      console.error('Auth user creation failed:', {
-        error: authError.message,
-        email: companyData.contact_email,
-        details: authError
-      });
+    if (authError || !authData.user) {
+      console.error('Auth user creation failed:', authError);
       return new Response(
-        JSON.stringify({ 
-          error: 'Registration failed',
-          details: authError.message
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400 
-        }
+        JSON.stringify({ error: 'Registration failed', details: authError?.message }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       )
     }
 
-    if (!authData.user) {
-      console.error('Auth creation failed: No user data returned');
-      return new Response(
-        JSON.stringify({ 
-          error: 'Registration failed',
-          details: 'No user data returned from auth signup'
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400 
-        }
-      )
-    }
-
-    console.log('Auth user created successfully:', {
-      userId: authData.user.id,
-      email: authData.user.email
-    });
-
-    // Register the company using RPC function
-    console.log('Creating company record...');
-    const { data: response, error: registerError } = await supabase.rpc(
+    const { data: company, error: registerError } = await supabase.rpc(
       'register_company',
       {
         company_data: {
@@ -262,86 +148,61 @@ serve(async (req) => {
     );
       
     if (registerError) {
-      console.error('Company creation failed:', {
-        error: registerError.message,
-        companyName: companyData.name,
-        userId: authData.user.id,
-        details: registerError
-      });
+      console.error('Company creation failed:', registerError);
       
-      // Delete the auth user if company creation failed
-      console.log('Rolling back auth user creation...');
+      // Rollback auth user creation
       const { error: deleteError } = await supabase.auth.admin.deleteUser(authData.user.id);
-      
       if (deleteError) {
-        console.error('Failed to rollback auth user:', {
-          error: deleteError.message,
-          userId: authData.user.id
-        });
+        console.error('Failed to rollback auth user:', deleteError);
       }
       
       return new Response(
-        JSON.stringify({ 
-          error: 'Registration failed',
-          details: registerError.message
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400 
-        }
+        JSON.stringify({ error: 'Registration failed', details: registerError.message }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       )
     }
 
-    // Only send welcome email after successful registration
-    console.log('Sending welcome email...');
-    const emailSent = await sendWelcomeEmail(
-      companyData.contact_email,
-      companyData.name
+    // Trigger welcome email function
+    const emailResponse = await fetch(
+      `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-welcome-email`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+        },
+        body: JSON.stringify({
+          companyId: company.id,
+          email: companyData.contact_email,
+          companyName: companyData.name
+        })
+      }
     );
 
-    if (!emailSent) {
-      console.warn('Welcome email could not be sent, but registration was successful');
+    if (!emailResponse.ok) {
+      console.warn('Welcome email trigger failed, but registration was successful:', 
+        await emailResponse.text()
+      );
     }
-
-    // Log successful registration
-    console.log('Company registration completed successfully:', {
-      companyName: companyData.name,
-      userId: authData.user.id,
-      registrationComplete: new Date().toISOString(),
-      welcomeEmailSent: emailSent
-    });
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Company registered successfully',
         company: {
+          id: company.id,
           name: companyData.name,
           email: companyData.contact_email
         }
       }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200 
-      }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )
 
   } catch (error) {
-    // Log unexpected errors
-    console.error('Unexpected registration error:', {
-      error: error.message,
-      stack: error.stack,
-      timestamp: new Date().toISOString()
-    });
+    console.error('Unexpected registration error:', error);
     return new Response(
-      JSON.stringify({ 
-        error: 'Registration failed', 
-        details: error.message
-      }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400 
-      }
+      JSON.stringify({ error: 'Registration failed', details: error.message }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
     )
   }
 })

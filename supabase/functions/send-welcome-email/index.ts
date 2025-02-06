@@ -1,6 +1,8 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { verifyOrigin, corsHeaders } from "../_shared/verify-origin.ts";
+import { corsHeaders } from "../_shared/cors.ts"
+import { verifyOrigin } from "../_shared/verify-origin.ts"
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 
@@ -10,26 +12,42 @@ serve(async (req) => {
   }
 
   try {
-    // Verify the request origin
     if (!verifyOrigin(req)) {
       return new Response(
-        JSON.stringify({ error: 'Unauthorized origin' }),
-        { 
-          status: 403,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+        JSON.stringify({ error: 'Invalid origin' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
-    const { email, companyName, confirmationLink } = await req.json()
-    console.log('Sending welcome email to:', email)
+    const { companyId, email, companyName } = await req.json();
 
-    // Initialize Supabase client with service role key
+    if (!companyId || !email || !companyName) {
+      return new Response(
+        JSON.stringify({ error: 'Missing required parameters' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
+    // Check if email was already sent
+    const { data: company } = await supabase
+      .from('companies')
+      .select('welcome_email_sent')
+      .eq('id', companyId)
+      .single();
+
+    if (company?.welcome_email_sent) {
+      return new Response(
+        JSON.stringify({ message: 'Welcome email already sent' }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Send welcome email
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -45,52 +63,40 @@ serve(async (req) => {
             <h1 style="color: #040480;">Welcome to MAZ Moves, ${companyName}!</h1>
             <p>Thank you for registering with MAZ Moves. We're excited to have you on board!</p>
             <p>Your application is currently under review by our team. We'll verify your details and get back to you shortly.</p>
-            ${confirmationLink ? `
-              <div style="margin: 30px 0; text-align: center;">
-                <p style="margin-bottom: 20px; font-weight: bold;">Please confirm your email address by clicking the button below:</p>
-                <a href="${confirmationLink}" 
-                   style="background-color: #040480; 
-                          color: white; 
-                          padding: 15px 30px; 
-                          text-decoration: none; 
-                          border-radius: 5px; 
-                          display: inline-block;
-                          font-weight: bold;
-                          font-size: 16px;
-                          margin: 20px 0;">
-                  Confirm Email Address
-                </a>
-                <p style="font-size: 12px; color: #666; margin-top: 20px;">
-                  If the button doesn't work, copy and paste this link into your browser:<br>
-                  <span style="color: #1f3dd2;">${confirmationLink}</span>
-                </p>
-              </div>
-            ` : ''}
             <p style="margin-top: 20px;">Best regards,<br>MAZ Moves Team</p>
           </div>
         `
       }),
-    })
-
-    const responseText = await emailResponse.text()
-    console.log('Resend API response:', responseText)
+    });
 
     if (!emailResponse.ok) {
-      throw new Error(`Resend API error: ${responseText}`)
+      console.error('Failed to send welcome email:', await emailResponse.text());
+      return new Response(
+        JSON.stringify({ error: 'Failed to send welcome email' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
-    return new Response(JSON.stringify({ success: true }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    })
+    // Mark email as sent in database
+    const { error: updateError } = await supabase.rpc(
+      'mark_welcome_email_sent',
+      { company_id: companyId }
+    );
+
+    if (updateError) {
+      console.error('Failed to mark email as sent:', updateError);
+    }
+
+    return new Response(
+      JSON.stringify({ success: true, message: 'Welcome email sent successfully' }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
 
   } catch (error) {
-    console.error('Error in send-welcome-email function:', error)
+    console.error('Error in send-welcome-email function:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      { 
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      }
+      { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 })

@@ -120,6 +120,8 @@ export type Database = {
           vat_number: string | null
           verification_date: string | null
           verification_notes: string | null
+          welcome_email_sent: boolean | null
+          welcome_email_sent_at: string | null
         }
         Insert: {
           auth_user_id?: string | null
@@ -156,6 +158,8 @@ export type Database = {
           vat_number?: string | null
           verification_date?: string | null
           verification_notes?: string | null
+          welcome_email_sent?: boolean | null
+          welcome_email_sent_at?: string | null
         }
         Update: {
           auth_user_id?: string | null
@@ -192,6 +196,8 @@ export type Database = {
           vat_number?: string | null
           verification_date?: string | null
           verification_notes?: string | null
+          welcome_email_sent?: boolean | null
+          welcome_email_sent_at?: string | null
         }
         Relationships: []
       }
@@ -1881,6 +1887,12 @@ export type Database = {
       longtransactionsenabled: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      mark_welcome_email_sent: {
+        Args: {
+          company_id: string
+        }
+        Returns: undefined
       }
       migrate_sensitive_data: {
         Args: Record<PropertyKey, never>
