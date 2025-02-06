@@ -101,11 +101,9 @@ serve(async (req) => {
           business_address: companyData.business_address,
           manager_name: companyData.manager_name,
           latitude: null,
-          longitude: null
-        },
-        auth_user_id: authData.user.id,
-        user_email: companyData.contact_email,
-        user_full_name: companyData.manager_name
+          longitude: null,
+          auth_user_id: authData.user.id
+        }
       }
     );
       
