@@ -63,7 +63,7 @@ verify_jwt = true
 
 [[functions]]
 name = "register-company"
-verify_jwt = true
+verify_jwt = false
 
 [[functions]]
 name = "report-usage"
