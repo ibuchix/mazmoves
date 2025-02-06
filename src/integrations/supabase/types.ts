@@ -190,7 +190,7 @@ export type Database = {
           business_address: Json
           contact_email: string
           contact_phone: string | null
-          country_code: string
+          country_code: string | null
           country_name: string | null
           created_at: string | null
           description: string | null
@@ -228,7 +228,7 @@ export type Database = {
           business_address: Json
           contact_email: string
           contact_phone?: string | null
-          country_code: string
+          country_code?: string | null
           country_name?: string | null
           created_at?: string | null
           description?: string | null
@@ -266,7 +266,7 @@ export type Database = {
           business_address?: Json
           contact_email?: string
           contact_phone?: string | null
-          country_code?: string
+          country_code?: string | null
           country_name?: string | null
           created_at?: string | null
           description?: string | null

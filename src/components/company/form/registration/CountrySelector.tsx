@@ -33,11 +33,11 @@ export function CountrySelector({ register, watch, errors, onCountryChange }: Co
 
   return (
     <select 
-      {...register("country", { required: "Country is required" })}
+      {...register("country")}
       className="w-full h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 rounded-md"
       defaultValue=""
     >
-      <option value="" disabled>Select your country</option>
+      <option value="">Select your country (optional)</option>
       {allowedCountries.map((country) => (
         <option key={country.code} value={JSON.stringify(country)}>
           {country.name}

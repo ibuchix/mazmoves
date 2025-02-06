@@ -44,7 +44,7 @@ export function CompanyDetailsSection({ register, watch, errors, onCountryChange
 
         <div className="space-y-2">
           <Label htmlFor="country" className="text-sm font-medium text-[#040480]">
-            Country <span className="text-red-500">*</span>
+            Country <span className="text-sm text-muted-foreground font-normal">(Optional)</span>
           </Label>
           <CountrySelector
             register={register}
