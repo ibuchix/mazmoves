@@ -1,10 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { corsHeaders } from "../_shared/cors.ts"
+import { verifyOrigin } from "../_shared/verify-origin.ts"
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -13,6 +10,14 @@ serve(async (req) => {
   }
 
   try {
+    // Verify request origin
+    if (!verifyOrigin(req)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid origin' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     console.log('Starting company registration process...');
     const { companyData } = await req.json();
     
