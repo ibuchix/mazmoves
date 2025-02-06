@@ -112,7 +112,9 @@ export type Database = {
           rating: number | null
           registration_date: string | null
           registration_number: string | null
-          registration_status: string | null
+          registration_status:
+            | Database["public"]["Enums"]["registration_status_type"]
+            | null
           service_areas: Json | null
           stripe_customer_id: string | null
           subscription_status: string | null
@@ -150,7 +152,9 @@ export type Database = {
           rating?: number | null
           registration_date?: string | null
           registration_number?: string | null
-          registration_status?: string | null
+          registration_status?:
+            | Database["public"]["Enums"]["registration_status_type"]
+            | null
           service_areas?: Json | null
           stripe_customer_id?: string | null
           subscription_status?: string | null
@@ -188,7 +192,9 @@ export type Database = {
           rating?: number | null
           registration_date?: string | null
           registration_number?: string | null
-          registration_status?: string | null
+          registration_status?:
+            | Database["public"]["Enums"]["registration_status_type"]
+            | null
           service_areas?: Json | null
           stripe_customer_id?: string | null
           subscription_status?: string | null
@@ -262,6 +268,13 @@ export type Database = {
             foreignKeyName: "company_invoices_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "admin_dashboard_mv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_invoices_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -313,6 +326,13 @@ export type Database = {
             foreignKeyName: "company_payments_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "admin_dashboard_mv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_payments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -358,6 +378,13 @@ export type Database = {
             foreignKeyName: "document_access_logs_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "admin_dashboard_mv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_access_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -367,6 +394,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "scheduled_moves_view"
             referencedColumns: ["company_id"]
+          },
+          {
+            foreignKeyName: "document_access_logs_company_id_fkey1"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_dashboard_mv"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "document_access_logs_company_id_fkey1"
@@ -511,6 +545,13 @@ export type Database = {
             foreignKeyName: "move_assignments_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "admin_dashboard_mv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "move_assignments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -633,6 +674,13 @@ export type Database = {
             foreignKeyName: "notification_logs_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
+            referencedRelation: "admin_dashboard_mv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
             referencedRelation: "companies"
             referencedColumns: ["id"]
           },
@@ -692,6 +740,13 @@ export type Database = {
           limit_type?: Database["public"]["Enums"]["rate_limit_type"]
         }
         Relationships: [
+          {
+            foreignKeyName: "rate_limit_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_dashboard_mv"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "rate_limit_logs_company_id_fkey"
             columns: ["company_id"]
@@ -865,10 +920,13 @@ export type Database = {
     Views: {
       admin_dashboard_mv: {
         Row: {
-          pending_companies: number | null
-          rejected_companies: number | null
-          total_companies: number | null
-          verified_companies: number | null
+          completed_assignments: number | null
+          contact_email: string | null
+          created_at: string | null
+          id: string | null
+          name: string | null
+          registration_status: string | null
+          total_assignments: number | null
         }
         Relationships: []
       }
@@ -4140,6 +4198,7 @@ export type Database = {
       assignment_status: "active" | "completed" | "cancelled" | "accepted"
       invoice_status: "draft" | "pending" | "paid" | "failed" | "void"
       rate_limit_type: "hourly" | "daily" | "monthly"
+      registration_status_type: "pending" | "approved" | "rejected"
       request_status:
         | "pending"
         | "assigned"
