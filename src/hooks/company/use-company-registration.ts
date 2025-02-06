@@ -27,8 +27,6 @@ export function useCompanyRegistration() {
               contact_phone: data.phone,
               business_address: data.address,
               manager_name: data.managerName,
-              country_code: data.country_code,
-              country_name: data.country_name,
               password: data.password
             }
           }
@@ -80,12 +78,6 @@ export function useCompanyRegistration() {
         setError('duplicate_email');
         toast.error("Registration Failed", {
           description: "An account with this email already exists."
-        });
-      }
-      else if (errorMessage?.includes('country')) {
-        setError('country_not_supported');
-        toast.error("Registration Failed", {
-          description: "Registration is not available in your country."
         });
       }
       else {

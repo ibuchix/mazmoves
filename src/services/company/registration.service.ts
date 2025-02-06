@@ -40,8 +40,6 @@ export async function registerCompany(data: CompanyRegistrationForm) {
           contact_phone: data.phone,
           business_address: data.address,
           manager_name: data.managerName,
-          country_code: data.country_code,
-          country_name: data.country_name,
           latitude: null, // Will be set by geocoding trigger
           longitude: null // Will be set by geocoding trigger
         },

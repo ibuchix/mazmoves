@@ -36,8 +36,6 @@ export async function createCompanyRecord(data: CompanyRegistrationForm, authUse
     contact_phone: data.phone,
     business_address: data.address,
     manager_name: data.managerName,
-    country_code: data.country_code,
-    country_name: data.country_name,
     latitude: coordinates?.latitude,
     longitude: coordinates?.longitude,
     auth_user_id: authUserId,

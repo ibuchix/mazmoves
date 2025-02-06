@@ -18,20 +18,6 @@ export async function validateRegistration(data: CompanyRegistrationForm) {
     if (!rateLimitCheck) {
       throw new Error('rate limit exceeded');
     }
-
-    // Check country support
-    const { data: countryCheck, error: countryError } = await supabase.rpc('is_country_allowed', {
-      check_code: data.country_code
-    });
-
-    if (countryError) {
-      console.error('Country check error:', countryError);
-      throw new Error('country not supported');
-    }
-
-    if (!countryCheck) {
-      throw new Error('country not supported');
-    }
   } catch (error: any) {
     console.error('Validation error:', error);
     throw error;
