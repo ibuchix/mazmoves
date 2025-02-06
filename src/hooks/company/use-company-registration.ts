@@ -16,7 +16,7 @@ export function useCompanyRegistration() {
     try {
       console.log('Starting company registration process...');
       
-      // Call the register-company edge function
+      // Call the register-company edge function with anon key
       const { data: response, error: registerError } = await supabase.functions.invoke(
         'register-company',
         {
