@@ -23,14 +23,32 @@ export function RegisterCompanyForm() {
   } = useCompanyRegistration();
 
   const onSubmit = async (data: CompanyRegistrationForm) => {
-    if (rateLimitExceeded) {
-      toast.error("Rate Limit Exceeded", {
-        description: "Please wait a few minutes before trying again."
-      });
-      return;
-    }
+    try {
+      if (rateLimitExceeded) {
+        toast.error("Rate Limit Exceeded", {
+          description: "Please wait a few minutes before trying again."
+        });
+        return;
+      }
 
-    await handleRegistration(data);
+      // Validate passwords match
+      if (data.password !== data.confirmPassword) {
+        toast.error("Passwords do not match");
+        return;
+      }
+
+      // Validate emails match
+      if (data.email !== data.confirmEmail) {
+        toast.error("Email addresses do not match");
+        return;
+      }
+
+      await handleRegistration(data);
+    } catch (err: any) {
+      toast.error("Registration failed", {
+        description: err.message || "Please try again later"
+      });
+    }
   };
 
   return (
@@ -46,9 +64,16 @@ export function RegisterCompanyForm() {
               watch={watch}
             />
             <Separator className="my-8" />
-            <ContactDetailsSection register={register} errors={errors} getValues={getValues} />
+            <ContactDetailsSection 
+              register={register} 
+              errors={errors} 
+              getValues={getValues} 
+            />
             <Separator className="my-8" />
-            <AddressSection register={register} errors={errors} />
+            <AddressSection 
+              register={register} 
+              errors={errors} 
+            />
           </div>
 
           <div className="pt-4">

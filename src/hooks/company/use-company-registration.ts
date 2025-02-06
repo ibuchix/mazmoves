@@ -14,9 +14,29 @@ export function useCompanyRegistration() {
     setUploading(true);
     
     try {
-      console.log('Starting company registration process...');
-      
-      const { data: response, error: registerError } = await supabase.functions.invoke(
+      // First create the auth user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: {
+            full_name: data.managerName,
+            role: 'company'
+          }
+        }
+      });
+
+      if (authError) {
+        console.error('Auth error:', authError);
+        throw authError;
+      }
+
+      if (!authData.user) {
+        throw new Error('No user data returned from auth signup');
+      }
+
+      // Then register the company
+      const { data: companyData, error: registerError } = await supabase.functions.invoke(
         'register-company',
         {
           body: {
@@ -27,7 +47,7 @@ export function useCompanyRegistration() {
               contact_phone: data.phone,
               business_address: data.address,
               manager_name: data.managerName,
-              password: data.password
+              auth_user_id: authData.user.id
             }
           }
         }
@@ -38,31 +58,15 @@ export function useCompanyRegistration() {
         throw registerError;
       }
 
-      if (!response?.success) {
-        console.error('Registration failed:', response);
-        throw new Error('Registration failed');
-      }
-
-      console.log('Registration successful:', response);
       setShowSuccessDialog(true);
       toast.success("Registration Successful", {
         description: "Please check your email to verify your account."
       });
+
     } catch (err: any) {
       console.error('Registration error:', err);
       
-      // Parse error message from response if available
-      let errorMessage = err.message;
-      try {
-        if (err.message && err.message.includes('{')) {
-          const errorBody = JSON.parse(err.message);
-          errorMessage = errorBody.details || errorBody.error || err.message;
-        }
-      } catch (e) {
-        // If parsing fails, use original message
-      }
-      
-      if (errorMessage?.includes('rate limit')) {
+      if (err.message?.includes('rate limit')) {
         setRateLimitExceeded(true);
         setError('rate_limit');
         toast.error("Rate Limit Exceeded", {
@@ -74,7 +78,7 @@ export function useCompanyRegistration() {
           setError(null);
         }, 5 * 60 * 1000);
       }
-      else if (errorMessage?.includes('already exists')) {
+      else if (err.message?.includes('already exists')) {
         setError('duplicate_email');
         toast.error("Registration Failed", {
           description: "An account with this email already exists."
@@ -83,9 +87,10 @@ export function useCompanyRegistration() {
       else {
         setError('unknown');
         toast.error("Registration Failed", {
-          description: errorMessage || "An error occurred during registration. Please try again."
+          description: err.message || "An error occurred during registration. Please try again."
         });
       }
+      throw err;
     } finally {
       setUploading(false);
     }
