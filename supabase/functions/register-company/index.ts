@@ -1,10 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { validateRegistrationData } from './validation.ts'
-import { handleAuthentication } from './auth-service.ts'
-import { createCompanyRecord, createUserRecord } from './company-service.ts'
-import { checkRateLimits, recordSuccessfulAttempt } from './rate-limit-service.ts'
-import { generateConfirmationLink, sendWelcomeEmail } from './notification-service.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -12,6 +7,7 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -21,14 +17,15 @@ serve(async (req) => {
     const { companyData } = await req.json();
     
     if (!companyData) {
-      console.error('Missing company data in request');
       return new Response(
         JSON.stringify({ 
           error: 'Invalid request data',
-          details: 'Company data is required',
-          status: 400
+          details: 'Company data is required'
         }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400 
+        }
       )
     }
 
@@ -37,56 +34,75 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
-    // Get client IP address for rate limiting
-    const clientIP = req.headers.get('x-forwarded-for')?.split(',')[0] || 'unknown'
-    console.log('Processing request from IP:', clientIP)
+    // Create auth user first
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+      email: companyData.contact_email,
+      password: companyData.password,
+      email_confirm: false,
+      user_metadata: { role: 'company' }
+    });
 
-    // Check rate limits
-    try {
-      await checkRateLimits(supabase, clientIP, companyData.contact_email);
-    } catch (error) {
-      console.error('Rate limit exceeded:', error);
+    if (authError) {
+      console.error('Auth error:', authError);
       return new Response(
         JSON.stringify({ 
-          error: 'Too many requests',
-          details: 'Please try again later',
-          status: 429
+          error: 'Authentication error',
+          details: authError.message
         }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 429 }
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400 
+        }
       )
     }
 
-    // Create company record
-    try {
-      await createCompanyRecord(supabase, companyData);
-      console.log('Company record created successfully');
-    } catch (error) {
-      console.error('Error creating company record:', error);
+    if (!authData.user) {
       return new Response(
         JSON.stringify({ 
-          error: 'Company creation failed',
-          details: error.message,
-          status: 400
+          error: 'User creation failed',
+          details: 'No user returned from auth signup'
         }),
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400 
+        }
       )
     }
 
-    // Record successful registration
-    await recordSuccessfulAttempt(supabase, clientIP, companyData.contact_email);
-
-    // Generate and send confirmation email
-    try {
-      const confirmData = await generateConfirmationLink(supabase, companyData.contact_email);
-      await sendWelcomeEmail(
-        supabase,
-        companyData.contact_email,
-        companyData.name,
-        confirmData.properties.action_link
-      );
-    } catch (error) {
-      console.error('Error sending welcome email:', error);
-      // Don't fail the registration if email fails
+    // Register the company using RPC function
+    const { data: response, error: registerError } = await supabase.rpc(
+      'register_company',
+      {
+        company_data: {
+          name: companyData.name,
+          registration_number: companyData.registration_number,
+          contact_email: companyData.contact_email,
+          contact_phone: companyData.contact_phone,
+          business_address: companyData.business_address,
+          manager_name: companyData.manager_name,
+          country_code: companyData.country_code,
+          country_name: companyData.country_name,
+          latitude: null,
+          longitude: null
+        },
+        auth_user_id: authData.user.id,
+        user_email: companyData.contact_email,
+        user_full_name: companyData.manager_name
+      }
+    );
+      
+    if (registerError) {
+      console.error('Registration error:', registerError);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Registration failed',
+          details: registerError.message
+        }),
+        { 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 400 
+        }
+      )
     }
 
     return new Response(
@@ -98,19 +114,23 @@ serve(async (req) => {
           email: companyData.contact_email
         }
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 200 
+      }
     )
 
   } catch (error) {
     console.error('Registration error:', error)
-    const status = error.status || 500;
     return new Response(
       JSON.stringify({ 
         error: 'Registration failed', 
-        details: error.message,
-        status
+        details: error.message
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status }
+      { 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 500 
+      }
     )
   }
 })

@@ -1,36 +1,22 @@
+import { useState } from "react";
 import { CompanyRegistrationForm } from "@/types/company";
 import { toast } from "sonner";
-import { useRegistrationState } from "./use-registration-state";
 import { supabase } from "@/integrations/supabase/client";
-import { REGISTRATION_ERROR_CODES, handleRegistrationError } from "@/utils/error/registration-errors";
 
 export function useCompanyRegistration() {
-  const {
-    uploading,
-    setUploading,
-    showSuccessDialog,
-    setShowSuccessDialog,
-    error,
-    setError,
-    rateLimitExceeded,
-    setRateLimitExceeded
-  } = useRegistrationState();
+  const [uploading, setUploading] = useState(false);
+  const [showSuccessDialog, setShowSuccessDialog] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [rateLimitExceeded, setRateLimitExceeded] = useState(false);
 
   const handleRegistration = async (data: CompanyRegistrationForm) => {
-    if (rateLimitExceeded) {
-      toast.error("Rate Limit Exceeded", {
-        description: "Please wait a few minutes before trying again."
-      });
-      return;
-    }
-
     setError(null);
     setUploading(true);
     
     try {
       console.log('Starting company registration process...');
       
-      // Call the register-company edge function with authorization
+      // Call the register-company edge function
       const { data: response, error: registerError } = await supabase.functions.invoke(
         'register-company',
         {
@@ -46,9 +32,6 @@ export function useCompanyRegistration() {
               country_name: data.country_name,
               password: data.password
             }
-          },
-          headers: {
-            Authorization: `Bearer ${process.env.VITE_SUPABASE_ANON_KEY}`
           }
         }
       );
@@ -64,21 +47,37 @@ export function useCompanyRegistration() {
     } catch (err: any) {
       console.error('Registration error:', err);
       
-      const registrationError = handleRegistrationError(err);
-      setError(registrationError.code);
-      
-      if (registrationError.code === REGISTRATION_ERROR_CODES.RATE_LIMIT) {
+      if (err.message?.includes('rate limit')) {
         setRateLimitExceeded(true);
+        setError('rate_limit');
+        toast.error("Rate Limit Exceeded", {
+          description: "Too many registration attempts. Please try again later."
+        });
+        
         // Reset rate limit after 5 minutes
         setTimeout(() => {
           setRateLimitExceeded(false);
           setError(null);
         }, 5 * 60 * 1000);
       }
-
-      toast.error("Registration Failed", {
-        description: registrationError.message
-      });
+      else if (err.message?.includes('already exists')) {
+        setError('duplicate_email');
+        toast.error("Registration Failed", {
+          description: "An account with this email already exists."
+        });
+      }
+      else if (err.message?.includes('country')) {
+        setError('country_not_supported');
+        toast.error("Registration Failed", {
+          description: "Registration is not available in your country."
+        });
+      }
+      else {
+        setError('unknown');
+        toast.error("Registration Failed", {
+          description: "An error occurred during registration. Please try again."
+        });
+      }
     } finally {
       setUploading(false);
     }
