@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { AdminDashboardData } from "@/types/admin";
@@ -11,11 +12,13 @@ type DashboardStats = {
 };
 
 type MaterializedViewData = {
-  id: number;
-  pending_companies: number;
-  rejected_companies: number;
-  total_companies: number;
-  verified_companies: number;
+  id: string;
+  name: string;
+  contact_email: string;
+  registration_status: string;
+  created_at: string;
+  total_assignments: number;
+  completed_assignments: number;
 };
 
 type RawCompanyData = Tables<'companies'> & {
@@ -70,22 +73,22 @@ export function useAdminDashboard() {
         }));
       }
       
-      // If materialized view data is available, transform it to match AdminDashboardData
-      const stats = mvData as MaterializedViewData[];
-      return stats.map((stat): AdminDashboardData => ({
-        company_id: '', // Placeholder values for required fields
-        company_name: '',
-        contact_email: '',
-        registration_status: 'pending',
-        registration_date: '',
-        is_verified: false,
-        subscription_status: 'trial',
+      // Transform materialized view data to match AdminDashboardData
+      const mvResults = mvData as MaterializedViewData[];
+      return mvResults.map((company): AdminDashboardData => ({
+        company_id: company.id,
+        company_name: company.name,
+        contact_email: company.contact_email,
+        registration_status: company.registration_status as "pending" | "approved" | "rejected",
+        registration_date: company.created_at,
+        is_verified: false, // Default value since it's not in the view
+        subscription_status: "trial", // Default value since it's not in the view
         last_payment_date: null,
-        total_assignments: 0,
-        active_assignments: 0,
-        completed_assignments: 0,
-        total_payments: 0,
-        total_paid_amount: 0
+        total_assignments: company.total_assignments,
+        active_assignments: 0, // Not available in the view
+        completed_assignments: company.completed_assignments,
+        total_payments: 0, // Not available in the view
+        total_paid_amount: 0 // Not available in the view
       }));
     },
   });
