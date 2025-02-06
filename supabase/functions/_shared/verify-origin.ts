@@ -1,9 +1,11 @@
+
 const ALLOWED_ORIGINS = [
   'https://mazmoves.com',
   'https://app.mazmoves.com',
   'http://localhost:5173', // Development
   'http://localhost:3000',  // Development
-  'https://5b91d28b-133e-4d6b-bf07-94156296a276.lovableproject.com' // Lovable preview URL
+  'https://5b91d28b-133e-4d6b-bf07-94156296a276.lovableproject.com', // Lovable preview URL
+  'https://id-preview--5b91d28b-133e-4d6b-bf07-94156296a276.lovable.app' // Additional Lovable preview URL
 ];
 
 export function verifyOrigin(request: Request): boolean {
