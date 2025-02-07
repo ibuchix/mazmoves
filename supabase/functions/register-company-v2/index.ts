@@ -46,11 +46,6 @@ function validateCompanyData(data: Partial<CompanyRegistrationData>): { isValid:
     errors.push("Invalid email format");
   }
 
-  // Password strength validation
-  if (data.password && data.password.length < 8) {
-    errors.push("Password must be at least 8 characters long");
-  }
-
   // Phone number format validation (basic check)
   const phoneRegex = /^\+?[\d\s-]{8,}$/;
   if (data.contact_phone && !phoneRegex.test(data.contact_phone)) {
@@ -82,13 +77,12 @@ serve(async (req) => {
 
     let companyData: Partial<CompanyRegistrationData>;
     try {
-      const body = await req.json();
-      companyData = body.companyData;
+      companyData = await req.json(); // 🔧 Fixed: directly get the data from request body
       
       console.log('Received registration request:', {
         companyName: companyData.name,
         email: companyData.contact_email,
-        hasPassword: !!companyData.password, // Log whether password exists without exposing it
+        hasPassword: !!companyData.password,
         registrationTime: new Date().toISOString()
       });
     } catch (error) {
@@ -142,7 +136,7 @@ serve(async (req) => {
       )
     }
 
-    // Create company record with the password included
+    // Create company record
     const { data: company, error: registerError } = await supabase.rpc(
       'register_company',
       {
@@ -153,7 +147,7 @@ serve(async (req) => {
           contact_phone: companyData.contact_phone,
           business_address: companyData.business_address,
           manager_name: companyData.manager_name,
-          password: companyData.password, // Explicitly include password
+          password: companyData.password,
           latitude: null,
           longitude: null,
           auth_user_id: authData.user.id
