@@ -1,5 +1,5 @@
 
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 export async function createAuthUser(supabase: any, email: string, password: string) {
   const { data: authData, error: authError } = await supabase.auth.admin.createUser({
