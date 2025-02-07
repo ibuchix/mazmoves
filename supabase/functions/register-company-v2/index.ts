@@ -88,6 +88,7 @@ serve(async (req) => {
       console.log('Received registration request:', {
         companyName: companyData.name,
         email: companyData.contact_email,
+        hasPassword: !!companyData.password, // Log whether password exists without exposing it
         registrationTime: new Date().toISOString()
       });
     } catch (error) {
@@ -141,6 +142,7 @@ serve(async (req) => {
       )
     }
 
+    // Create company record with the password included
     const { data: company, error: registerError } = await supabase.rpc(
       'register_company',
       {
@@ -151,6 +153,7 @@ serve(async (req) => {
           contact_phone: companyData.contact_phone,
           business_address: companyData.business_address,
           manager_name: companyData.manager_name,
+          password: companyData.password, // Explicitly include password
           latitude: null,
           longitude: null,
           auth_user_id: authData.user.id
