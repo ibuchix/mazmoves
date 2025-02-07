@@ -12,25 +12,20 @@ export async function registerCompany(data: CompanyRegistrationForm) {
       addressFields: Object.keys(data.address || {})
     });
 
-    const formattedAddress = {
-      street: data.address.street,
-      city: data.address.city,
-      state: data.address.state,
-      zipCode: data.address.zipCode
-    };
-
     // Format data to match the expected CompanyRegistrationData type
     const registrationData = {
       name: data.name,
       registration_number: data.registrationNumber,
       contact_email: data.email,
       contact_phone: data.phone,
-      business_address: formattedAddress,
+      business_address: {
+        street: data.address.street,
+        city: data.address.city,
+        state: data.address.state,
+        zipCode: data.address.zipCode
+      },
       manager_name: data.managerName,
-      password: data.password,
-      auth_user_id: null,
-      latitude: null,
-      longitude: null
+      password: data.password
     };
 
     console.log('Calling register-company-v2 edge function with data:', {
@@ -63,7 +58,7 @@ export async function registerCompany(data: CompanyRegistrationForm) {
     
     // Check for validation errors from the edge function
     try {
-      const errorBody = JSON.parse(error.body);
+      const errorBody = JSON.parse(error.message);
       if (errorBody.error === 'Validation failed') {
         throw new Error(errorBody.details.join(', '));
       }
