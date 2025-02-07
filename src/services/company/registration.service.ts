@@ -4,6 +4,12 @@ import { CompanyRegistrationForm } from "@/types/company";
 
 export async function registerCompany(data: CompanyRegistrationForm) {
   try {
+    console.log('Starting company registration with data:', { 
+      name: data.name,
+      email: data.email,
+      // Exclude password from logging
+    });
+
     const formattedAddress = {
       street: data.address.street,
       city: data.address.city,
@@ -11,24 +17,26 @@ export async function registerCompany(data: CompanyRegistrationForm) {
       zipCode: data.address.zipCode
     };
 
-    const companyData = {
+    // Format data to match the expected CompanyRegistrationData type
+    const registrationData = {
       name: data.name,
       registration_number: data.registrationNumber,
       contact_email: data.email,
       contact_phone: data.phone,
       business_address: formattedAddress,
       manager_name: data.managerName,
-      password: data.password, // ✅ Password included
+      password: data.password,
       auth_user_id: null,
       latitude: null,
       longitude: null
     };
 
-    // Key fix: Remove "companyData" wrapper
+    console.log('Calling register-company-v2 edge function...');
+    
     const { data: response, error: registerError } = await supabase.functions.invoke(
       'register-company-v2',
       {
-        body: companyData // 👈 Directly pass the object
+        body: registrationData
       }
     );
 
@@ -37,12 +45,27 @@ export async function registerCompany(data: CompanyRegistrationForm) {
       throw registerError;
     }
 
+    console.log('Registration successful');
     return response;
 
   } catch (error: any) {
+    console.error('Registration failed:', error);
+    
+    // Enhanced error handling
     if (error.message?.includes('already exists')) {
       throw new Error('A company with this email already exists');
     }
+    
+    // Check for validation errors from the edge function
+    try {
+      const errorBody = JSON.parse(error.body);
+      if (errorBody.error === 'Validation failed') {
+        throw new Error(errorBody.details.join(', '));
+      }
+    } catch (e) {
+      // If JSON parsing fails, throw the original error
+    }
+    
     throw error;
   }
 }
