@@ -5,7 +5,8 @@ import { CompanyRegistrationForm } from "@/types/company";
 export async function registerCompany(data: CompanyRegistrationForm) {
   console.log('Starting company registration process...', { 
     name: data.name, 
-    email: data.email 
+    email: data.email,
+    has_password: !!data.password // Log password presence without exposing value
   });
   
   try {
@@ -25,7 +26,7 @@ export async function registerCompany(data: CompanyRegistrationForm) {
       contact_phone: data.phone,
       business_address: formattedAddress,
       manager_name: data.managerName,
-      password: data.password,
+      password: data.password, // Explicitly include password
       auth_user_id: null, // This will be set by the edge function
       latitude: null,
       longitude: null
