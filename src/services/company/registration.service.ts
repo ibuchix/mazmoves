@@ -18,7 +18,7 @@ export async function registerCompany(data: CompanyRegistrationForm) {
       zipCode: data.address.zipCode
     };
 
-    // Ensure all required fields are included in the correct structure
+    // Ensure password is explicitly included in the request body
     const companyData = {
       name: data.name,
       registration_number: data.registrationNumber,
@@ -31,6 +31,11 @@ export async function registerCompany(data: CompanyRegistrationForm) {
       latitude: null,
       longitude: null
     };
+
+    console.log('Sending registration request with data:', {
+      ...companyData,
+      password: '[REDACTED]' // Log structure without exposing password
+    });
 
     // Register the company with all required fields
     const { data: response, error: registerError } = await supabase.functions.invoke(
@@ -57,4 +62,3 @@ export async function registerCompany(data: CompanyRegistrationForm) {
     throw error;
   }
 }
-
