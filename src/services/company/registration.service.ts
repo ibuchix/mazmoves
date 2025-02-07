@@ -57,3 +57,4 @@ export async function registerCompany(data: CompanyRegistrationForm) {
     throw error;
   }
 }
+
