@@ -107,6 +107,7 @@ export type Database = {
           longitude: number | null
           manager_name: string | null
           name: string
+          password: string | null
           password_hash: string | null
           public_access_token: string
           rating: number | null
@@ -147,6 +148,7 @@ export type Database = {
           longitude?: number | null
           manager_name?: string | null
           name: string
+          password?: string | null
           password_hash?: string | null
           public_access_token?: string
           rating?: number | null
@@ -187,6 +189,7 @@ export type Database = {
           longitude?: number | null
           manager_name?: string | null
           name?: string
+          password?: string | null
           password_hash?: string | null
           public_access_token?: string
           rating?: number | null
