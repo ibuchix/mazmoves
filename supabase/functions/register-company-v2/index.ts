@@ -27,25 +27,32 @@ serve(async (req) => {
 
     let companyData: Partial<CompanyRegistrationData>;
     try {
-      companyData = await req.json();
+      const rawData = await req.text();
+      console.log('Raw request data:', rawData);
       
-      console.log('Received registration request:', {
-        companyName: companyData.name,
+      companyData = JSON.parse(rawData);
+      
+      console.log('Parsed registration request:', {
+        name: companyData.name,
         email: companyData.contact_email,
         hasPassword: !!companyData.password,
-        registrationTime: new Date().toISOString()
+        registrationTime: new Date().toISOString(),
+        fullData: companyData // Log all data for debugging
       });
     } catch (error) {
       console.error('Registration failed: Invalid JSON payload', { error });
       return new Response(
-        JSON.stringify({ error: 'Invalid request format' }),
+        JSON.stringify({ error: 'Invalid request format', details: error.message }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       )
     }
 
     const { isValid, errors } = validateCompanyData(companyData);
     if (!isValid) {
-      console.error('Registration failed: Validation errors', { errors });
+      console.error('Registration failed: Validation errors', { 
+        errors,
+        receivedData: companyData 
+      });
       return new Response(
         JSON.stringify({ error: 'Validation failed', details: errors }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
@@ -105,4 +112,3 @@ serve(async (req) => {
     )
   }
 })
-
