@@ -3,14 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { CompanyRegistrationForm } from "@/types/company";
 
 export async function registerCompany(data: CompanyRegistrationForm) {
-  console.log('Starting company registration process...', { 
-    name: data.name, 
-    email: data.email,
-    has_password: !!data.password // Log password presence without exposing value
-  });
-  
   try {
-    // Format the address object correctly
     const formattedAddress = {
       street: data.address.street,
       city: data.address.city,
@@ -18,7 +11,6 @@ export async function registerCompany(data: CompanyRegistrationForm) {
       zipCode: data.address.zipCode
     };
 
-    // Ensure password is explicitly included in the request body
     const companyData = {
       name: data.name,
       registration_number: data.registrationNumber,
@@ -26,36 +18,28 @@ export async function registerCompany(data: CompanyRegistrationForm) {
       contact_phone: data.phone,
       business_address: formattedAddress,
       manager_name: data.managerName,
-      password: data.password, // Explicitly include password
-      auth_user_id: null, // This will be set by the edge function
+      password: data.password, // ✅ Password included
+      auth_user_id: null,
       latitude: null,
       longitude: null
     };
 
-    console.log('Sending registration request with data:', {
-      ...companyData,
-      password: '[REDACTED]' // Log structure without exposing password
-    });
-
-    // Register the company with all required fields
+    // Key fix: Remove "companyData" wrapper
     const { data: response, error: registerError } = await supabase.functions.invoke(
       'register-company-v2',
       {
-        body: { companyData }
+        body: companyData // 👈 Directly pass the object
       }
     );
-    
+
     if (registerError) {
-      console.error('Company registration error:', registerError);
+      console.error('Registration error:', registerError);
       throw registerError;
     }
 
-    console.log('Registration successful:', response);
     return response;
 
   } catch (error: any) {
-    console.error('Registration error:', error);
-    // Check for specific error types
     if (error.message?.includes('already exists')) {
       throw new Error('A company with this email already exists');
     }
