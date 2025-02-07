@@ -16,12 +16,18 @@ export function useCompanyRegistration() {
     setUploading(true);
     
     try {
-      console.log('Starting company registration process...', {
+      console.log('useCompanyRegistration hook received data:', {
         name: data.name,
-        email: data.email
+        email: data.email,
+        registrationNumber: data.registrationNumber,
+        phone: data.phone,
+        address: data.address,
+        managerName: data.managerName,
+        hasPassword: !!data.password
       });
       
       const response = await registerCompany(data);
+      console.log('Registration service response:', response);
 
       if (!response?.success) {
         console.error('Registration failed:', response);
@@ -34,7 +40,7 @@ export function useCompanyRegistration() {
         description: "Please check your email to verify your account."
       });
     } catch (err: any) {
-      console.error('Registration error:', err);
+      console.error('Registration error in hook:', err);
       
       // Parse error message from response if available
       let errorMessage = err.message;

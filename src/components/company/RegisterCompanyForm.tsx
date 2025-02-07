@@ -1,3 +1,4 @@
+
 import { useForm } from "react-hook-form";
 import { Card } from "@/components/ui/card";
 import { CompanyDetailsSection } from "./form/CompanyDetailsSection";
@@ -24,6 +25,16 @@ export function RegisterCompanyForm() {
 
   const onSubmit = async (data: CompanyRegistrationForm) => {
     try {
+      console.log('Form submission started with data:', {
+        name: data.name,
+        email: data.email,
+        registrationNumber: data.registrationNumber,
+        phone: data.phone,
+        address: data.address,
+        managerName: data.managerName,
+        hasPassword: !!data.password
+      });
+
       if (rateLimitExceeded) {
         toast.error("Rate Limit Exceeded", {
           description: "Please wait a few minutes before trying again."
@@ -45,6 +56,7 @@ export function RegisterCompanyForm() {
 
       await handleRegistration(data);
     } catch (err: any) {
+      console.error('Form submission error:', err);
       toast.error("Registration failed", {
         description: err.message || "Please try again later"
       });

@@ -4,10 +4,12 @@ import { CompanyRegistrationForm } from "@/types/company";
 
 export async function registerCompany(data: CompanyRegistrationForm) {
   try {
-    console.log('Starting company registration with data:', { 
+    console.log('Registration service received data:', { 
       name: data.name,
       email: data.email,
-      // Exclude password from logging
+      registrationNumber: data.registrationNumber,
+      hasAddress: !!data.address,
+      addressFields: Object.keys(data.address || {})
     });
 
     const formattedAddress = {
@@ -31,7 +33,10 @@ export async function registerCompany(data: CompanyRegistrationForm) {
       longitude: null
     };
 
-    console.log('Calling register-company-v2 edge function...');
+    console.log('Calling register-company-v2 edge function with data:', {
+      ...registrationData,
+      password: '[REDACTED]'
+    });
     
     const { data: response, error: registerError } = await supabase.functions.invoke(
       'register-company-v2',
@@ -41,15 +46,15 @@ export async function registerCompany(data: CompanyRegistrationForm) {
     );
 
     if (registerError) {
-      console.error('Registration error:', registerError);
+      console.error('Edge function returned error:', registerError);
       throw registerError;
     }
 
-    console.log('Registration successful');
+    console.log('Edge function response:', response);
     return response;
 
   } catch (error: any) {
-    console.error('Registration failed:', error);
+    console.error('Registration service error:', error);
     
     // Enhanced error handling
     if (error.message?.includes('already exists')) {
