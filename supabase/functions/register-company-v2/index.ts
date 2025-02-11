@@ -18,6 +18,9 @@ serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
   )
 
+  // Start a transaction for atomic operations
+  const { data: client } = await supabase.rpc('begin_transaction');
+
   try {
     // Verify request origin
     if (!verifyOrigin(req)) {
@@ -42,30 +45,18 @@ serve(async (req) => {
       
       companyData = JSON.parse(rawData);
       
-      // Log registration attempt details
-      await supabase.rpc('log_registration_error', {
-        error_msg: 'Registration attempt started',
-        error_details: { stage: 'init' },
-        request_data: companyData,
-        client_ip: req.headers.get('x-real-ip') || req.headers.get('x-forwarded-for') || 'unknown'
+      // Log registration attempt
+      await supabase.rpc('log_registration_attempt', {
+        email: companyData.contact_email,
+        client_ip: req.headers.get('x-real-ip') || req.headers.get('x-forwarded-for') || 'unknown',
+        attempt_data: companyData
       });
 
-      console.log('Parsed registration request:', {
-        name: companyData.name,
-        email: companyData.contact_email,
-        hasPassword: !!companyData.password,
-        registrationTime: new Date().toISOString()
-      });
+      console.log('Registration attempt logged for:', companyData.contact_email);
     } catch (error) {
       console.error('Registration failed: Invalid JSON payload', { error });
+      await supabase.rpc('rollback_transaction');
       
-      await supabase.rpc('log_registration_error', {
-        error_msg: 'Invalid JSON payload',
-        error_details: { error: error.message },
-        request_data: null,
-        client_ip: req.headers.get('x-real-ip') || req.headers.get('x-forwarded-for') || 'unknown'
-      });
-
       return new Response(
         JSON.stringify({ 
           error: 'Invalid request format', 
@@ -78,20 +69,8 @@ serve(async (req) => {
     // Validate company data
     const { isValid, errors } = validateCompanyData(companyData);
     if (!isValid) {
-      console.error('Registration failed: Validation errors', { 
-        errors,
-        receivedData: {
-          ...companyData,
-          password: '[REDACTED]'
-        }
-      });
-
-      await supabase.rpc('log_registration_error', {
-        error_msg: 'Validation failed',
-        error_details: { errors },
-        request_data: { ...companyData, password: '[REDACTED]' },
-        client_ip: req.headers.get('x-real-ip') || req.headers.get('x-forwarded-for') || 'unknown'
-      });
+      console.error('Registration failed: Validation errors', { errors });
+      await supabase.rpc('rollback_transaction');
 
       return new Response(
         JSON.stringify({ 
@@ -107,19 +86,16 @@ serve(async (req) => {
       await checkExistingCompany(supabase, companyData.contact_email!);
     } catch (error) {
       console.error('Registration failed: Company exists check failed', { error });
+      await supabase.rpc('rollback_transaction');
       
-      await supabase.rpc('log_registration_error', {
-        error_msg: 'Company exists check failed',
-        error_details: { error: error.message },
-        request_data: { email: companyData.contact_email },
-        client_ip: req.headers.get('x-real-ip') || req.headers.get('x-forwarded-for') || 'unknown'
-      });
-
-      throw error;
+      return new Response(
+        JSON.stringify({ 
+          error: 'Company exists',
+          details: [error.message]
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      )
     }
-
-    // Begin registration process
-    console.log('Starting registration process for:', companyData.contact_email);
 
     // Create auth user
     let user;
@@ -128,26 +104,29 @@ serve(async (req) => {
       console.log('Auth user created:', user.id);
     } catch (error) {
       console.error('Failed to create auth user:', error);
+      await supabase.rpc('rollback_transaction');
       
-      await supabase.rpc('log_registration_error', {
-        error_msg: 'Auth user creation failed',
-        error_details: { error: error.message },
-        request_data: { email: companyData.contact_email },
-        client_ip: req.headers.get('x-real-ip') || req.headers.get('x-forwarded-for') || 'unknown'
-      });
-
-      throw new Error('Failed to create user account');
+      return new Response(
+        JSON.stringify({ 
+          error: 'Auth creation failed',
+          details: [error.message]
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      )
     }
 
     try {
-      // Create company record
+      // Create company record within transaction
       const company = await registerCompany(supabase, {
         ...companyData as CompanyRegistrationData,
         auth_user_id: user.id
       });
       console.log('Company record created:', company.id);
 
-      // Send welcome email
+      // Commit transaction
+      await supabase.rpc('commit_transaction');
+
+      // Send welcome email (non-blocking)
       try {
         await sendWelcomeEmail(
           supabase,
@@ -158,16 +137,7 @@ serve(async (req) => {
         console.log('Welcome email sent successfully');
       } catch (emailError) {
         console.warn('Welcome email failed but registration completed:', emailError);
-        
-        await supabase.rpc('log_registration_error', {
-          error_msg: 'Welcome email failed',
-          error_details: { error: emailError.message },
-          request_data: { 
-            companyId: company.id,
-            email: companyData.contact_email 
-          },
-          client_ip: req.headers.get('x-real-ip') || req.headers.get('x-forwarded-for') || 'unknown'
-        });
+        // Don't roll back transaction for email failure
       }
 
       return new Response(
@@ -184,43 +154,29 @@ serve(async (req) => {
       )
 
     } catch (error) {
-      // If company creation fails, attempt to clean up the auth user
-      console.error('Registration failed after auth user creation:', error);
+      console.error('Failed to create company record:', error);
       
-      await supabase.rpc('log_registration_error', {
-        error_msg: 'Company creation failed',
-        error_details: { error: error.message },
-        request_data: { 
-          userId: user.id,
-          email: companyData.contact_email 
-        },
-        client_ip: req.headers.get('x-real-ip') || req.headers.get('x-forwarded-for') || 'unknown'
-      });
-
+      // Roll back transaction and clean up auth user
+      await supabase.rpc('rollback_transaction');
       try {
         await deleteAuthUser(supabase, user.id);
-        console.log('Successfully cleaned up auth user after failed registration');
+        console.log('Auth user cleaned up after failed registration');
       } catch (cleanupError) {
         console.error('Failed to clean up auth user:', cleanupError);
-        // Continue with throwing the original error
       }
-      throw error;
+
+      return new Response(
+        JSON.stringify({ 
+          error: 'Company creation failed',
+          details: [error.message]
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
+      )
     }
 
   } catch (error) {
     console.error('Unexpected registration error:', error);
-
-    // Log the unexpected error
-    try {
-      await supabase.rpc('log_registration_error', {
-        error_msg: 'Unexpected registration error',
-        error_details: { error: error.message },
-        request_data: null,
-        client_ip: req.headers.get('x-real-ip') || req.headers.get('x-forwarded-for') || 'unknown'
-      });
-    } catch (logError) {
-      console.error('Failed to log error:', logError);
-    }
+    await supabase.rpc('rollback_transaction');
 
     return new Response(
       JSON.stringify({ 
