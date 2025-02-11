@@ -790,6 +790,36 @@ export type Database = {
         }
         Relationships: []
       }
+      registration_errors: {
+        Row: {
+          attempt_time: string | null
+          cleaned_at: string | null
+          client_ip: string | null
+          error_details: Json | null
+          error_message: string | null
+          id: string
+          request_data: Json | null
+        }
+        Insert: {
+          attempt_time?: string | null
+          cleaned_at?: string | null
+          client_ip?: string | null
+          error_details?: Json | null
+          error_message?: string | null
+          id?: string
+          request_data?: Json | null
+        }
+        Update: {
+          attempt_time?: string | null
+          cleaned_at?: string | null
+          client_ip?: string | null
+          error_details?: Json | null
+          error_message?: string | null
+          id?: string
+          request_data?: Json | null
+        }
+        Relationships: []
+      }
       secrets: {
         Row: {
           id: number
@@ -1349,6 +1379,10 @@ export type Database = {
           p_ip: string
         }
         Returns: boolean
+      }
+      cleanup_old_registration_errors: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       create_company_bypass_rls: {
         Args: {
@@ -1942,6 +1976,15 @@ export type Database = {
         Args: {
           company_id: string
           error_message: string
+        }
+        Returns: undefined
+      }
+      log_registration_error: {
+        Args: {
+          error_msg: string
+          error_details: Json
+          request_data: Json
+          client_ip: string
         }
         Returns: undefined
       }
