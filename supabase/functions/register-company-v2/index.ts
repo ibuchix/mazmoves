@@ -86,8 +86,14 @@ serve(async (req) => {
     console.log('Starting registration process for:', companyData.contact_email);
 
     // Create auth user
-    const user = await createAuthUser(supabase, companyData.contact_email!, companyData.password!);
-    console.log('Auth user created:', user.id);
+    let user;
+    try {
+      user = await createAuthUser(supabase, companyData.contact_email!, companyData.password!);
+      console.log('Auth user created:', user.id);
+    } catch (error) {
+      console.error('Failed to create auth user:', error);
+      throw new Error('Failed to create user account');
+    }
 
     try {
       // Create company record
@@ -124,9 +130,15 @@ serve(async (req) => {
       )
 
     } catch (error) {
-      // If company creation fails, clean up the auth user
+      // If company creation fails, attempt to clean up the auth user
       console.error('Registration failed after auth user creation:', error);
-      await deleteAuthUser(supabase, user.id);
+      try {
+        await deleteAuthUser(supabase, user.id);
+        console.log('Successfully cleaned up auth user after failed registration');
+      } catch (cleanupError) {
+        console.error('Failed to clean up auth user:', cleanupError);
+        // Continue with throwing the original error
+      }
       throw error;
     }
 
@@ -135,7 +147,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         error: 'Registration failed', 
-        details: [error.message]
+        details: [error.message || 'An unexpected error occurred']
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
     )
