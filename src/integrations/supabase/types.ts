@@ -2234,7 +2234,47 @@ export type Database = {
             Args: {
               company_data: Json
             }
-            Returns: string
+            Returns: {
+              auth_user_id: string
+              billing_status: string | null
+              business_address: Json
+              contact_email: string
+              contact_phone: string | null
+              created_at: string | null
+              description: string | null
+              email_verified: boolean | null
+              encrypted_contact_phone: string | null
+              encrypted_registration_number: string | null
+              encrypted_vat_number: string | null
+              free_assignments_remaining: number | null
+              id: string
+              is_active: boolean | null
+              is_verified: boolean | null
+              last_payment_date: string | null
+              latitude: number | null
+              location: unknown | null
+              longitude: number | null
+              manager_name: string | null
+              name: string
+              password: string | null
+              password_hash: string | null
+              public_access_token: string
+              rating: number | null
+              registration_date: string | null
+              registration_number: string | null
+              registration_status:
+                | Database["public"]["Enums"]["registration_status_type"]
+                | null
+              service_areas: Json | null
+              stripe_customer_id: string | null
+              subscription_status: string | null
+              updated_at: string | null
+              vat_number: string | null
+              verification_date: string | null
+              verification_notes: string | null
+              welcome_email_sent: boolean | null
+              welcome_email_sent_at: string | null
+            }
           }
         | {
             Args: {
@@ -4199,6 +4239,7 @@ export type Database = {
     }
     Enums: {
       assignment_status: "active" | "completed" | "cancelled" | "accepted"
+      company_registration_status: "pending" | "active" | "suspended"
       invoice_status: "draft" | "pending" | "paid" | "failed" | "void"
       rate_limit_type: "hourly" | "daily" | "monthly"
       registration_status_type: "pending" | "approved" | "rejected"
