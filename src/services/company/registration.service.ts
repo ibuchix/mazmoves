@@ -4,7 +4,7 @@ import { CompanyRegistrationForm } from "@/types/company";
 
 export async function registerCompany(data: CompanyRegistrationForm) {
   try {
-    console.log('Registration service received data:', { 
+    console.log('Registration service started with data:', { 
       name: data.name,
       email: data.email,
       registrationNumber: data.registrationNumber,
@@ -41,31 +41,46 @@ export async function registerCompany(data: CompanyRegistrationForm) {
     );
 
     if (registerError) {
-      console.error('Edge function returned error:', registerError);
-      throw registerError;
+      console.error('Edge function error:', registerError);
+      
+      // Try to parse error details if available
+      try {
+        const errorDetails = JSON.parse(registerError.message);
+        if (errorDetails.error === 'Validation failed') {
+          throw new Error(errorDetails.details.join(', '));
+        }
+        throw new Error(errorDetails.error || errorDetails.message || registerError.message);
+      } catch (parseError) {
+        // If parsing fails, throw the original error
+        throw registerError;
+      }
     }
 
-    console.log('Edge function response:', response);
+    if (!response?.success) {
+      console.error('Registration failed with response:', response);
+      throw new Error(response?.message || 'Registration failed');
+    }
+
+    console.log('Registration successful:', response);
     return response;
 
   } catch (error: any) {
     console.error('Registration service error:', error);
     
-    // Enhanced error handling
-    if (error.message?.includes('already exists')) {
-      throw new Error('A company with this email already exists');
-    }
-    
-    // Check for validation errors from the edge function
-    try {
-      const errorBody = JSON.parse(error.message);
-      if (errorBody.error === 'Validation failed') {
-        throw new Error(errorBody.details.join(', '));
+    // Handle specific error cases
+    if (typeof error.message === 'string') {
+      if (error.message.includes('already exists')) {
+        throw new Error('A company with this email already exists');
       }
-    } catch (e) {
-      // If JSON parsing fails, throw the original error
+      if (error.message.includes('rate limit')) {
+        throw new Error('Too many registration attempts. Please try again later');
+      }
+      if (error.message.includes('validation')) {
+        throw new Error(error.message);
+      }
     }
     
-    throw error;
+    // For unexpected errors
+    throw new Error(error.message || 'An unexpected error occurred during registration');
   }
 }

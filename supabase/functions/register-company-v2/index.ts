@@ -14,17 +14,22 @@ serve(async (req) => {
   }
 
   try {
+    // Verify request origin
     if (!verifyOrigin(req)) {
       console.error('Registration failed: Invalid origin', {
         origin: req.headers.get('origin'),
         referer: req.headers.get('referer')
       });
       return new Response(
-        JSON.stringify({ error: 'Invalid origin' }),
+        JSON.stringify({ 
+          error: 'Invalid origin',
+          details: ['Request origin not allowed']
+        }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
+    // Parse and validate request data
     let companyData: Partial<CompanyRegistrationData>;
     try {
       const rawData = await req.text();
@@ -36,29 +41,39 @@ serve(async (req) => {
         name: companyData.name,
         email: companyData.contact_email,
         hasPassword: !!companyData.password,
-        registrationTime: new Date().toISOString(),
-        fullData: companyData // Log all data for debugging
+        registrationTime: new Date().toISOString()
       });
     } catch (error) {
       console.error('Registration failed: Invalid JSON payload', { error });
       return new Response(
-        JSON.stringify({ error: 'Invalid request format', details: error.message }),
+        JSON.stringify({ 
+          error: 'Invalid request format', 
+          details: ['Invalid JSON format', error.message]
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       )
     }
 
+    // Validate company data
     const { isValid, errors } = validateCompanyData(companyData);
     if (!isValid) {
       console.error('Registration failed: Validation errors', { 
         errors,
-        receivedData: companyData 
+        receivedData: {
+          ...companyData,
+          password: '[REDACTED]'
+        }
       });
       return new Response(
-        JSON.stringify({ error: 'Validation failed', details: errors }),
+        JSON.stringify({ 
+          error: 'Validation failed',
+          details: errors
+        }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
       )
     }
 
+    // Initialize Supabase client
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
@@ -67,8 +82,12 @@ serve(async (req) => {
     // Check for existing company
     await checkExistingCompany(supabase, companyData.contact_email!);
 
+    // Begin registration process
+    console.log('Starting registration process for:', companyData.contact_email);
+
     // Create auth user
     const user = await createAuthUser(supabase, companyData.contact_email!, companyData.password!);
+    console.log('Auth user created:', user.id);
 
     try {
       // Create company record
@@ -76,14 +95,20 @@ serve(async (req) => {
         ...companyData as CompanyRegistrationData,
         auth_user_id: user.id
       });
+      console.log('Company record created:', company.id);
 
       // Send welcome email
-      await sendWelcomeEmail(
-        supabase,
-        company.id,
-        companyData.contact_email!,
-        companyData.name!
-      );
+      try {
+        await sendWelcomeEmail(
+          supabase,
+          company.id,
+          companyData.contact_email!,
+          companyData.name!
+        );
+        console.log('Welcome email sent successfully');
+      } catch (emailError) {
+        console.warn('Welcome email failed but registration completed:', emailError);
+      }
 
       return new Response(
         JSON.stringify({ 
@@ -100,6 +125,7 @@ serve(async (req) => {
 
     } catch (error) {
       // If company creation fails, clean up the auth user
+      console.error('Registration failed after auth user creation:', error);
       await deleteAuthUser(supabase, user.id);
       throw error;
     }
@@ -107,7 +133,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Unexpected registration error:', error);
     return new Response(
-      JSON.stringify({ error: 'Registration failed', details: error.message }),
+      JSON.stringify({ 
+        error: 'Registration failed', 
+        details: [error.message]
+      }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 400 }
     )
   }
