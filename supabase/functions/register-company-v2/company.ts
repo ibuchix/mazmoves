@@ -48,26 +48,20 @@ export async function registerCompany(supabase: any, companyData: CompanyRegistr
 
 export async function sendWelcomeEmail(supabase: any, companyId: string, email: string, companyName: string) {
   try {
-    const emailResponse = await fetch(
-      `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-welcome-email`,
+    const { data: response, error } = await supabase.functions.invoke(
+      'send-welcome-email',
       {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-        },
-        body: JSON.stringify({
+        body: {
           companyId,
           email,
           companyName
-        })
+        }
       }
     );
 
-    if (!emailResponse.ok) {
-      const errorText = await emailResponse.text();
-      console.error('Welcome email failed:', errorText);
-      throw new Error(`Failed to send welcome email: ${errorText}`);
+    if (error) {
+      console.error('Welcome email failed:', error);
+      throw new Error(`Failed to send welcome email: ${error.message}`);
     }
 
     // Update email status in database
