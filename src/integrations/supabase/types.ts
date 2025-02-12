@@ -421,6 +421,61 @@ export type Database = {
           },
         ]
       }
+      email_logs: {
+        Row: {
+          company_id: string | null
+          created_at: string | null
+          email_type: string
+          error_message: string | null
+          id: string
+          recipient_email: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          created_at?: string | null
+          email_type: string
+          error_message?: string | null
+          id?: string
+          recipient_email: string
+          status: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          created_at?: string | null
+          email_type?: string
+          error_message?: string | null
+          id?: string
+          recipient_email?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_dashboard_mv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_logs_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_moves_view"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       email_templates: {
         Row: {
           created_at: string | null
@@ -1971,6 +2026,16 @@ export type Database = {
           "": unknown
         }
         Returns: Json
+      }
+      log_email_attempt: {
+        Args: {
+          p_company_id: string
+          p_email_type: string
+          p_recipient_email: string
+          p_status: string
+          p_error_message?: string
+        }
+        Returns: undefined
       }
       log_notification_error: {
         Args: {

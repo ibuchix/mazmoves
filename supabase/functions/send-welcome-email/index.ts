@@ -33,6 +33,8 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
+    console.log(`Attempting to send welcome email to ${email} for company ${companyName} (${companyId})`);
+
     // Check if email was already sent
     const { data: company } = await supabase
       .from('companies')
@@ -41,6 +43,17 @@ serve(async (req) => {
       .single();
 
     if (company?.welcome_email_sent) {
+      console.log(`Welcome email already sent to ${email}`);
+      
+      // Log the duplicate attempt
+      await supabase.rpc('log_email_attempt', {
+        p_company_id: companyId,
+        p_email_type: 'welcome',
+        p_recipient_email: email,
+        p_status: 'skipped',
+        p_error_message: 'Welcome email already sent'
+      });
+
       return new Response(
         JSON.stringify({ message: 'Welcome email already sent' }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -48,6 +61,7 @@ serve(async (req) => {
     }
 
     // Send welcome email
+    console.log('Sending welcome email via Resend...');
     const emailResponse = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {
@@ -70,12 +84,33 @@ serve(async (req) => {
     });
 
     if (!emailResponse.ok) {
-      console.error('Failed to send welcome email:', await emailResponse.text());
+      const errorText = await emailResponse.text();
+      console.error('Failed to send welcome email:', errorText);
+      
+      // Log the failure
+      await supabase.rpc('log_email_attempt', {
+        p_company_id: companyId,
+        p_email_type: 'welcome',
+        p_recipient_email: email,
+        p_status: 'failed',
+        p_error_message: errorText
+      });
+
       return new Response(
-        JSON.stringify({ error: 'Failed to send welcome email' }),
+        JSON.stringify({ error: 'Failed to send welcome email', details: errorText }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
+
+    console.log('Welcome email sent successfully');
+
+    // Log the success
+    await supabase.rpc('log_email_attempt', {
+      p_company_id: companyId,
+      p_email_type: 'welcome',
+      p_recipient_email: email,
+      p_status: 'success'
+    });
 
     // Mark email as sent in database
     const { error: updateError } = await supabase.rpc(
