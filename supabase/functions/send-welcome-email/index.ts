@@ -7,11 +7,13 @@ import { verifyOrigin } from "../_shared/verify-origin.ts"
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 
 serve(async (req) => {
+  // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
+    // Verify request origin
     if (!verifyOrigin(req)) {
       return new Response(
         JSON.stringify({ error: 'Invalid origin' }),
@@ -46,13 +48,15 @@ serve(async (req) => {
       console.log(`Welcome email already sent to ${email}`);
       
       // Log the duplicate attempt
-      await supabase.rpc('log_email_attempt', {
-        p_company_id: companyId,
-        p_email_type: 'welcome',
-        p_recipient_email: email,
-        p_status: 'skipped',
-        p_error_message: 'Welcome email already sent'
-      });
+      await supabase
+        .from('email_logs')
+        .insert({
+          company_id: companyId,
+          email_type: 'welcome',
+          recipient_email: email,
+          status: 'skipped',
+          error_message: 'Welcome email already sent'
+        });
 
       return new Response(
         JSON.stringify({ message: 'Welcome email already sent' }),
@@ -83,21 +87,24 @@ serve(async (req) => {
       }),
     });
 
+    const emailResponseText = await emailResponse.text();
+
     if (!emailResponse.ok) {
-      const errorText = await emailResponse.text();
-      console.error('Failed to send welcome email:', errorText);
+      console.error('Failed to send welcome email:', emailResponseText);
       
       // Log the failure
-      await supabase.rpc('log_email_attempt', {
-        p_company_id: companyId,
-        p_email_type: 'welcome',
-        p_recipient_email: email,
-        p_status: 'failed',
-        p_error_message: errorText
-      });
+      await supabase
+        .from('email_logs')
+        .insert({
+          company_id: companyId,
+          email_type: 'welcome',
+          recipient_email: email,
+          status: 'failed',
+          error_message: emailResponseText
+        });
 
       return new Response(
-        JSON.stringify({ error: 'Failed to send welcome email', details: errorText }),
+        JSON.stringify({ error: 'Failed to send welcome email', details: emailResponseText }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
@@ -105,18 +112,23 @@ serve(async (req) => {
     console.log('Welcome email sent successfully');
 
     // Log the success
-    await supabase.rpc('log_email_attempt', {
-      p_company_id: companyId,
-      p_email_type: 'welcome',
-      p_recipient_email: email,
-      p_status: 'success'
-    });
+    await supabase
+      .from('email_logs')
+      .insert({
+        company_id: companyId,
+        email_type: 'welcome',
+        recipient_email: email,
+        status: 'success'
+      });
 
     // Mark email as sent in database
-    const { error: updateError } = await supabase.rpc(
-      'mark_welcome_email_sent',
-      { company_id: companyId }
-    );
+    const { error: updateError } = await supabase
+      .from('companies')
+      .update({ 
+        welcome_email_sent: true,
+        welcome_email_sent_at: new Date().toISOString()
+      })
+      .eq('id', companyId);
 
     if (updateError) {
       console.error('Failed to mark email as sent:', updateError);
