@@ -48,26 +48,55 @@ export async function registerCompany(supabase: any, companyData: CompanyRegistr
 
 export async function sendWelcomeEmail(supabase: any, companyId: string, email: string, companyName: string) {
   try {
-    const { data: response, error } = await supabase.functions.invoke(
-      'send-welcome-email',
+    console.log('Attempting to send welcome email with data:', {
+      companyId,
+      email,
+      companyName,
+      hasSupabase: !!supabase,
+    });
+
+    // Create a new Supabase client using the service role key
+    const response = await fetch(
+      `${Deno.env.get('SUPABASE_URL')}/functions/v1/send-welcome-email`,
       {
-        body: {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+          'x-client-info': 'edge-function',
+          'apikey': Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+        },
+        body: JSON.stringify({
           companyId,
           email,
           companyName
-        }
+        })
       }
     );
 
-    if (error) {
-      console.error('Welcome email failed:', error);
-      throw new Error(`Failed to send welcome email: ${error.message}`);
+    const responseText = await response.text();
+    console.log('Welcome email response:', responseText);
+
+    if (!response.ok) {
+      console.error('Welcome email failed with status:', response.status);
+      console.error('Response text:', responseText);
+      throw new Error(`Failed to send welcome email: ${responseText}`);
+    }
+
+    try {
+      const responseData = JSON.parse(responseText);
+      console.log('Parsed response data:', responseData);
+    } catch (e) {
+      console.warn('Could not parse response as JSON:', e);
     }
 
     // Update email status in database
     const { error: updateError } = await supabase
       .from('companies')
-      .update({ welcome_email_sent: true })
+      .update({ 
+        welcome_email_sent: true,
+        welcome_email_sent_at: new Date().toISOString()
+      })
       .eq('id', companyId);
 
     if (updateError) {
@@ -76,7 +105,7 @@ export async function sendWelcomeEmail(supabase: any, companyId: string, email: 
 
     return true;
   } catch (error) {
-    console.error('Error sending welcome email:', error);
+    console.error('Error in sendWelcomeEmail:', error);
     throw error;
   }
 }

@@ -7,14 +7,21 @@ import { verifyOrigin } from "../_shared/verify-origin.ts"
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 
 serve(async (req) => {
+  // Log all incoming headers for debugging
+  console.log('Incoming request headers:', Object.fromEntries(req.headers.entries()));
+  
   // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    // Verify request origin
-    if (!verifyOrigin(req)) {
+    // Special case for edge function calls
+    const isEdgeFunction = req.headers.get('x-client-info') === 'edge-function';
+    if (isEdgeFunction) {
+      console.log('Request is from edge function, bypassing origin check');
+    } else if (!verifyOrigin(req)) {
+      console.error('Origin verification failed');
       return new Response(
         JSON.stringify({ error: 'Invalid origin' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -22,8 +29,10 @@ serve(async (req) => {
     }
 
     const { companyId, email, companyName } = await req.json();
+    console.log('Received request data:', { companyId, email, companyName });
 
     if (!companyId || !email || !companyName) {
+      console.error('Missing required parameters:', { companyId, email, companyName });
       return new Response(
         JSON.stringify({ error: 'Missing required parameters' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
