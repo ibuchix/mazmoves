@@ -93,7 +93,9 @@ export type Database = {
           contact_phone: string | null
           created_at: string | null
           description: string | null
+          email_verification_sent_at: string | null
           email_verified: boolean | null
+          email_verified_at: string | null
           encrypted_contact_phone: string | null
           encrypted_registration_number: string | null
           encrypted_vat_number: string | null
@@ -134,7 +136,9 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string | null
           description?: string | null
+          email_verification_sent_at?: string | null
           email_verified?: boolean | null
+          email_verified_at?: string | null
           encrypted_contact_phone?: string | null
           encrypted_registration_number?: string | null
           encrypted_vat_number?: string | null
@@ -175,7 +179,9 @@ export type Database = {
           contact_phone?: string | null
           created_at?: string | null
           description?: string | null
+          email_verification_sent_at?: string | null
           email_verified?: boolean | null
+          email_verified_at?: string | null
           encrypted_contact_phone?: string | null
           encrypted_registration_number?: string | null
           encrypted_vat_number?: string | null
@@ -414,6 +420,64 @@ export type Database = {
           },
           {
             foreignKeyName: "document_access_logs_company_id_fkey1"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_moves_view"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
+      email_confirmations: {
+        Row: {
+          company_id: string | null
+          confirmed_at: string | null
+          created_at: string | null
+          expires_at: string
+          id: string
+          ip_address: string | null
+          status: Database["public"]["Enums"]["token_status"] | null
+          token: string
+          updated_at: string | null
+        }
+        Insert: {
+          company_id?: string | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          ip_address?: string | null
+          status?: Database["public"]["Enums"]["token_status"] | null
+          token: string
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string | null
+          confirmed_at?: string | null
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          status?: Database["public"]["Enums"]["token_status"] | null
+          token?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_confirmations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_dashboard_mv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_confirmations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_confirmations_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "scheduled_moves_view"
@@ -1406,6 +1470,17 @@ export type Database = {
             }
             Returns: string
           }
+      check_confirmation_token: {
+        Args: {
+          token_param: string
+        }
+        Returns: {
+          is_valid: boolean
+          company_id: string
+          status: Database["public"]["Enums"]["token_status"]
+          message: string
+        }[]
+      }
       check_password_reset_rate_limit: {
         Args: {
           p_email: string
@@ -2350,7 +2425,9 @@ export type Database = {
               contact_phone: string | null
               created_at: string | null
               description: string | null
+              email_verification_sent_at: string | null
               email_verified: boolean | null
+              email_verified_at: string | null
               encrypted_contact_phone: string | null
               encrypted_registration_number: string | null
               encrypted_vat_number: string | null
@@ -4358,6 +4435,7 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "no_companies_found"
+      token_status: "pending" | "used" | "expired"
       user_role: "customer" | "company" | "admin"
     }
     CompositeTypes: {
