@@ -33,17 +33,15 @@ export default function ConfirmEmail() {
       }
 
       try {
-        // First check if the token is valid
-        const { data: tokenCheck, error: tokenError } = await supabase
-          .from('email_confirmations')
-          .select('*')
-          .eq('token', token)
-          .limit(1)
-          .single();
+        // Check if the token is valid using RPC function
+        const { data: tokenCheckResult, error: tokenError } = await supabase
+          .rpc('check_confirmation_token', { 
+            token_param: token 
+          });
 
-        if (tokenError || !tokenCheck) {
+        if (tokenError || !tokenCheckResult || !tokenCheckResult.is_valid) {
           setStatus('error');
-          setMessage('Invalid or expired confirmation link.');
+          setMessage(tokenCheckResult?.message || 'Invalid or expired confirmation link.');
           setVerifying(false);
           return;
         }
@@ -55,20 +53,11 @@ export default function ConfirmEmail() {
             email_verified: true,
             email_verified_at: new Date().toISOString()
           })
-          .eq('id', tokenCheck.company_id);
+          .eq('id', tokenCheckResult.company_id);
 
         if (updateError) {
           throw updateError;
         }
-
-        // Update token status to used
-        await supabase
-          .from('email_confirmations')
-          .update({
-            status: 'used' as const,
-            confirmed_at: new Date().toISOString()
-          })
-          .eq('id', tokenCheck.id);
 
         setStatus('success');
         setMessage('Your email has been successfully verified!');
