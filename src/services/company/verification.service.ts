@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 export async function verifyRegistration(authUserId: string, companyId: string) {

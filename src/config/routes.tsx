@@ -17,6 +17,7 @@ const RequestMove = lazy(() => import("@/pages/RequestMove"));
 const CompanyInvoices = lazy(() => import("@/pages/company/Invoices"));
 const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
 const AdminBilling = lazy(() => import("@/pages/admin/Billing"));
+const ConfirmEmail = lazy(() => import("@/pages/auth/ConfirmEmail"));
 
 export const publicRoutes: RouteConfig[] = [
   { path: "/", element: <Index /> },
@@ -30,6 +31,7 @@ export const publicRoutes: RouteConfig[] = [
   { path: "/company/register", element: <Register /> },
   { path: "/request-move", element: <RequestMove /> },
   { path: "/company/:id", element: <PublicDashboard /> },
+  { path: "/confirm-email", element: <ConfirmEmail /> },
 ];
 
 export const companyRoutes: RouteConfig[] = [
