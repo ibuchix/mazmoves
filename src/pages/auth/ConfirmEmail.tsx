@@ -14,6 +14,10 @@ interface TokenCheckResult {
   message: string;
 }
 
+interface TokenCheckParams {
+  token_param: string;
+}
+
 export default function ConfirmEmail() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -35,7 +39,7 @@ export default function ConfirmEmail() {
       try {
         // Check if the token is valid using RPC function
         const { data, error: tokenError } = await supabase
-          .rpc<TokenCheckResult>('check_confirmation_token', { 
+          .rpc<TokenCheckResult, TokenCheckParams>('check_confirmation_token', { 
             token_param: token 
           });
 
