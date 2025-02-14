@@ -7,15 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, Check, Mail } from "lucide-react";
 import { toast } from "sonner";
 
+type TokenStatus = 'pending' | 'used' | 'expired';
+
 type TokenCheckResult = {
   is_valid: boolean;
   company_id: string;
-  status: 'pending' | 'used' | 'expired';
+  status: TokenStatus;
   message: string;
-}
-
-type TokenCheckParams = {
-  token_param: string;
 }
 
 export default function ConfirmEmail() {
@@ -37,7 +35,6 @@ export default function ConfirmEmail() {
       }
 
       try {
-        // Check if the token is valid using RPC function
         const { data, error: tokenError } = await supabase
           .from('email_confirmations')
           .select('company_id, status')
@@ -67,7 +64,7 @@ export default function ConfirmEmail() {
         // Update token status
         await supabase
           .from('email_confirmations')
-          .update({ status: 'used' as const })
+          .update({ status: 'used' as TokenStatus })
           .eq('token', token);
 
         setStatus('success');
