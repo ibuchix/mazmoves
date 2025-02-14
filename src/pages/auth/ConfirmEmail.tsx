@@ -6,9 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, Check, Mail } from "lucide-react";
 import { toast } from "sonner";
-import { Database } from "@/integrations/supabase/types";
 
-type TokenCheckResponse = Database["public"]["Functions"]["check_confirmation_token"]["Returns"][0];
+interface TokenCheckResponse {
+  is_valid: boolean;
+  company_id: string;
+  status: 'pending' | 'used' | 'expired';
+  message: string;
+}
 
 export default function ConfirmEmail() {
   const [searchParams] = useSearchParams();
@@ -29,17 +33,17 @@ export default function ConfirmEmail() {
       }
 
       try {
+        // First check if the token is valid
         const { data: tokenCheck, error: tokenError } = await supabase
-          .rpc('check_confirmation_token', { 
-            token_param: token 
-          }) as { 
-            data: TokenCheckResponse | null; 
-            error: Error | null 
-          };
+          .from('email_confirmations')
+          .select('*')
+          .eq('token', token)
+          .limit(1)
+          .single();
 
-        if (tokenError || !tokenCheck?.is_valid) {
+        if (tokenError || !tokenCheck) {
           setStatus('error');
-          setMessage(tokenCheck?.message || 'Invalid or expired confirmation link.');
+          setMessage('Invalid or expired confirmation link.');
           setVerifying(false);
           return;
         }
@@ -57,8 +61,15 @@ export default function ConfirmEmail() {
           throw updateError;
         }
 
-        // Mark the token as used - we'll use companies update for now since
-        // email_confirmations table is not in the generated types yet
+        // Update token status to used
+        await supabase
+          .from('email_confirmations')
+          .update({
+            status: 'used' as const,
+            confirmed_at: new Date().toISOString()
+          })
+          .eq('id', tokenCheck.id);
+
         setStatus('success');
         setMessage('Your email has been successfully verified!');
         toast.success('Email verified successfully');
