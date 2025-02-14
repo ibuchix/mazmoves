@@ -34,8 +34,7 @@ export default function ConfirmEmail() {
 
       try {
         // First check if the token is valid
-        const { data: tokenCheck, error: tokenError } = await supabase
-          .rpc<TokenCheckResponse>('check_confirmation_token', { token_param: token });
+        const { data: tokenCheck, error: tokenError } = await supabase.rpc<TokenCheckResponse>('check_confirmation_token', { token_param: token });
 
         if (tokenError || !tokenCheck?.is_valid) {
           setStatus('error');
