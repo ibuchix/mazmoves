@@ -6,13 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AlertCircle, Check, Mail } from "lucide-react";
 import { toast } from "sonner";
+import { Database } from "@/integrations/supabase/types";
 
-interface TokenCheckResponse {
-  is_valid: boolean;
-  company_id: string;
-  status: 'pending' | 'used' | 'expired';
-  message: string;
-}
+type TokenCheckResponse = Database["public"]["Functions"]["check_confirmation_token"]["Returns"][0];
 
 export default function ConfirmEmail() {
   const [searchParams] = useSearchParams();
@@ -33,8 +29,13 @@ export default function ConfirmEmail() {
       }
 
       try {
-        // First check if the token is valid
-        const { data: tokenCheck, error: tokenError } = await supabase.rpc<TokenCheckResponse>('check_confirmation_token', { token_param: token });
+        const { data: tokenCheck, error: tokenError } = await supabase
+          .rpc('check_confirmation_token', { 
+            token_param: token 
+          }) as { 
+            data: TokenCheckResponse | null; 
+            error: Error | null 
+          };
 
         if (tokenError || !tokenCheck?.is_valid) {
           setStatus('error');
