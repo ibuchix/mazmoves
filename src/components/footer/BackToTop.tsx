@@ -36,7 +36,7 @@ export default function BackToTop() {
       onClick={scrollToTop}
       aria-label="Back to top"
     >
-      <ArrowUp className="h-4 w-4" />
+      <ArrowUp className="h-4 w-4 text-[#d2491f]" />
     </Button>
   );
 }
