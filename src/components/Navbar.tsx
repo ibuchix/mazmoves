@@ -40,16 +40,16 @@ export default function Navbar() {
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 transition-shadow duration-300 backdrop-blur-sm bg-white/90">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-[88px]"> {/* Increased height to accommodate larger logo */}
           <div className="flex-shrink-0 transition-transform duration-300 hover:-translate-y-0.5">
             <Link to="/" className="block">
               <img 
                 src="/lovable-uploads/b700dde9-463e-4b6e-8523-ec9f718b3beb.png" 
                 alt="MAZ Moves - Your Trusted Moving Partner" 
-                className="h-16 w-auto"
+                className="h-[72px] w-auto" // Increased from h-16 (64px) to 72px
                 loading="eager"
                 width="180"
-                height="64"
+                height="72"
               />
             </Link>
           </div>
