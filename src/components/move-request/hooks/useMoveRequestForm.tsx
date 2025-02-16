@@ -1,16 +1,20 @@
-import { useState } from "react";
+
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { MoveRequestForm, MoveType } from "@/types/move-request";
-import { useLocation } from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useSubmitMoveRequest } from "@/hooks/use-submit-move-request";
 
 export function useMoveRequestForm() {
   const location = useLocation();
-  const initialMoveType = location.state?.moveType || null;
-  const [step, setStep] = useState(initialMoveType ? 2 : 1);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialMoveType = searchParams.get("moveType") as MoveType || location.state?.moveType || null;
+  const initialStep = searchParams.get("step") ? parseInt(searchParams.get("step")!) : (initialMoveType ? 2 : 1);
+  
+  const [step, setStep] = useState(initialStep);
   const [moveType, setMoveType] = useState<MoveType | null>(initialMoveType);
-  const { register, handleSubmit, watch, formState: { errors } } = useForm<MoveRequestForm>();
+  const { register, handleSubmit, watch, formState: { errors }, setValue } = useForm<MoveRequestForm>();
   const { toast } = useToast();
   const { 
     isSubmitting, 
@@ -20,6 +24,16 @@ export function useMoveRequestForm() {
     handleSubmit: onSubmit, 
     handleSuccessClose 
   } = useSubmitMoveRequest();
+
+  // Update URL params when step or moveType changes
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+    params.set("step", step.toString());
+    if (moveType) {
+      params.set("moveType", moveType);
+    }
+    setSearchParams(params, { replace: true });
+  }, [step, moveType, setSearchParams]);
 
   const totalSteps = 5;
   const isProcessing = isSubmitting || isGeocodingPickup || isGeocodingDelivery;
