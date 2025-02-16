@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MoveType } from "@/types/move-request";
@@ -16,8 +17,7 @@ export default function Index() {
 
   const handleGetQuotes = () => {
     if (moveType) {
-      navigate('/request-move', { 
-        state: { moveType },
+      navigate('/request-move?step=2&moveType=' + moveType, { 
         replace: true 
       });
     }
