@@ -9,8 +9,10 @@ import { useSubmitMoveRequest } from "@/hooks/use-submit-move-request";
 export function useMoveRequestForm() {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const initialMoveType = searchParams.get("moveType") as MoveType || location.state?.moveType || null;
-  const initialStep = searchParams.get("step") ? parseInt(searchParams.get("step")!) : (initialMoveType ? 2 : 1);
+  
+  // Ensure we have valid initial values
+  const initialMoveType = searchParams.get("moveType") as MoveType || null;
+  const initialStep = searchParams.get("step") ? Math.max(1, parseInt(searchParams.get("step")!)) : 1;
   
   const [step, setStep] = useState(initialStep);
   const [moveType, setMoveType] = useState<MoveType | null>(initialMoveType);
@@ -31,9 +33,18 @@ export function useMoveRequestForm() {
     params.set("step", step.toString());
     if (moveType) {
       params.set("moveType", moveType);
+    } else {
+      params.delete("moveType");
     }
     setSearchParams(params, { replace: true });
   }, [step, moveType, setSearchParams]);
+
+  // Ensure step is valid based on moveType
+  useEffect(() => {
+    if (!moveType && step > 1) {
+      setStep(1);
+    }
+  }, [moveType, step]);
 
   const totalSteps = 5;
   const isProcessing = isSubmitting || isGeocodingPickup || isGeocodingDelivery;
