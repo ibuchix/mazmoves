@@ -3,7 +3,30 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
 import { corsHeaders } from "../_shared/cors.ts";
 import { verifyOrigin } from "../_shared/verify-origin.ts";
-import { MoveRequestForm, MoveType, PropertySize } from "../../../src/types/move-request.ts";
+
+// Define types locally instead of importing from frontend
+type MoveType = "domestic" | "commercial" | "international";
+type PropertySize = "1" | "2" | "3" | "4" | "5+" | "office" | "warehouse" | "retail";
+
+interface Address {
+  street: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  country?: string;
+}
+
+interface MoveRequestForm {
+  moveType: MoveType;
+  propertySize: PropertySize;
+  pickupAddress: Address;
+  deliveryAddress: Address;
+  moveDate: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  specialInstructions?: string;
+}
 
 const ALLOWED_MOVE_TYPES: MoveType[] = ["domestic", "commercial", "international"];
 const ALLOWED_PROPERTY_SIZES: PropertySize[] = ["1", "2", "3", "4", "5+", "office", "warehouse", "retail"];
