@@ -1,3 +1,4 @@
+
 import { lazy } from "react";
 import { RouteConfig } from "@/types/route";
 
@@ -29,7 +30,7 @@ export const publicRoutes: RouteConfig[] = [
   { path: "/auth/forgot-password", element: <ForgotPassword /> },
   { path: "/auth/reset-password", element: <ResetPassword /> },
   { path: "/company/register", element: <Register /> },
-  { path: "/request-move", element: <RequestMove /> },
+  { path: "/request-move/*", element: <RequestMove /> }, // Updated to handle all sub-paths
   { path: "/company/:id", element: <PublicDashboard /> },
   { path: "/confirm-email", element: <ConfirmEmail /> },
 ];
