@@ -5,6 +5,7 @@ import { MoveRequestForm, MoveType } from "@/types/move-request";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useSubmitMoveRequest } from "@/hooks/use-submit-move-request";
+import DOMPurify from "dompurify";
 
 export function useMoveRequestForm() {
   const location = useLocation();
@@ -16,7 +17,13 @@ export function useMoveRequestForm() {
   
   const [step, setStep] = useState(initialStep);
   const [moveType, setMoveType] = useState<MoveType | null>(initialMoveType);
-  const { register, handleSubmit, watch, formState: { errors }, setValue } = useForm<MoveRequestForm>();
+
+  const { register, handleSubmit, watch, formState: { errors }, setValue, getValues } = useForm<MoveRequestForm>({
+    defaultValues: {
+      moveType: initialMoveType || undefined,
+    }
+  });
+
   const { toast } = useToast();
   const { 
     isSubmitting, 
@@ -49,31 +56,73 @@ export function useMoveRequestForm() {
   const totalSteps = 5;
   const isProcessing = isSubmitting || isGeocodingPickup || isGeocodingDelivery;
 
-  const nextStep = () => {
-    // For step 3 (pickup address), validate before proceeding
-    if (step === 3) {
-      const pickupAddress = watch("pickupAddress");
-      if (!pickupAddress?.street || !pickupAddress?.city || !pickupAddress?.state || !pickupAddress?.zipCode) {
-        toast({
-          title: "Missing Information",
-          description: "Please fill in all pickup address fields before proceeding",
-          variant: "destructive"
-        });
-        return;
-      }
-    }
+  const validateField = (value: string, pattern: RegExp, minLength = 0): boolean => {
+    if (!value || value.length < minLength) return false;
+    return pattern.test(value);
+  };
 
-    // For step 4 (delivery address), validate before proceeding
-    if (step === 4) {
-      const deliveryAddress = watch("deliveryAddress");
-      if (!deliveryAddress?.street || !deliveryAddress?.city || !deliveryAddress?.state || !deliveryAddress?.zipCode) {
-        toast({
-          title: "Missing Information",
-          description: "Please fill in all delivery address fields before proceeding",
-          variant: "destructive"
+  const sanitizeInput = (input: string): string => {
+    return DOMPurify.sanitize(input.trim(), { 
+      ALLOWED_TAGS: [], // No HTML tags allowed
+      ALLOWED_ATTR: [] // No attributes allowed
+    });
+  };
+
+  const nextStep = () => {
+    const currentValues = getValues();
+
+    // Validate based on current step
+    switch (step) {
+      case 2: // Property Size
+        if (!currentValues.propertySize) {
+          toast({
+            title: "Missing Information",
+            description: "Please select a property size before proceeding",
+            variant: "destructive"
+          });
+          return;
+        }
+        break;
+
+      case 3: // Pickup Address
+        const pickupAddress = currentValues.pickupAddress;
+        if (!pickupAddress?.street || !pickupAddress?.city || !pickupAddress?.state || !pickupAddress?.zipCode) {
+          toast({
+            title: "Missing Information",
+            description: "Please fill in all pickup address fields before proceeding",
+            variant: "destructive"
+          });
+          return;
+        }
+        // Sanitize address inputs
+        setValue('pickupAddress', {
+          street: sanitizeInput(pickupAddress.street),
+          city: sanitizeInput(pickupAddress.city),
+          state: sanitizeInput(pickupAddress.state),
+          zipCode: sanitizeInput(pickupAddress.zipCode),
+          country: pickupAddress.country ? sanitizeInput(pickupAddress.country) : undefined
         });
-        return;
-      }
+        break;
+
+      case 4: // Delivery Address
+        const deliveryAddress = currentValues.deliveryAddress;
+        if (!deliveryAddress?.street || !deliveryAddress?.city || !deliveryAddress?.state || !deliveryAddress?.zipCode) {
+          toast({
+            title: "Missing Information",
+            description: "Please fill in all delivery address fields before proceeding",
+            variant: "destructive"
+          });
+          return;
+        }
+        // Sanitize address inputs
+        setValue('deliveryAddress', {
+          street: sanitizeInput(deliveryAddress.street),
+          city: sanitizeInput(deliveryAddress.city),
+          state: sanitizeInput(deliveryAddress.state),
+          zipCode: sanitizeInput(deliveryAddress.zipCode),
+          country: deliveryAddress.country ? sanitizeInput(deliveryAddress.country) : undefined
+        });
+        break;
     }
 
     setStep((prev) => Math.min(prev + 1, totalSteps));
@@ -83,6 +132,7 @@ export function useMoveRequestForm() {
 
   const handleMoveTypeChange = (type: MoveType) => {
     setMoveType(type);
+    setValue('moveType', type);
     setStep(2); // Immediately move to step 2 when type is selected
   };
 
@@ -95,12 +145,48 @@ export function useMoveRequestForm() {
       });
       return;
     }
-    
+
+    // Final validation before submission
     const formData = {
       ...data,
-      moveType
+      moveType,
+      fullName: sanitizeInput(data.fullName),
+      email: sanitizeInput(data.email),
+      phone: sanitizeInput(data.phone),
+      specialInstructions: data.specialInstructions ? sanitizeInput(data.specialInstructions) : undefined,
+      moveDate: data.moveDate // Date input is already sanitized by the input type
     };
-    
+
+    // Validate email format
+    if (!validateField(formData.email, /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate phone format
+    if (!validateField(formData.phone, /^[0-9\s\-\+\(\)]{8,}$/)) {
+      toast({
+        title: "Invalid Phone Number",
+        description: "Please enter a valid phone number",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate name length and format
+    if (!validateField(formData.fullName, /^[a-zA-Z\s-']+$/, 2)) {
+      toast({
+        title: "Invalid Name",
+        description: "Please enter a valid full name (minimum 2 characters)",
+        variant: "destructive"
+      });
+      return;
+    }
+
     onSubmit(formData);
   };
 
