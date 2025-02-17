@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { MoveRequestForm, MoveType } from "@/types/move-request";
+import { MoveRequestForm, MoveType, PropertySize } from "@/types/move-request";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useSubmitMoveRequest } from "@/hooks/use-submit-move-request";
@@ -18,11 +18,14 @@ export function useMoveRequestForm() {
   const [step, setStep] = useState(initialStep);
   const [moveType, setMoveType] = useState<MoveType | null>(initialMoveType);
 
-  const { register, handleSubmit, watch, formState: { errors }, setValue, getValues } = useForm<MoveRequestForm>({
+  const form = useForm<MoveRequestForm>({
     defaultValues: {
       moveType: initialMoveType || undefined,
+      propertySize: undefined
     }
   });
+
+  const { register, handleSubmit, watch, formState: { errors }, setValue, getValues } = form;
 
   const { toast } = useToast();
   const { 
@@ -33,6 +36,9 @@ export function useMoveRequestForm() {
     handleSubmit: onSubmit, 
     handleSuccessClose 
   } = useSubmitMoveRequest();
+
+  // Watch for propertySize changes
+  const propertySize = watch('propertySize');
 
   // Update URL params when step or moveType changes
   useEffect(() => {
@@ -70,11 +76,12 @@ export function useMoveRequestForm() {
 
   const nextStep = () => {
     const currentValues = getValues();
+    console.log('Current form values:', currentValues); // Debug log
 
     // Validate based on current step
     switch (step) {
       case 2: // Property Size
-        if (!currentValues.propertySize) {
+        if (!propertySize) {
           toast({
             title: "Missing Information",
             description: "Please select a property size before proceeding",
@@ -133,7 +140,14 @@ export function useMoveRequestForm() {
   const handleMoveTypeChange = (type: MoveType) => {
     setMoveType(type);
     setValue('moveType', type);
-    setStep(2); // Immediately move to step 2 when type is selected
+    // Reset propertySize when move type changes
+    setValue('propertySize', undefined);
+    setStep(2);
+  };
+
+  const handlePropertySizeChange = (size: PropertySize) => {
+    console.log('Setting property size:', size); // Debug log
+    setValue('propertySize', size, { shouldValidate: true });
   };
 
   const handleFormSubmit = (data: MoveRequestForm) => {
@@ -202,8 +216,10 @@ export function useMoveRequestForm() {
     handleSubmit,
     handleFormSubmit,
     handleMoveTypeChange,
+    handlePropertySizeChange,
     handleSuccessClose,
     nextStep,
-    prevStep
+    prevStep,
+    propertySize
   };
 }

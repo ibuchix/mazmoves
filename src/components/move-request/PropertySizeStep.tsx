@@ -10,15 +10,13 @@ interface PropertySizeStepProps {
 }
 
 export function PropertySizeStep({ moveType, value, onChange }: PropertySizeStepProps) {
-  const handleChange = (newValue: string) => {
-    onChange(newValue as PropertySize);
-  };
+  console.log('PropertySizeStep value:', value); // Debug log
 
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">Property Size</h3>
       {moveType === "domestic" && (
-        <RadioGroup value={value} onValueChange={handleChange}>
+        <RadioGroup value={value} onValueChange={onChange}>
           {["1", "2", "3", "4", "5+"].map((size) => (
             <div key={size} className="flex items-center space-x-2">
               <RadioGroupItem value={size} id={`size-${size}`} />
@@ -28,7 +26,7 @@ export function PropertySizeStep({ moveType, value, onChange }: PropertySizeStep
         </RadioGroup>
       )}
       {moveType === "commercial" && (
-        <RadioGroup value={value} onValueChange={handleChange}>
+        <RadioGroup value={value} onValueChange={onChange}>
           {["office", "warehouse", "retail"].map((type) => (
             <div key={type} className="flex items-center space-x-2">
               <RadioGroupItem value={type} id={`type-${type}`} />
@@ -40,7 +38,7 @@ export function PropertySizeStep({ moveType, value, onChange }: PropertySizeStep
         </RadioGroup>
       )}
       {moveType === "international" && (
-        <RadioGroup value={value} onValueChange={handleChange}>
+        <RadioGroup value={value} onValueChange={onChange}>
           {["1", "2", "3", "4", "5+", "business"].map((size) => (
             <div key={size} className="flex items-center space-x-2">
               <RadioGroupItem value={size} id={`size-${size}`} />
