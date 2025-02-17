@@ -5,7 +5,7 @@ import { AddressStep } from "./AddressStep";
 import { ContactStep } from "./ContactStep";
 import { FormNavigation } from "./FormNavigation";
 import { MoveType } from "@/types/move-request";
-import { UseFormRegister, FieldErrors } from "react-hook-form";
+import { UseFormRegister, FieldErrors, UseFormSetValue } from "react-hook-form";
 import { MoveRequestForm } from "@/types/move-request";
 
 interface MoveRequestFormContentProps {
@@ -15,6 +15,7 @@ interface MoveRequestFormContentProps {
   register: UseFormRegister<MoveRequestForm>;
   errors: FieldErrors<MoveRequestForm>;
   watch: any;
+  setValue: UseFormSetValue<MoveRequestForm>;
   isProcessing: boolean;
   onMoveTypeChange: (type: MoveType) => void;
   onNext: () => void;
@@ -28,6 +29,7 @@ export function MoveRequestFormContent({
   totalSteps,
   moveType,
   register,
+  setValue,
   errors,
   watch,
   isProcessing,
@@ -52,8 +54,7 @@ export function MoveRequestFormContent({
           moveType={moveType}
           value={watch("propertySize")}
           onChange={value => {
-            // Directly set the form value using register
-            register("propertySize").onChange({ target: { value } });
+            setValue("propertySize", value);
           }}
         />
       )}

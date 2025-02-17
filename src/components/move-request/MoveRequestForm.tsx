@@ -1,8 +1,7 @@
-import { Card, CardContent } from "@/components/ui/card";
-import { LoadingOverlay } from "@/components/ui/loading-overlay";
-import { SuccessDialog } from "./SuccessDialog";
-import { FormProgress } from "./FormProgress";
+
 import { MoveRequestFormContent } from "./MoveRequestFormContent";
+import { FormProgress } from "./FormProgress";
+import { SuccessDialog } from "./SuccessDialog";
 import { useMoveRequestForm } from "./hooks/useMoveRequestForm";
 
 export function MoveRequestForm() {
@@ -13,46 +12,40 @@ export function MoveRequestForm() {
     register,
     errors,
     watch,
+    setValue,
     isProcessing,
     showSuccess,
-    handleSubmit,
-    handleFormSubmit,
     handleMoveTypeChange,
     handleSuccessClose,
     nextStep,
-    prevStep
+    prevStep,
+    isGeocodingPickup,
+    isGeocodingDelivery
   } = useMoveRequestForm();
 
   return (
-    <div data-testid="move-request-form" className="container mx-auto px-4 py-8 max-w-2xl">
-      <Card>
-        <CardContent className="p-6">
-          <div className="relative">
-            {isProcessing && <LoadingOverlay />}
-            
-            <FormProgress step={step} totalSteps={totalSteps} />
-
-            <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-              <MoveRequestFormContent
-                step={step}
-                totalSteps={totalSteps}
-                moveType={moveType}
-                register={register}
-                errors={errors}
-                watch={watch}
-                isProcessing={isProcessing}
-                onMoveTypeChange={handleMoveTypeChange}
-                onNext={nextStep}
-                onPrevious={prevStep}
-              />
-            </form>
-          </div>
-        </CardContent>
-      </Card>
+    <div className="max-w-2xl mx-auto p-4 space-y-6" data-testid="move-request-form">
+      <FormProgress currentStep={step} totalSteps={totalSteps} />
+      
+      <MoveRequestFormContent
+        step={step}
+        totalSteps={totalSteps}
+        moveType={moveType}
+        register={register}
+        errors={errors}
+        watch={watch}
+        setValue={setValue}
+        isProcessing={isProcessing}
+        onMoveTypeChange={handleMoveTypeChange}
+        onNext={nextStep}
+        onPrevious={prevStep}
+        isGeocodingPickup={isGeocodingPickup}
+        isGeocodingDelivery={isGeocodingDelivery}
+      />
 
       <SuccessDialog 
-        isOpen={showSuccess} 
-        onClose={handleSuccessClose}
+        open={showSuccess} 
+        onClose={handleSuccessClose} 
       />
     </div>
   );
