@@ -24,7 +24,7 @@ export function MoveRequestForm() {
   } = useMoveRequestForm();
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-2xl">
+    <div data-testid="move-request-form" className="container mx-auto px-4 py-8 max-w-2xl">
       <Card>
         <CardContent className="p-6">
           <div className="relative">
