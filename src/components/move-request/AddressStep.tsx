@@ -1,3 +1,4 @@
+
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { UseFormRegister, FieldErrors } from "react-hook-form";
@@ -46,7 +47,15 @@ export function AddressStep({
               addressErrors?.street ? "border-red-500" : ""
             }`}
             {...register(`${type}Address.street` as any, { 
-              required: "Street address is required" 
+              required: "Street address is required",
+              maxLength: {
+                value: 100,
+                message: "Street address cannot exceed 100 characters"
+              },
+              pattern: {
+                value: /^[a-zA-Z0-9\s,.\-#']+$/,
+                message: "Please enter a valid street address"
+              }
             })}
             disabled={isGeocoding}
           />
@@ -66,7 +75,15 @@ export function AddressStep({
               addressErrors?.city ? "border-red-500" : ""
             }`}
             {...register(`${type}Address.city` as any, { 
-              required: "City is required" 
+              required: "City is required",
+              maxLength: {
+                value: 50,
+                message: "City name cannot exceed 50 characters"
+              },
+              pattern: {
+                value: /^[a-zA-Z\s\-']+$/,
+                message: "Please enter a valid city name"
+              }
             })}
             disabled={isGeocoding}
           />
@@ -86,7 +103,15 @@ export function AddressStep({
               addressErrors?.state ? "border-red-500" : ""
             }`}
             {...register(`${type}Address.state` as any, { 
-              required: "State/Province is required" 
+              required: "State/Province is required",
+              maxLength: {
+                value: 20,
+                message: "State/Province name cannot exceed 20 characters"
+              },
+              pattern: {
+                value: /^[a-zA-Z\s\-']+$/,
+                message: "Please enter a valid state or province name"
+              }
             })}
             disabled={isGeocoding}
           />
@@ -107,7 +132,15 @@ export function AddressStep({
                 addressErrors?.country ? "border-red-500" : ""
               }`}
               {...register(`${type}Address.country` as any, { 
-                required: "Country is required" 
+                required: "Country is required",
+                maxLength: {
+                  value: 56,
+                  message: "Country name cannot exceed 56 characters"
+                },
+                pattern: {
+                  value: /^[a-zA-Z\s\-']+$/,
+                  message: "Please enter a valid country name"
+                }
               })}
               disabled={isGeocoding}
             />
@@ -129,6 +162,10 @@ export function AddressStep({
             }`}
             {...register(`${type}Address.zipCode` as any, { 
               required: "Postal code is required",
+              maxLength: {
+                value: 10,
+                message: "Postal code cannot exceed 10 characters"
+              },
               pattern: {
                 value: /^[A-Z0-9\s-]{3,10}$/i,
                 message: "Please enter a valid postal code"
