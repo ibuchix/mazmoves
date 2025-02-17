@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 
 interface FormNavigationProps {
@@ -7,6 +8,7 @@ interface FormNavigationProps {
   onPrevious: () => void;
   onNext: () => void;
   onSubmit?: () => void;
+  isValid?: boolean;
 }
 
 export function FormNavigation({ 
@@ -15,7 +17,8 @@ export function FormNavigation({
   isProcessing, 
   onPrevious, 
   onNext,
-  onSubmit 
+  onSubmit,
+  isValid = true
 }: FormNavigationProps) {
   return (
     <div className="flex justify-between pt-4">
@@ -35,7 +38,7 @@ export function FormNavigation({
           type="button" 
           onClick={onNext}
           className="bg-[#040480] hover:bg-[#1f3dd2] text-white ml-auto"
-          disabled={isProcessing}
+          disabled={isProcessing || !isValid}
         >
           Next
         </Button>
@@ -43,8 +46,12 @@ export function FormNavigation({
         <Button 
           type="submit"
           onClick={onSubmit} 
-          disabled={isProcessing}
-          className="bg-[#040480] hover:bg-[#1f3dd2] text-white ml-auto"
+          disabled={isProcessing || !isValid}
+          className={`ml-auto ${
+            isProcessing || !isValid 
+              ? "bg-gray-400 cursor-not-allowed" 
+              : "bg-[#040480] hover:bg-[#1f3dd2]"
+          } text-white`}
         >
           {isProcessing ? "Submitting..." : "Submit Request"}
         </Button>
