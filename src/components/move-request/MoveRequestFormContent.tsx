@@ -22,6 +22,8 @@ interface MoveRequestFormContentProps {
   onPrevious: () => void;
   isGeocodingPickup?: boolean;
   isGeocodingDelivery?: boolean;
+  onSubmit?: () => void;
+  isValid?: boolean;
 }
 
 export function MoveRequestFormContent({
@@ -37,10 +39,15 @@ export function MoveRequestFormContent({
   onNext,
   onPrevious,
   isGeocodingPickup,
-  isGeocodingDelivery
+  isGeocodingDelivery,
+  onSubmit,
+  isValid
 }: MoveRequestFormContentProps) {
   return (
-    <>
+    <form onSubmit={(e) => {
+      e.preventDefault();
+      if (onSubmit) onSubmit();
+    }}>
       {step === 1 && (
         <MoveTypeStep
           value={moveType}
@@ -94,7 +101,9 @@ export function MoveRequestFormContent({
         isProcessing={isProcessing}
         onPrevious={onPrevious}
         onNext={onNext}
+        onSubmit={onSubmit}
+        isValid={isValid}
       />
-    </>
+    </form>
   );
 }

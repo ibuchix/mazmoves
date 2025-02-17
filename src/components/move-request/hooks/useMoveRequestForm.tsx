@@ -7,10 +7,12 @@ import { useFormValidation } from "./form/useFormValidation";
 import { useUrlParams } from "./url/useUrlParams";
 import { useFormSubmission } from "./form/useFormSubmission";
 import { useSubmitMoveRequest } from "@/hooks/use-submit-move-request";
+import { useToast } from "@/hooks/use-toast";
 
 export function useMoveRequestForm() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const { toast } = useToast();
   
   // Ensure we have valid initial values
   const initialMoveType = searchParams.get("moveType") as MoveType || null;
@@ -23,10 +25,11 @@ export function useMoveRequestForm() {
     defaultValues: {
       moveType: initialMoveType || undefined,
       propertySize: undefined
-    }
+    },
+    mode: "onChange" // Enable real-time validation
   });
 
-  const { register, handleSubmit, watch, formState: { errors }, setValue, getValues } = form;
+  const { register, handleSubmit, watch, formState: { errors, isValid }, setValue, getValues } = form;
   const { validateField, sanitizeInput, validatePropertySize, validateAddress } = useFormValidation();
   const { handleFormSubmit } = useFormSubmission();
   const { isSubmitting, isGeocodingPickup, isGeocodingDelivery, showSuccess, handleSuccessClose } = useSubmitMoveRequest();
@@ -46,22 +49,35 @@ export function useMoveRequestForm() {
 
   const nextStep = () => {
     const currentValues = getValues();
+    let isStepValid = true;
 
     // Validate based on current step
     switch (step) {
       case 2:
-        if (!validatePropertySize(currentValues.propertySize)) return;
+        isStepValid = validatePropertySize(currentValues.propertySize);
         break;
 
       case 3:
-        if (!validateAddress(currentValues.pickupAddress, 'pickup')) return;
+        isStepValid = validateAddress(currentValues.pickupAddress, 'pickup');
         break;
 
       case 4:
-        if (!validateAddress(currentValues.deliveryAddress, 'delivery')) return;
+        isStepValid = validateAddress(currentValues.deliveryAddress, 'delivery');
+        break;
+
+      case 5:
+        if (!currentValues.fullName || !currentValues.email || !currentValues.phone) {
+          toast({
+            title: "Missing Information",
+            description: "Please fill in all required contact information",
+            variant: "destructive"
+          });
+          isStepValid = false;
+        }
         break;
     }
 
+    if (!isStepValid) return;
     setStep((prev) => Math.min(prev + 1, totalSteps));
   };
 
@@ -74,6 +90,26 @@ export function useMoveRequestForm() {
     setStep(2);
   };
 
+  const onSubmit = handleSubmit((data: MoveRequestForm) => {
+    if (!moveType) {
+      toast({
+        title: "Error",
+        description: "Please select a move type",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate all required fields before submission
+    if (!validateAddress(data.pickupAddress, 'pickup') || 
+        !validateAddress(data.deliveryAddress, 'delivery') || 
+        !validatePropertySize(data.propertySize)) {
+      return;
+    }
+
+    handleFormSubmit(data, moveType, validateField, sanitizeInput);
+  });
+
   return {
     step,
     totalSteps,
@@ -84,14 +120,14 @@ export function useMoveRequestForm() {
     setValue,
     isProcessing,
     showSuccess,
-    handleSubmit,
-    handleFormSubmit: (data: MoveRequestForm) => handleFormSubmit(data, moveType, validateField, sanitizeInput),
+    handleSubmit: onSubmit,
     handleMoveTypeChange,
     handleSuccessClose,
     nextStep,
     prevStep,
     isGeocodingPickup,
     isGeocodingDelivery,
-    propertySize: watch('propertySize')
+    propertySize: watch('propertySize'),
+    isValid
   };
 }
