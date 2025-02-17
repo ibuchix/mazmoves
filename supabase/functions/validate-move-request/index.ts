@@ -1,179 +1,115 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { verifyOrigin, corsHeaders } from "../_shared/verify-origin.ts";
 
-interface ValidationError {
-  field: string;
-  message: string;
-}
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
+import { corsHeaders } from "../_shared/cors.ts";
+import { verifyOrigin } from "../_shared/verify-origin.ts";
+import { MoveRequestForm, MoveType, PropertySize } from "../../../src/types/move-request.ts";
 
-function validateEmail(email: string): boolean {
-  const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
-  return emailRegex.test(email);
-}
-
-function validatePhone(phone: string): boolean {
-  const phoneRegex = /^[0-9\s\-\+\(\)]{8,}$/;
-  return phoneRegex.test(phone);
-}
-
-function validateAddress(address: any): ValidationError[] {
-  const errors: ValidationError[] = [];
-  
-  if (!address.street?.trim()) {
-    errors.push({ field: 'street', message: 'Street is required' });
-  }
-  if (!address.city?.trim()) {
-    errors.push({ field: 'city', message: 'City is required' });
-  }
-  if (!address.state?.trim()) {
-    errors.push({ field: 'state', message: 'State is required' });
-  }
-  if (!address.zipCode?.trim()) {
-    errors.push({ field: 'zipCode', message: 'Zip code is required' });
-  }
-  
-  return errors;
-}
-
-function sanitizeInput(input: string): string {
-  return input.replace(/[<>]/g, ''); // Basic XSS prevention
-}
+const ALLOWED_MOVE_TYPES: MoveType[] = ["domestic", "commercial", "international"];
+const ALLOWED_PROPERTY_SIZES: PropertySize[] = ["1", "2", "3", "4", "5+", "office", "warehouse", "retail"];
 
 serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders })
+  // Handle CORS
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
   }
 
   try {
-    // Verify the request origin
-    if (!verifyOrigin(req)) {
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized origin' }),
-        { 
-          status: 403,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+    // Verify request origin
+    const originError = await verifyOrigin(req);
+    if (originError) return originError;
+
+    // Parse request body
+    const { moveRequest } = await req.json();
+
+    // Validation rules
+    const errors = [];
+
+    // Validate move type
+    if (!moveRequest.moveType || !ALLOWED_MOVE_TYPES.includes(moveRequest.moveType)) {
+      errors.push({ field: "moveType", message: "Invalid move type selected" });
     }
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
-
-    const { moveRequest, clientIp } = await req.json();
-    const errors: ValidationError[] = [];
-
-    // Validate required fields
-    if (!moveRequest.fullName?.trim()) {
-      errors.push({ field: 'fullName', message: 'Full name is required' });
+    // Validate property size
+    if (!moveRequest.propertySize || !ALLOWED_PROPERTY_SIZES.includes(moveRequest.propertySize)) {
+      errors.push({ field: "propertySize", message: "Invalid property size selected" });
     }
 
-    if (!moveRequest.email || !validateEmail(moveRequest.email)) {
-      errors.push({ field: 'email', message: 'Valid email is required' });
+    // Validate addresses
+    if (!moveRequest.pickupAddress || !moveRequest.deliveryAddress) {
+      errors.push({ field: "address", message: "Both pickup and delivery addresses are required" });
     }
 
-    if (!moveRequest.phone || !validatePhone(moveRequest.phone)) {
-      errors.push({ field: 'phone', message: 'Valid phone number is required' });
-    }
-
+    // Validate date
     if (!moveRequest.moveDate) {
-      errors.push({ field: 'moveDate', message: 'Move date is required' });
+      errors.push({ field: "moveDate", message: "Move date is required" });
     } else {
       const moveDate = new Date(moveRequest.moveDate);
       const today = new Date();
       if (moveDate < today) {
-        errors.push({ field: 'moveDate', message: 'Move date cannot be in the past' });
+        errors.push({ field: "moveDate", message: "Move date cannot be in the past" });
       }
     }
 
-    // Validate addresses
-    const pickupAddressErrors = validateAddress(moveRequest.pickupAddress);
-    const deliveryAddressErrors = validateAddress(moveRequest.deliveryAddress);
-    errors.push(...pickupAddressErrors.map(e => ({ ...e, field: `pickupAddress.${e.field}` })));
-    errors.push(...deliveryAddressErrors.map(e => ({ ...e, field: `deliveryAddress.${e.field}` })));
-
-    // Check for rate limiting
-    const { count } = await supabase
-      .from('move_requests')
-      .select('id', { count: 'exact' })
-      .eq('customer_email', moveRequest.email)
-      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString());
-
-    if (count && count >= 5) {
-      errors.push({ 
-        field: 'general', 
-        message: 'Maximum request limit reached. Please try again in 24 hours.' 
-      });
+    // Validate contact information
+    if (!moveRequest.fullName || moveRequest.fullName.length < 2) {
+      errors.push({ field: "fullName", message: "Valid full name is required" });
     }
 
-    if (errors.length > 0) {
-      // Log validation failure
-      await supabase
-        .from('validation_failures')
-        .insert({
-          request_data: moveRequest,
-          failure_reason: JSON.stringify(errors),
-          ip_address: clientIp
-        });
+    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    if (!moveRequest.email || !emailRegex.test(moveRequest.email)) {
+      errors.push({ field: "email", message: "Valid email address is required" });
+    }
 
+    const phoneRegex = /^[0-9\s\-\+\(\)]{8,}$/;
+    if (!moveRequest.phone || !phoneRegex.test(moveRequest.phone)) {
+      errors.push({ field: "phone", message: "Valid phone number is required" });
+    }
+
+    // Sanitize special instructions
+    if (moveRequest.specialInstructions) {
+      // Remove any HTML tags and limit length
+      moveRequest.specialInstructions = moveRequest.specialInstructions
+        .replace(/<[^>]*>/g, '')
+        .slice(0, 500);
+    }
+
+    // If there are validation errors, return them
+    if (errors.length > 0) {
       return new Response(
-        JSON.stringify({ 
-          success: false, 
-          errors 
-        }),
-        { 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 400 
+        JSON.stringify({ success: false, errors }),
+        {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 400,
         }
       );
     }
 
-    // Sanitize text inputs
-    const sanitizedRequest = {
-      ...moveRequest,
-      fullName: sanitizeInput(moveRequest.fullName),
-      specialInstructions: moveRequest.specialInstructions ? 
-        sanitizeInput(moveRequest.specialInstructions) : undefined,
-      pickupAddress: {
-        ...moveRequest.pickupAddress,
-        street: sanitizeInput(moveRequest.pickupAddress.street),
-        city: sanitizeInput(moveRequest.pickupAddress.city),
-        state: sanitizeInput(moveRequest.pickupAddress.state),
-        zipCode: sanitizeInput(moveRequest.pickupAddress.zipCode)
-      },
-      deliveryAddress: {
-        ...moveRequest.deliveryAddress,
-        street: sanitizeInput(moveRequest.deliveryAddress.street),
-        city: sanitizeInput(moveRequest.deliveryAddress.city),
-        state: sanitizeInput(moveRequest.deliveryAddress.state),
-        zipCode: sanitizeInput(moveRequest.deliveryAddress.zipCode)
-      }
-    };
-
+    // If validation passes, return sanitized data
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        data: sanitizedRequest 
+      JSON.stringify({
+        success: true,
+        data: {
+          ...moveRequest,
+          specialInstructions: moveRequest.specialInstructions || null,
+        },
       }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
       }
     );
-
   } catch (error) {
-    console.error('Validation error:', error);
-    
+    console.error("Error processing request:", error);
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: 'Internal validation error' 
+      JSON.stringify({
+        success: false,
+        error: "Internal server error",
       }),
-      { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500 
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
       }
     );
   }
-})
+});
