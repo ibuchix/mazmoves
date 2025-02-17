@@ -1,7 +1,8 @@
 
 import { useToast } from "@/hooks/use-toast";
 import DOMPurify from "dompurify";
-import { PropertySize, Address } from "@/types/move-request";
+import { PropertySize } from "@/types/move-request";
+import { Address } from "@/types/address";
 
 export function useFormValidation() {
   const { toast } = useToast();
