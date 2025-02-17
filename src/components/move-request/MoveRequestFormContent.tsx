@@ -1,3 +1,4 @@
+
 import { MoveTypeStep } from "./MoveTypeStep";
 import { PropertySizeStep } from "./PropertySizeStep";
 import { AddressStep } from "./AddressStep";
@@ -50,7 +51,10 @@ export function MoveRequestFormContent({
         <PropertySizeStep
           moveType={moveType}
           value={watch("propertySize")}
-          onChange={(value) => register("propertySize").onChange({ target: { value } })}
+          onChange={value => {
+            // Directly set the form value using register
+            register("propertySize").onChange({ target: { value } });
+          }}
         />
       )}
 
