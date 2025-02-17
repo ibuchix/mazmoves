@@ -1,3 +1,4 @@
+
 import {
   Dialog,
   DialogContent,
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle } from "lucide-react";
 
 interface SuccessDialogProps {
-  isOpen: boolean;
+  isOpen: boolean;  // Changed from open to isOpen
   onClose: () => void;
 }
 

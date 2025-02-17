@@ -1,5 +1,6 @@
+
 interface FormProgressProps {
-  step: number;
+  step: number;  // Changed from currentStep to step
   totalSteps: number;
 }
 

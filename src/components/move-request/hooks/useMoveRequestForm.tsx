@@ -211,6 +211,7 @@ export function useMoveRequestForm() {
     register,
     errors,
     watch,
+    setValue, // Explicitly return setValue
     isProcessing,
     showSuccess,
     handleSubmit,
@@ -220,6 +221,8 @@ export function useMoveRequestForm() {
     handleSuccessClose,
     nextStep,
     prevStep,
+    isGeocodingPickup,   // Explicitly return geocoding states
+    isGeocodingDelivery,
     propertySize
   };
 }
