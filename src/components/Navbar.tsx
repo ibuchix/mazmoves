@@ -12,6 +12,7 @@ import { Button } from "./ui/button";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [logoError, setLogoError] = useState(false);
   const { session } = useAuth();
 
   const { data: userData } = useQuery({
@@ -37,20 +38,33 @@ export default function Navbar() {
   // Check if user is registered company
   const isRegisteredCompany = userData?.role === 'company';
 
+  // Handle logo error
+  const handleLogoError = () => {
+    console.error("Logo failed to load");
+    setLogoError(true);
+  };
+
   return (
     <nav className="bg-white border-b border-gray-200 sticky top-0 z-50 transition-shadow duration-300 backdrop-blur-sm bg-white/90">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-[88px]"> {/* Increased height to accommodate larger logo */}
+        <div className="flex justify-between items-center h-[88px]">
           <div className="flex-shrink-0 transition-transform duration-300 hover:-translate-y-0.5">
             <Link to="/" className="block">
-              <img 
-                src="/lovable-uploads/b700dde9-463e-4b6e-8523-ec9f718b3beb.png" 
-                alt="MAZ Moves - Your Trusted Moving Partner" 
-                className="h-[72px] w-auto" // Increased from h-16 (64px) to 72px
-                loading="eager"
-                width="180"
-                height="72"
-              />
+              {!logoError ? (
+                <img 
+                  src="/lovable-uploads/b700dde9-463e-4b6e-8523-ec9f718b3beb.png" 
+                  onError={handleLogoError}
+                  alt="MAZ Moves - Your Trusted Moving Partner" 
+                  className="h-[72px] w-auto"
+                  loading="eager"
+                  width="180"
+                  height="72"
+                />
+              ) : (
+                <div className="h-[72px] flex items-center">
+                  <span className="text-[#040480] text-xl font-bold">MAZ Moves</span>
+                </div>
+              )}
             </Link>
           </div>
           
