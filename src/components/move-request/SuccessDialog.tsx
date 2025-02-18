@@ -21,17 +21,17 @@ export function SuccessDialog({ isOpen, onClose }: SuccessDialogProps) {
         <DialogHeader>
           <DialogTitle className="text-center flex flex-col items-center gap-4">
             <CheckCircle className="h-12 w-12 text-[#84d21f]" />
-            <span className="text-[#040480] text-xl">Request Submitted Successfully!</span>
+            <span className="text-[#040480] text-xl font-montserrat">Request Submitted Successfully!</span>
           </DialogTitle>
         </DialogHeader>
-        <div className="space-y-6">
+        <div className="space-y-6 font-roboto">
           <div className="text-center text-gray-600">
             <p className="mb-4">
               Thank you for submitting your move request. Our verified local movers will contact you shortly to discuss your needs.
             </p>
             <Separator className="my-4" />
             <div className="space-y-4">
-              <h4 className="font-semibold text-[#040480]">What happens next?</h4>
+              <h4 className="font-semibold text-[#040480] font-montserrat">What happens next?</h4>
               <div className="flex items-center gap-2 justify-center text-sm">
                 <Clock className="h-4 w-4 text-[#1f3dd2]" />
                 <span>Companies will respond within 24 hours</span>
@@ -43,7 +43,7 @@ export function SuccessDialog({ isOpen, onClose }: SuccessDialogProps) {
             </div>
             <Separator className="my-4" />
             <div className="space-y-2">
-              <h4 className="font-semibold text-[#040480]">Need assistance?</h4>
+              <h4 className="font-semibold text-[#040480] font-montserrat">Need assistance?</h4>
               <div className="flex items-center gap-2 justify-center text-sm">
                 <Phone className="h-4 w-4 text-[#1f3dd2]" />
                 <span>Contact support: 1-800-MAZ-MOVE</span>
@@ -53,7 +53,7 @@ export function SuccessDialog({ isOpen, onClose }: SuccessDialogProps) {
           <div className="flex justify-center">
             <Button 
               onClick={onClose} 
-              className="bg-[#040480] hover:bg-[#1f3dd2] text-white w-full sm:w-auto"
+              className="bg-[#040480] hover:bg-[#1f3dd2] text-white w-full sm:w-auto font-montserrat shadow-md"
             >
               Return to Home
             </Button>

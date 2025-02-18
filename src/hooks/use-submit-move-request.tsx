@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -32,13 +31,11 @@ export function useSubmitMoveRequest() {
         phone: "REDACTED"
       });
 
-      // Check rate limits
       console.log("Checking rate limits...");
       const isWithinLimits = await checkRateLimit();
       console.log("Rate limit check result:", isWithinLimits);
       if (!isWithinLimits) return;
 
-      // Validate request
       console.log("Validating move request...");
       const { data: validationResponse, error: validationError } = await supabase.functions.invoke(
         'validate-move-request',
@@ -73,7 +70,6 @@ export function useSubmitMoveRequest() {
         phone: "REDACTED"
       });
       
-      // Geocode addresses
       console.log("Starting address geocoding...");
       const { pickupCoords, deliveryCoords } = await geocodeAddresses(
         sanitizedData.pickupAddress,
@@ -114,41 +110,42 @@ export function useSubmitMoveRequest() {
 
       console.log("Move request inserted successfully:", moveRequest.id);
 
-      // Send confirmation email with retry
       try {
         console.log("Sending confirmation email to:", sanitizedData.email);
         await sendConfirmationEmail(sanitizedData.email, sanitizedData.fullName);
         console.log("Confirmation email sent successfully");
       } catch (emailError) {
         console.error("Failed to send confirmation email:", emailError);
-        // Log the error but don't block the submission
       }
 
-      // Notify companies
       console.log("Notifying companies about new move request...");
       await notifyCompanies(moveRequest.id);
       console.log("Companies notified successfully");
 
-      // Log the rate limit usage
       console.log("Logging rate limit usage...");
       await logRateLimit();
       console.log("Rate limit logged successfully");
 
       setShowSuccess(true);
-      toast({
-        title: "Move Request Received",
-        variant: "default",
-        action: (
-          <ToastAction 
-            altText="Go to homepage" 
-            onClick={() => navigate("/")}
-            className="bg-[#040480] text-white hover:bg-[#1f3dd2] rounded-lg px-4 py-2 text-sm font-medium w-full"
-          >
-            Return Home
-          </ToastAction>
-        ),
-        duration: 5000,
-      });
+
+      setTimeout(() => {
+        toast({
+          title: "Move Request Received",
+          description: "Check your email for confirmation details",
+          variant: "default",
+          action: (
+            <ToastAction 
+              altText="Go to homepage" 
+              onClick={() => navigate("/")}
+              className="bg-[#040480] text-white hover:bg-[#1f3dd2] rounded-lg px-4 py-2 text-sm font-montserrat font-semibold shadow-md"
+            >
+              Return Home
+            </ToastAction>
+          ),
+          duration: 5000,
+          className: "z-[100]",
+        });
+      }, 500);
 
     } catch (error: any) {
       console.error("Detailed error in submission:", error);
