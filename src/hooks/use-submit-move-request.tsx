@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -142,12 +143,12 @@ export function useSubmitMoveRequest() {
           <ToastAction 
             altText="Go to homepage" 
             onClick={() => navigate("/")}
-            className="bg-[#040480] text-white hover:bg-[#1f3dd2] rounded-lg"
+            className="bg-[#040480] text-white hover:bg-[#1f3dd2] rounded-lg px-4 py-2 text-sm font-medium"
           >
             Return Home
           </ToastAction>
         ),
-        duration: 5000, // Show for 5 seconds
+        duration: 5000,
       });
 
     } catch (error: any) {
