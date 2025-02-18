@@ -1,5 +1,6 @@
 
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface FormNavigationProps {
   step: number;
@@ -20,6 +21,9 @@ export function FormNavigation({
   onSubmit,
   isValid = true
 }: FormNavigationProps) {
+  const isLastStep = step === totalSteps;
+  const canProceed = !isProcessing && isValid;
+
   return (
     <div className="flex justify-between pt-4">
       {step > 1 && (
@@ -33,27 +37,35 @@ export function FormNavigation({
           Previous
         </Button>
       )}
-      {step < totalSteps ? (
+
+      {!isLastStep ? (
         <Button 
           type="button" 
           onClick={onNext}
           className="bg-[#040480] hover:bg-[#1f3dd2] text-white ml-auto"
-          disabled={isProcessing || !isValid}
+          disabled={!canProceed}
         >
           Next
         </Button>
       ) : (
         <Button 
           type="submit"
-          onClick={onSubmit} 
-          disabled={isProcessing || !isValid}
-          className={`ml-auto ${
-            isProcessing || !isValid 
+          onClick={onSubmit}
+          disabled={!canProceed}
+          className={`ml-auto inline-flex items-center space-x-2 ${
+            !canProceed
               ? "bg-gray-400 cursor-not-allowed" 
               : "bg-[#040480] hover:bg-[#1f3dd2]"
           } text-white`}
         >
-          {isProcessing ? "Submitting..." : "Submit Request"}
+          {isProcessing ? (
+            <>
+              <LoadingSpinner size="sm" className="border-white" />
+              <span>Submitting...</span>
+            </>
+          ) : (
+            <span>Submit Request</span>
+          )}
         </Button>
       )}
     </div>

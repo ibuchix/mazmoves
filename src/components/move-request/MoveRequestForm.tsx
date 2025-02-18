@@ -3,6 +3,7 @@ import { MoveRequestFormContent } from "./MoveRequestFormContent";
 import { FormProgress } from "./FormProgress";
 import { SuccessDialog } from "./SuccessDialog";
 import { useMoveRequestForm } from "./hooks/useMoveRequestForm";
+import { LoadingOverlay } from "@/components/ui/loading-overlay";
 
 export function MoveRequestForm() {
   const {
@@ -15,16 +16,22 @@ export function MoveRequestForm() {
     setValue,
     isProcessing,
     showSuccess,
+    handleSubmit,
     handleMoveTypeChange,
     handleSuccessClose,
     nextStep,
     prevStep,
     isGeocodingPickup,
-    isGeocodingDelivery
+    isGeocodingDelivery,
+    isValid
   } = useMoveRequestForm();
 
   return (
-    <div className="max-w-2xl mx-auto p-4 space-y-6" data-testid="move-request-form">
+    <div className="relative max-w-2xl mx-auto p-4 space-y-6" data-testid="move-request-form">
+      {isProcessing && (
+        <LoadingOverlay message="Processing your request..." />
+      )}
+      
       <FormProgress step={step} totalSteps={totalSteps} />
       
       <MoveRequestFormContent
@@ -41,6 +48,8 @@ export function MoveRequestForm() {
         onPrevious={prevStep}
         isGeocodingPickup={isGeocodingPickup}
         isGeocodingDelivery={isGeocodingDelivery}
+        onSubmit={handleSubmit}
+        isValid={isValid}
       />
 
       <SuccessDialog 
