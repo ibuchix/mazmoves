@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -136,14 +135,13 @@ export function useSubmitMoveRequest() {
 
       setShowSuccess(true);
       toast({
-        title: "Success!",
-        description: "Your move request has been submitted successfully.",
+        title: "Move Request Received",
         variant: "default",
         action: (
           <ToastAction 
             altText="Go to homepage" 
             onClick={() => navigate("/")}
-            className="bg-[#040480] text-white hover:bg-[#1f3dd2] rounded-lg px-4 py-2 text-sm font-medium"
+            className="bg-[#040480] text-white hover:bg-[#1f3dd2] rounded-lg px-4 py-2 text-sm font-medium w-full"
           >
             Return Home
           </ToastAction>
