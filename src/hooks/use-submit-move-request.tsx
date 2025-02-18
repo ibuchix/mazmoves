@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -28,7 +27,7 @@ export function useSubmitMoveRequest() {
     try {
       console.log("Starting form submission with data:", {
         ...data,
-        email: "REDACTED", // Don't log sensitive data
+        email: "REDACTED",
         phone: "REDACTED"
       });
 
