@@ -8,6 +8,7 @@ import { addressToJson } from "@/utils/address";
 import { checkRateLimit, logRateLimit } from "./move-request/use-rate-limit";
 import { geocodeAddresses } from "./move-request/use-geocoding";
 import { sendConfirmationEmail, notifyCompanies } from "./move-request/use-notifications";
+import { ToastAction } from "@/components/ui/toast";
 
 export function useSubmitMoveRequest() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -135,14 +136,23 @@ export function useSubmitMoveRequest() {
 
       setShowSuccess(true);
       toast({
-        title: "Success",
-        description: "Move request submitted successfully!",
-        variant: "default"
+        title: "Success!",
+        description: "Your move request has been submitted successfully.",
+        variant: "default",
+        action: (
+          <ToastAction 
+            altText="Go to homepage" 
+            onClick={() => navigate("/")}
+            className="bg-[#040480] text-white hover:bg-[#1f3dd2] rounded-lg"
+          >
+            Return Home
+          </ToastAction>
+        ),
+        duration: 5000, // Show for 5 seconds
       });
 
-      // Navigate immediately to home page
-      console.log("Redirecting to home page...");
-      navigate("/");
+      // Remove the automatic navigation
+      // The user will now need to click the button in the toast
 
     } catch (error: any) {
       console.error("Detailed error in submission:", error);
