@@ -151,9 +151,6 @@ export function useSubmitMoveRequest() {
         duration: 5000, // Show for 5 seconds
       });
 
-      // Remove the automatic navigation
-      // The user will now need to click the button in the toast
-
     } catch (error: any) {
       console.error("Detailed error in submission:", error);
       console.error("Error stack trace:", error.stack);
