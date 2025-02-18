@@ -1,6 +1,6 @@
 
 import { MoveRequestForm } from "@/components/move-request/MoveRequestForm";
-import { Navigate, useSearchParams, useLocation } from "react-router-dom";
+import { Navigate, useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 export default function RequestMove() {

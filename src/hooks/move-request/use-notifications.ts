@@ -2,7 +2,9 @@
 import { supabase } from "@/integrations/supabase/client";
 
 export async function sendConfirmationEmail(email: string, fullName: string) {
-  const { error: confirmationError } = await supabase.functions.invoke('send-confirmation-email', {
+  console.log("Starting confirmation email send process");
+  
+  const { data, error: confirmationError } = await supabase.functions.invoke('send-confirmation-email', {
     body: { 
       customerEmail: email,
       customerName: fullName
@@ -11,7 +13,11 @@ export async function sendConfirmationEmail(email: string, fullName: string) {
 
   if (confirmationError) {
     console.error("Error sending confirmation email:", confirmationError);
+    throw confirmationError;
   }
+
+  console.log("Confirmation email sent successfully:", data);
+  return data;
 }
 
 export async function notifyCompanies(requestId: string) {

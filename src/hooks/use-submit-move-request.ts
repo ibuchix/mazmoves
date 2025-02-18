@@ -90,8 +90,24 @@ export function useSubmitMoveRequest() {
         throw moveRequestError;
       }
 
-      // Send notifications
-      await sendConfirmationEmail(sanitizedData.email, sanitizedData.fullName);
+      // Send confirmation email with retry
+      try {
+        console.log("Sending confirmation email to:", sanitizedData.email);
+        const emailResult = await sendConfirmationEmail(sanitizedData.email, sanitizedData.fullName);
+        console.log("Confirmation email result:", emailResult);
+      } catch (emailError) {
+        console.error("Failed to send confirmation email:", emailError);
+        // Retry once after 2 seconds
+        setTimeout(async () => {
+          try {
+            await sendConfirmationEmail(sanitizedData.email, sanitizedData.fullName);
+          } catch (retryError) {
+            console.error("Retry failed to send confirmation email:", retryError);
+          }
+        }, 2000);
+      }
+
+      // Notify companies
       await notifyCompanies(moveRequest.id);
 
       // Log the rate limit usage
@@ -103,6 +119,12 @@ export function useSubmitMoveRequest() {
         description: "Move request submitted successfully!",
         variant: "default"
       });
+
+      // After 3 seconds (giving time for the user to see the success message),
+      // redirect to the home page
+      setTimeout(() => {
+        navigate("/");
+      }, 3000);
 
     } catch (error: any) {
       console.error("Detailed error in submission:", error);
