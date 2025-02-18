@@ -18,17 +18,27 @@ export function useSubmitMoveRequest() {
   const { toast } = useToast();
 
   const handleSubmit = async (data: MoveRequestForm) => {
-    if (isSubmitting) return;
+    if (isSubmitting) {
+      console.log("Submission already in progress, returning");
+      return;
+    }
     
     setIsSubmitting(true);
     try {
-      console.log("Starting form submission with data:", data);
+      console.log("Starting form submission with data:", {
+        ...data,
+        email: "REDACTED", // Don't log sensitive data
+        phone: "REDACTED"
+      });
 
       // Check rate limits
+      console.log("Checking rate limits...");
       const isWithinLimits = await checkRateLimit();
+      console.log("Rate limit check result:", isWithinLimits);
       if (!isWithinLimits) return;
 
       // Validate request
+      console.log("Validating move request...");
       const { data: validationResponse, error: validationError } = await supabase.functions.invoke(
         'validate-move-request',
         {
@@ -38,6 +48,9 @@ export function useSubmitMoveRequest() {
           }
         }
       );
+
+      console.log("Validation response:", validationResponse);
+      console.log("Validation error:", validationError);
 
       if (validationError || !validationResponse.success) {
         const errors = validationError?.message || validationResponse?.errors;
@@ -53,8 +66,14 @@ export function useSubmitMoveRequest() {
       }
 
       const sanitizedData = validationResponse.data;
+      console.log("Sanitized data:", {
+        ...sanitizedData,
+        email: "REDACTED",
+        phone: "REDACTED"
+      });
       
       // Geocode addresses
+      console.log("Starting address geocoding...");
       const { pickupCoords, deliveryCoords } = await geocodeAddresses(
         sanitizedData.pickupAddress,
         sanitizedData.deliveryAddress,
@@ -80,6 +99,7 @@ export function useSubmitMoveRequest() {
         move_type: sanitizedData.moveType
       };
 
+      console.log("Inserting move request into database...");
       const { data: moveRequest, error: moveRequestError } = await supabase
         .from("move_requests")
         .insert(moveRequestData)
@@ -87,8 +107,11 @@ export function useSubmitMoveRequest() {
         .single();
 
       if (moveRequestError) {
+        console.error("Error inserting move request:", moveRequestError);
         throw moveRequestError;
       }
+
+      console.log("Move request inserted successfully:", moveRequest.id);
 
       // Send confirmation email with retry
       try {
@@ -101,10 +124,14 @@ export function useSubmitMoveRequest() {
       }
 
       // Notify companies
+      console.log("Notifying companies about new move request...");
       await notifyCompanies(moveRequest.id);
+      console.log("Companies notified successfully");
 
       // Log the rate limit usage
+      console.log("Logging rate limit usage...");
       await logRateLimit();
+      console.log("Rate limit logged successfully");
 
       setShowSuccess(true);
       toast({
@@ -114,10 +141,12 @@ export function useSubmitMoveRequest() {
       });
 
       // Navigate immediately to home page
+      console.log("Redirecting to home page...");
       navigate("/");
 
     } catch (error: any) {
       console.error("Detailed error in submission:", error);
+      console.error("Error stack trace:", error.stack);
       toast({
         title: "Error",
         description: "Failed to submit request. Please try again.",
