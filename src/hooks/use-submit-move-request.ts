@@ -93,18 +93,11 @@ export function useSubmitMoveRequest() {
       // Send confirmation email with retry
       try {
         console.log("Sending confirmation email to:", sanitizedData.email);
-        const emailResult = await sendConfirmationEmail(sanitizedData.email, sanitizedData.fullName);
-        console.log("Confirmation email result:", emailResult);
+        await sendConfirmationEmail(sanitizedData.email, sanitizedData.fullName);
+        console.log("Confirmation email sent successfully");
       } catch (emailError) {
         console.error("Failed to send confirmation email:", emailError);
-        // Retry once after 2 seconds
-        setTimeout(async () => {
-          try {
-            await sendConfirmationEmail(sanitizedData.email, sanitizedData.fullName);
-          } catch (retryError) {
-            console.error("Retry failed to send confirmation email:", retryError);
-          }
-        }, 2000);
+        // Log the error but don't block the submission
       }
 
       // Notify companies
@@ -120,11 +113,8 @@ export function useSubmitMoveRequest() {
         variant: "default"
       });
 
-      // After 3 seconds (giving time for the user to see the success message),
-      // redirect to the home page
-      setTimeout(() => {
-        navigate("/");
-      }, 3000);
+      // Navigate immediately to home page
+      navigate("/");
 
     } catch (error: any) {
       console.error("Detailed error in submission:", error);
