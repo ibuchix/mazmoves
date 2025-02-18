@@ -1,6 +1,7 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { verifyOrigin, corsHeaders } from "../_shared/verify-origin.ts";
+import { Resend } from "npm:resend@2.0.0";
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const MAX_RETRIES = parseInt(Deno.env.get('MAX_RETRIES') || '3');
@@ -12,23 +13,36 @@ async function sleep(ms: number) {
 
 async function sendEmailWithRetry(emailData: any, attempt: number = 1): Promise<Response> {
   try {
-    const emailResponse = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-      },
-      body: JSON.stringify(emailData)
-    });
-
-    const responseText = await emailResponse.text();
-    console.log(`Attempt ${attempt} - Resend API response:`, responseText);
-
-    if (!emailResponse.ok) {
-      throw new Error(`Resend API error: ${responseText}`);
+    if (!RESEND_API_KEY) {
+      console.error('RESEND_API_KEY is not set');
+      throw new Error('RESEND_API_KEY is not configured');
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    const resend = new Resend(RESEND_API_KEY);
+    console.log(`Attempt ${attempt} - Sending email to:`, emailData.to);
+
+    const emailResponse = await resend.emails.send({
+      from: 'MAZ Moves <notifications@mazmoves.com>',
+      to: [emailData.to],
+      subject: 'Move Request Confirmation',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h2 style="color: #040480;">Thank you for your move request, ${emailData.customerName}!</h2>
+          <p>We have received your move request and our verified moving companies in your area will be notified.</p>
+          <p>You will be contacted directly by the moving companies to discuss your requirements in detail.</p>
+          <p style="margin-top: 20px;">Best regards,<br>MAZ Moves Team</p>
+        </div>
+      `
+    });
+
+    const responseText = JSON.stringify(emailResponse);
+    console.log(`Attempt ${attempt} - Resend API response:`, responseText);
+
+    if (!emailResponse) {
+      throw new Error('No response from Resend API');
+    }
+
+    return new Response(JSON.stringify({ success: true, data: emailResponse }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
@@ -64,27 +78,13 @@ serve(async (req) => {
       );
     }
 
-    if (!RESEND_API_KEY) {
-      console.error('RESEND_API_KEY is not set');
-      throw new Error('RESEND_API_KEY is not configured');
-    }
-
     const { customerEmail, customerName } = await req.json();
     
     console.log('Attempting to send confirmation email to:', customerEmail);
 
     const emailData = {
-      from: 'MAZ Moves <notifications@mazmoves.com>',
-      to: [customerEmail],
-      subject: 'Move Request Confirmation',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #040480;">Thank you for your move request, ${customerName}!</h2>
-          <p>We have received your move request and our verified moving companies in your area will be notified.</p>
-          <p>You will be contacted directly by the moving companies to discuss your requirements in detail.</p>
-          <p style="margin-top: 20px;">Best regards,<br>MAZ Moves Team</p>
-        </div>
-      `
+      to: customerEmail,
+      customerName: customerName
     };
 
     return await sendEmailWithRetry(emailData);
