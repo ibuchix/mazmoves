@@ -50,13 +50,12 @@ export function FormNavigation({
       ) : (
         <Button 
           type="submit"
-          onClick={onSubmit}
-          disabled={!canProceed}
           className={`ml-auto inline-flex items-center space-x-2 ${
             !canProceed
               ? "bg-gray-400 cursor-not-allowed" 
               : "bg-[#040480] hover:bg-[#1f3dd2]"
           } text-white`}
+          disabled={!canProceed}
         >
           {isProcessing ? (
             <>

@@ -43,16 +43,21 @@ export function MoveRequestFormContent({
   onSubmit,
   isValid
 }: MoveRequestFormContentProps) {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    console.log('Form submission triggered'); // Debug log
+    if (onSubmit) {
+      onSubmit();
+    }
+  };
+
   return (
-    <form onSubmit={(e) => {
-      e.preventDefault();
-      if (onSubmit) onSubmit();
-    }}>
+    <form onSubmit={handleSubmit}>
       {step === 1 && (
         <MoveTypeStep
           value={moveType}
           onChange={onMoveTypeChange}
-          onNext={() => onNext()}
+          onNext={onNext}
         />
       )}
 
