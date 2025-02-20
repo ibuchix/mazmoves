@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -153,29 +152,28 @@ export function useSubmitMoveRequest() {
 
       setShowSuccess(true);
 
-      // Debug: Toast rendering
-      console.log("Preparing to show success toast...");
+      // Debug: Toast rendering with explicit styling
+      console.log("Preparing to show success toast with action...");
       
-      // Show toast immediately without setTimeout
       toast({
-        title: "Move Request Received",
-        description: "Check your email for confirmation details",
+        title: "Move Request Received!",
+        description: "Check your email for confirmation details.",
         variant: "default",
         action: (
           <ToastAction 
-            altText="Go to homepage" 
+            altText="Go to homepage"
             onClick={() => {
-              console.log("Toast action clicked");
+              console.log("Toast action clicked - navigating to home");
               navigate("/");
             }}
-            className="inline-flex items-center justify-center rounded-md bg-[#040480] px-4 py-2 text-sm font-montserrat font-semibold text-white transition-colors hover:bg-[#1f3dd2] focus:outline-none focus:ring-2 focus:ring-[#1f3dd2] focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
           >
             Return Home
           </ToastAction>
         ),
-        duration: 0, // Make toast stay until dismissed
-        className: "z-[100]",
+        duration: 0,
+        className: "border-2 border-[#040480] bg-white shadow-lg",
       });
+      
       console.log("Success toast triggered");
 
     } catch (error: any) {
