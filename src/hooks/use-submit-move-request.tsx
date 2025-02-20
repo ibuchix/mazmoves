@@ -144,6 +144,7 @@ export function useSubmitMoveRequest() {
 
       setShowSuccess(true);
 
+      console.log("Showing success toast with action button");
       toast({
         title: "Move Request Received!",
         description: "Check your email for confirmation details.",
@@ -151,8 +152,10 @@ export function useSubmitMoveRequest() {
         action: (
           <ToastAction 
             altText="Go to homepage"
-            onClick={() => navigate("/")}
-            className="mt-2 w-full"
+            onClick={() => {
+              console.log("Navigate to home clicked");
+              navigate("/");
+            }}
           >
             Return Home
           </ToastAction>
