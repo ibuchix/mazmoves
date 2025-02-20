@@ -1,3 +1,4 @@
+
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { MoveType } from "@/types/move-request";
@@ -10,10 +11,13 @@ interface MoveTypeStepProps {
 }
 
 export function MoveTypeStep({ value, onChange, onNext }: MoveTypeStepProps) {
-  // When value changes and is not null, trigger onNext
+  // Add a small delay before triggering onNext to ensure state updates have completed
   useEffect(() => {
     if (value) {
-      onNext();
+      const timer = setTimeout(() => {
+        onNext();
+      }, 100);
+      return () => clearTimeout(timer);
     }
   }, [value, onNext]);
 

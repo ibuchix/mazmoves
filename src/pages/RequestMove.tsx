@@ -11,16 +11,29 @@ export default function RequestMove() {
   const moveType = searchParams.get("moveType");
 
   useEffect(() => {
-    // Increase timeout to 2000ms (2 seconds) to allow more time for form initialization
+    // Increase timeout to 5000ms (5 seconds) to allow more time for form initialization
     const timeout = setTimeout(() => {
       if (!document.querySelector('[data-testid="move-request-form"]')) {
         console.error("Form failed to initialize within timeout period");
         setHasError(true);
       }
-    }, 2000);
+    }, 5000);
 
-    // Clear timeout on component unmount
-    return () => clearTimeout(timeout);
+    // Clear timeout on component unmount or when form is found
+    const checkForm = () => {
+      if (document.querySelector('[data-testid="move-request-form"]')) {
+        clearTimeout(timeout);
+      }
+    };
+
+    // Check periodically for form
+    const interval = setInterval(checkForm, 100);
+
+    // Clear both timeout and interval on unmount
+    return () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
   }, [location.pathname]);
 
   // Show detailed error message instead of redirecting immediately
@@ -31,11 +44,13 @@ export default function RequestMove() {
 
   // If step is greater than 1 but no moveType is selected, redirect to step 1
   if (step && parseInt(step) > 1 && !moveType) {
-    return <Navigate to="/request-move" replace />;
+    console.log("Redirecting to step 1: No move type selected");
+    return <Navigate to="/request-move?step=1" replace />;
   }
 
   // If accessing directly without any params, ensure we start at step 1
   if (!step && !moveType) {
+    console.log("Initializing at step 1");
     return <Navigate to="/request-move?step=1" replace />;
   }
 
