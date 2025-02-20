@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -151,6 +152,7 @@ export function useSubmitMoveRequest() {
           <ToastAction 
             altText="Go to homepage"
             onClick={() => navigate("/")}
+            className="mt-2 w-full"
           >
             Return Home
           </ToastAction>
