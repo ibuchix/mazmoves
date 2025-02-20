@@ -8,7 +8,7 @@ import { addressToJson } from "@/utils/address";
 import { checkRateLimit, logRateLimit } from "./move-request/use-rate-limit";
 import { geocodeAddresses } from "./move-request/use-geocoding";
 import { sendConfirmationEmail, notifyCompanies } from "./move-request/use-notifications";
-import { ToastAction } from "@/components/ui/toast";
+import { toast } from "sonner";  // Change to use sonner directly
 
 export function useSubmitMoveRequest() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -16,7 +16,6 @@ export function useSubmitMoveRequest() {
   const [isGeocodingDelivery, setIsGeocodingDelivery] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
-  const { toast } = useToast();
 
   const handleSubmit = async (data: MoveRequestForm) => {
     if (isSubmitting) {
@@ -54,13 +53,9 @@ export function useSubmitMoveRequest() {
       if (validationError || !validationResponse?.success) {
         const errors = validationError?.message || validationResponse?.errors;
         console.error("Validation failed:", errors);
-        toast({
-          title: "Validation Error",
-          description: Array.isArray(errors) 
-            ? errors.map(e => e.message).join(", ")
-            : "Please check your input and try again",
-          variant: "destructive"
-        });
+        toast.error(Array.isArray(errors) 
+          ? errors.map(e => e.message).join(", ")
+          : "Please check your input and try again");
         return;
       }
 
@@ -148,22 +143,17 @@ export function useSubmitMoveRequest() {
       console.log("Before showing success toast");
       setShowSuccess(true);
 
-      console.log("Creating toast with action");
-      toast({
-        title: "Move Request Received!",
+      toast.success("Move Request Received!", {
         description: "Check your email for confirmation details.",
-        variant: "default",
-        action: <ToastAction altText="Go to homepage" onClick={() => navigate("/")}>Return Home</ToastAction>,
-        duration: 0,
+        action: {
+          label: "Return Home",
+          onClick: () => navigate("/")
+        },
       });
 
     } catch (error: any) {
       console.error("Detailed error in submission:", error);
-      toast({
-        title: "Error",
-        description: "Failed to submit request. Please try again.",
-        variant: "destructive"
-      });
+      toast.error("Failed to submit request. Please try again.");
     } finally {
       setIsSubmitting(false);
       setIsGeocodingPickup(false);
