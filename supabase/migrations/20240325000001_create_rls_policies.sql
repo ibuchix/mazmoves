@@ -14,6 +14,7 @@ DROP POLICY IF EXISTS "Companies view assigned requests" ON move_requests;
 DROP POLICY IF EXISTS "Admin view all requests" ON move_requests;
 DROP POLICY IF EXISTS "Customers can create requests" ON move_requests;
 DROP POLICY IF EXISTS "Admin can update requests" ON move_requests;
+DROP POLICY IF EXISTS "Anyone can create requests" ON move_requests;
 
 DROP POLICY IF EXISTS "Companies view own assignments" ON move_assignments;
 DROP POLICY IF EXISTS "Admin view all assignments" ON move_assignments;
@@ -113,10 +114,10 @@ USING (EXISTS (
     WHERE users.id = auth.uid() AND users.role = 'admin'
 ));
 
-CREATE POLICY "Customers can create requests"
+CREATE POLICY "Anyone can create requests"
 ON move_requests FOR INSERT
-TO authenticated
-WITH CHECK (auth.uid() = customer_id);
+TO anon, authenticated
+WITH CHECK (true);
 
 CREATE POLICY "Admin can update requests"
 ON move_requests FOR UPDATE
