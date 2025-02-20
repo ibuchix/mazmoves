@@ -19,7 +19,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
       </main>
       <Footer />
       <CookieConsent />
-      <Toaster richColors position="top-right" />
+      <Toaster richColors position="top-center" />
     </div>
   );
 };
