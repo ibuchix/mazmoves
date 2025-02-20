@@ -3,7 +3,7 @@ import { ReactNode } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import CookieConsent from "@/components/cookie/CookieConsent";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "sonner";
 
 interface MainLayoutProps {
   children: ReactNode;
@@ -19,7 +19,7 @@ export const MainLayout = ({ children }: MainLayoutProps) => {
       </main>
       <Footer />
       <CookieConsent />
-      <Toaster />
+      <Toaster richColors position="top-right" />
     </div>
   );
 };
