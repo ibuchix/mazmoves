@@ -25,20 +25,17 @@ export function useSubmitMoveRequest() {
     
     setIsSubmitting(true);
     try {
-      // Debug: Log the initial form data
       console.log("Starting form submission with data:", {
         ...data,
         email: "REDACTED",
         phone: "REDACTED"
       });
 
-      // Debug: Check rate limits
       console.log("Checking rate limits...");
       const isWithinLimits = await checkRateLimit();
       console.log("Rate limit check result:", isWithinLimits);
       if (!isWithinLimits) return;
 
-      // Debug: Validate request
       console.log("Validating move request...");
       const { data: validationResponse, error: validationError } = await supabase.functions.invoke(
         'validate-move-request',
@@ -73,7 +70,6 @@ export function useSubmitMoveRequest() {
         phone: "REDACTED"
       });
       
-      // Debug: Geocoding
       console.log("Starting address geocoding...");
       const { pickupCoords, deliveryCoords } = await geocodeAddresses(
         sanitizedData.pickupAddress,
@@ -84,7 +80,6 @@ export function useSubmitMoveRequest() {
 
       console.log("Geocoding results:", { pickupCoords, deliveryCoords });
 
-      // Debug: Database insertion data
       const moveRequestData = {
         pickup_address: addressToJson(sanitizedData.pickupAddress),
         delivery_address: addressToJson(sanitizedData.deliveryAddress),
@@ -107,7 +102,6 @@ export function useSubmitMoveRequest() {
         customer_phone: "REDACTED"
       });
 
-      // Debug: Database insertion
       const { data: moveRequest, error: moveRequestError } = await supabase
         .from("move_requests")
         .insert(moveRequestData)
@@ -127,7 +121,6 @@ export function useSubmitMoveRequest() {
 
       console.log("Move request inserted successfully:", moveRequest.id);
 
-      // Debug: Email confirmation
       try {
         console.log("Sending confirmation email to:", sanitizedData.email);
         const emailResult = await sendConfirmationEmail(sanitizedData.email, sanitizedData.fullName);
@@ -140,21 +133,16 @@ export function useSubmitMoveRequest() {
         });
       }
 
-      // Debug: Company notifications
       console.log("Notifying companies about new move request...");
       await notifyCompanies(moveRequest.id);
       console.log("Companies notified successfully");
 
-      // Debug: Rate limit logging
       console.log("Logging rate limit usage...");
       await logRateLimit();
       console.log("Rate limit logged successfully");
 
       setShowSuccess(true);
 
-      // Debug: Toast rendering with explicit styling
-      console.log("Preparing to show success toast with action...");
-      
       toast({
         title: "Move Request Received!",
         description: "Check your email for confirmation details.",
@@ -162,23 +150,16 @@ export function useSubmitMoveRequest() {
         action: (
           <ToastAction 
             altText="Go to homepage"
-            onClick={() => {
-              console.log("Toast action clicked - navigating to home");
-              navigate("/");
-            }}
+            onClick={() => navigate("/")}
           >
             Return Home
           </ToastAction>
         ),
         duration: 0,
-        className: "border-2 border-[#040480] bg-white shadow-lg",
       });
-      
-      console.log("Success toast triggered");
 
     } catch (error: any) {
       console.error("Detailed error in submission:", error);
-      console.error("Error stack trace:", error.stack);
       toast({
         title: "Error",
         description: "Failed to submit request. Please try again.",
