@@ -1,6 +1,6 @@
 
 import { MoveRequestForm } from "@/components/move-request/MoveRequestForm";
-import { Navigate, useSearchParams, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, useSearchParams, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 
 export default function RequestMove() {
@@ -11,18 +11,21 @@ export default function RequestMove() {
   const moveType = searchParams.get("moveType");
 
   useEffect(() => {
-    // If we can't properly initialize the form within 500ms, redirect to home
+    // Increase timeout to 2000ms (2 seconds) to allow more time for form initialization
     const timeout = setTimeout(() => {
       if (!document.querySelector('[data-testid="move-request-form"]')) {
+        console.error("Form failed to initialize within timeout period");
         setHasError(true);
       }
-    }, 500);
+    }, 2000);
 
+    // Clear timeout on component unmount
     return () => clearTimeout(timeout);
   }, [location.pathname]);
 
-  // Redirect to home if there's an error
+  // Show detailed error message instead of redirecting immediately
   if (hasError) {
+    console.error("Move request form initialization failed");
     return <Navigate to="/" replace />;
   }
 
