@@ -26,10 +26,10 @@ export function useMoveRequestForm() {
       moveType: initialMoveType || undefined,
       propertySize: undefined
     },
-    mode: "onChange" // Enable real-time validation
+    mode: "onChange"
   });
 
-  const { register, handleSubmit, watch, formState: { errors, isValid }, setValue, getValues } = form;
+  const { register, handleSubmit, watch, formState: { errors }, setValue, getValues } = form;
   const { validateField, sanitizeInput, validatePropertySize, validateAddress } = useFormValidation();
   const { handleFormSubmit } = useFormSubmission();
   const { isSubmitting, isGeocodingPickup, isGeocodingDelivery, showSuccess, handleSuccessClose } = useSubmitMoveRequest();
@@ -47,46 +47,53 @@ export function useMoveRequestForm() {
   const totalSteps = 5;
   const isProcessing = isSubmitting || isGeocodingPickup || isGeocodingDelivery;
 
-  const nextStep = () => {
-    const currentValues = getValues();
-    let isStepValid = true;
-
-    // Validate based on current step
-    switch (step) {
-      case 1:
-        isStepValid = !!moveType;
-        break;
-
-      case 2:
-        isStepValid = validatePropertySize(currentValues.propertySize);
-        break;
-
-      case 3:
-        isStepValid = validateAddress(currentValues.pickupAddress, 'pickup');
-        break;
-
-      case 4:
-        isStepValid = validateAddress(currentValues.deliveryAddress, 'delivery');
-        break;
-
-      case 5:
-        if (!currentValues.fullName || !currentValues.email || !currentValues.phone) {
-          toast({
-            title: "Missing Information",
-            description: "Please fill in all required contact information",
-            variant: "destructive"
-          });
-          isStepValid = false;
-        }
-        break;
+  // Helper function to safely validate an optional value
+  const safeValidate = <T,>(value: T | undefined, validatorFn: (val: T) => boolean): boolean => {
+    if (value === undefined) return false;
+    try {
+      return validatorFn(value);
+    } catch (error) {
+      console.log("Validation error:", error);
+      return false;
     }
+  };
 
-    if (!isStepValid) return;
-    setStep((prev) => Math.min(prev + 1, totalSteps));
+  // Helper function to check if current step is valid
+  const isCurrentStepValid = () => {
+    const currentValues = getValues();
+    
+    try {
+      switch (step) {
+        case 1:
+          return !!moveType;
+        case 2:
+          return safeValidate(currentValues.propertySize, (size) => !!size);
+        case 3:
+          return safeValidate(currentValues.pickupAddress, (addr) => 
+            !!addr && !!addr.street && !!addr.city && !!addr.state && !!addr.zipCode
+          );
+        case 4:
+          return safeValidate(currentValues.deliveryAddress, (addr) => 
+            !!addr && !!addr.street && !!addr.city && !!addr.state && !!addr.zipCode
+          );
+        case 5:
+          return !!(currentValues.fullName && currentValues.email && currentValues.phone);
+        default:
+          return false;
+      }
+    } catch (error) {
+      console.log("Step validation error:", error);
+      return false;
+    }
+  };
+
+  const nextStep = () => {
+    if (isCurrentStepValid()) {
+      setStep((prev) => Math.min(prev + 1, totalSteps));
+    }
   };
 
   const prevStep = () => {
-    // When going back, we don't need to validate the current step
     setStep((prev) => Math.max(prev - 1, 1));
   };
 
@@ -117,25 +124,6 @@ export function useMoveRequestForm() {
     handleFormSubmit(data, moveType, validateField, sanitizeInput);
   });
 
-  // Helper function to check if current step is valid
-  const isCurrentStepValid = () => {
-    const currentValues = getValues();
-    switch (step) {
-      case 1:
-        return !!moveType;
-      case 2:
-        return validatePropertySize(currentValues.propertySize);
-      case 3:
-        return validateAddress(currentValues.pickupAddress, 'pickup');
-      case 4:
-        return validateAddress(currentValues.deliveryAddress, 'delivery');
-      case 5:
-        return !!(currentValues.fullName && currentValues.email && currentValues.phone);
-      default:
-        return true;
-    }
-  };
-
   return {
     step,
     totalSteps,
@@ -154,6 +142,6 @@ export function useMoveRequestForm() {
     isGeocodingPickup,
     isGeocodingDelivery,
     propertySize: watch('propertySize'),
-    isValid: isCurrentStepValid() // Use our custom validation check
+    isValid: isCurrentStepValid()
   };
 }
