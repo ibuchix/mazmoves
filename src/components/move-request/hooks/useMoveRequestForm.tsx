@@ -53,6 +53,10 @@ export function useMoveRequestForm() {
 
     // Validate based on current step
     switch (step) {
+      case 1:
+        isStepValid = !!moveType;
+        break;
+
       case 2:
         isStepValid = validatePropertySize(currentValues.propertySize);
         break;
@@ -81,7 +85,10 @@ export function useMoveRequestForm() {
     setStep((prev) => Math.min(prev + 1, totalSteps));
   };
 
-  const prevStep = () => setStep((prev) => Math.max(prev - 1, 1));
+  const prevStep = () => {
+    // When going back, we don't need to validate the current step
+    setStep((prev) => Math.max(prev - 1, 1));
+  };
 
   const handleMoveTypeChange = (type: MoveType) => {
     setMoveType(type);
@@ -110,6 +117,25 @@ export function useMoveRequestForm() {
     handleFormSubmit(data, moveType, validateField, sanitizeInput);
   });
 
+  // Helper function to check if current step is valid
+  const isCurrentStepValid = () => {
+    const currentValues = getValues();
+    switch (step) {
+      case 1:
+        return !!moveType;
+      case 2:
+        return validatePropertySize(currentValues.propertySize);
+      case 3:
+        return validateAddress(currentValues.pickupAddress, 'pickup');
+      case 4:
+        return validateAddress(currentValues.deliveryAddress, 'delivery');
+      case 5:
+        return !!(currentValues.fullName && currentValues.email && currentValues.phone);
+      default:
+        return true;
+    }
+  };
+
   return {
     step,
     totalSteps,
@@ -128,6 +154,6 @@ export function useMoveRequestForm() {
     isGeocodingPickup,
     isGeocodingDelivery,
     propertySize: watch('propertySize'),
-    isValid
+    isValid: isCurrentStepValid() // Use our custom validation check
   };
 }
