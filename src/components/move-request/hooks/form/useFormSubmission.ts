@@ -61,16 +61,9 @@ export function useFormSubmission() {
           : undefined
       };
 
-      // TODO: Add your API call here
-      // const response = await submitMoveRequest(submissionData);
-
+      // We'll remove the success toast from here since it's handled in use-submit-move-request.tsx
       logSubmissionSuccess();
       
-      toast({
-        title: "Success",
-        description: "Your move request has been submitted successfully!",
-      });
-
     } catch (error) {
       logSubmissionError(error);
     }

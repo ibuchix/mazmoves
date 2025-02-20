@@ -61,13 +61,6 @@ export function useSubmissionTracking() {
         event: 'submission_success'
       }
     });
-
-    // Show success toast
-    toast({
-      title: "Success!",
-      description: "Your move request has been submitted successfully.",
-      variant: "default",
-    });
   };
 
   return {
