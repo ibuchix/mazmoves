@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -80,6 +81,7 @@ export function useSubmitMoveRequest() {
 
       console.log("Geocoding results:", { pickupCoords, deliveryCoords });
 
+      // Prepare data for database insertion
       const moveRequestData = {
         pickup_address: addressToJson(sanitizedData.pickupAddress),
         delivery_address: addressToJson(sanitizedData.deliveryAddress),
@@ -93,7 +95,8 @@ export function useSubmitMoveRequest() {
         pickup_longitude: pickupCoords.longitude,
         delivery_latitude: deliveryCoords.latitude,
         delivery_longitude: deliveryCoords.longitude,
-        move_type: sanitizedData.moveType
+        move_type: sanitizedData.moveType,
+        status: 'pending'
       };
 
       console.log("Attempting to insert move request with data:", {
@@ -125,7 +128,7 @@ export function useSubmitMoveRequest() {
         console.log("Sending confirmation email to:", sanitizedData.email);
         const emailResult = await sendConfirmationEmail(sanitizedData.email, sanitizedData.fullName);
         console.log("Confirmation email result:", emailResult);
-      } catch (emailError) {
+      } catch (emailError: any) {
         console.error("Failed to send confirmation email:", emailError);
         console.error("Email error details:", {
           message: emailError.message,
