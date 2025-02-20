@@ -90,7 +90,7 @@ USING (EXISTS (
 CREATE POLICY "Customers view own requests"
 ON move_requests FOR SELECT
 TO authenticated
-USING (customer_id = auth.uid());
+USING (customer_email = auth.email());
 
 CREATE POLICY "Companies view assigned requests"
 ON move_requests FOR SELECT
