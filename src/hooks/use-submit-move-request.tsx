@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
@@ -142,10 +141,11 @@ export function useSubmitMoveRequest() {
       await logRateLimit();
       console.log("Rate limit logged successfully");
 
+      console.log("Before showing success toast");
       setShowSuccess(true);
 
-      console.log("Showing success toast with action button");
-      toast({
+      console.log("Creating toast with action");
+      const toastResult = toast({
         title: "Move Request Received!",
         description: "Check your email for confirmation details.",
         variant: "default",
@@ -153,7 +153,7 @@ export function useSubmitMoveRequest() {
           <ToastAction 
             altText="Go to homepage"
             onClick={() => {
-              console.log("Navigate to home clicked");
+              console.log("Return Home button clicked!");
               navigate("/");
             }}
           >
@@ -162,6 +162,8 @@ export function useSubmitMoveRequest() {
         ),
         duration: 0,
       });
+
+      console.log("Toast created with result:", toastResult);
 
     } catch (error: any) {
       console.error("Detailed error in submission:", error);

@@ -12,10 +12,20 @@ import {
 export function Toaster() {
   const { toasts } = useToast()
 
+  console.log("Current toasts:", toasts); // Log all toasts
+
   return (
     <ToastProvider swipeDirection="right">
       {toasts.map(function ({ id, title, description, action, ...props }) {
-        console.log("Rendering toast:", { id, title, description, action, props }); // Debug log
+        console.log("Rendering individual toast:", { 
+          id, 
+          title, 
+          description, 
+          hasAction: !!action,
+          actionProps: action?.props,
+          props 
+        });
+        
         return (
           <Toast key={id} {...props}>
             <div className="grid gap-1">
@@ -24,7 +34,11 @@ export function Toaster() {
                 <ToastDescription>{description}</ToastDescription>
               )}
             </div>
-            {action}
+            {action && (
+              <div className="mt-2">
+                {action}
+              </div>
+            )}
             <ToastClose />
           </Toast>
         )
