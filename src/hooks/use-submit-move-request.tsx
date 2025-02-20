@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { MoveRequestForm } from "@/types/move-request";
+import { MoveRequestForm, RequestStatus } from "@/types/move-request";
 import { addressToJson } from "@/utils/address";
 import { checkRateLimit, logRateLimit } from "./move-request/use-rate-limit";
 import { geocodeAddresses } from "./move-request/use-geocoding";
@@ -82,6 +82,7 @@ export function useSubmitMoveRequest() {
       console.log("Geocoding results:", { pickupCoords, deliveryCoords });
 
       // Prepare data for database insertion
+      const initialStatus: RequestStatus = "pending";
       const moveRequestData = {
         pickup_address: addressToJson(sanitizedData.pickupAddress),
         delivery_address: addressToJson(sanitizedData.deliveryAddress),
@@ -96,7 +97,7 @@ export function useSubmitMoveRequest() {
         delivery_latitude: deliveryCoords.latitude,
         delivery_longitude: deliveryCoords.longitude,
         move_type: sanitizedData.moveType,
-        status: 'pending'
+        status: initialStatus
       };
 
       console.log("Attempting to insert move request with data:", {
