@@ -145,25 +145,13 @@ export function useSubmitMoveRequest() {
       setShowSuccess(true);
 
       console.log("Creating toast with action");
-      const toastResult = toast({
+      toast({
         title: "Move Request Received!",
         description: "Check your email for confirmation details.",
         variant: "default",
-        action: (
-          <ToastAction 
-            altText="Go to homepage"
-            onClick={() => {
-              console.log("Return Home button clicked!");
-              navigate("/");
-            }}
-          >
-            Return Home
-          </ToastAction>
-        ),
+        action: <ToastAction altText="Go to homepage" onClick={() => navigate("/")}>Return Home</ToastAction>,
         duration: 0,
       });
-
-      console.log("Toast created with result:", toastResult);
 
     } catch (error: any) {
       console.error("Detailed error in submission:", error);
