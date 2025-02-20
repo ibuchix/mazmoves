@@ -154,26 +154,29 @@ export function useSubmitMoveRequest() {
       setShowSuccess(true);
 
       // Debug: Toast rendering
-      console.log("Showing success toast...");
-      setTimeout(() => {
-        toast({
-          title: "Move Request Received",
-          description: "Check your email for confirmation details",
-          variant: "default",
-          action: (
-            <ToastAction 
-              altText="Go to homepage" 
-              onClick={() => navigate("/")}
-              className="bg-[#040480] text-white hover:bg-[#1f3dd2] rounded-lg px-4 py-2 text-sm font-montserrat font-semibold shadow-md w-full"
-            >
-              Return Home
-            </ToastAction>
-          ),
-          duration: 5000,
-          className: "z-[100]",
-        });
-        console.log("Success toast shown");
-      }, 500);
+      console.log("Preparing to show success toast...");
+      
+      // Show toast immediately without setTimeout
+      toast({
+        title: "Move Request Received",
+        description: "Check your email for confirmation details",
+        variant: "default",
+        action: (
+          <ToastAction 
+            altText="Go to homepage" 
+            onClick={() => {
+              console.log("Toast action clicked");
+              navigate("/");
+            }}
+            className="inline-flex items-center justify-center rounded-md bg-[#040480] px-4 py-2 text-sm font-montserrat font-semibold text-white transition-colors hover:bg-[#1f3dd2] focus:outline-none focus:ring-2 focus:ring-[#1f3dd2] focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+          >
+            Return Home
+          </ToastAction>
+        ),
+        duration: 0, // Make toast stay until dismissed
+        className: "z-[100]",
+      });
+      console.log("Success toast triggered");
 
     } catch (error: any) {
       console.error("Detailed error in submission:", error);
