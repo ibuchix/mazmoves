@@ -74,6 +74,9 @@ export default function Login() {
                 button: 'auth-button',
                 input: 'auth-input',
                 label: 'text-sm font-medium text-gray-700',
+                // Hide the default auth footer links
+                anchorAfterButton: '[display:none]',
+                dividerAfterButton: '[display:none]',
               },
             }}
             theme="light"
