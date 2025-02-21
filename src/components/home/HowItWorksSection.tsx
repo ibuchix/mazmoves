@@ -1,7 +1,12 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, ClipboardList, BarChart3, Calendar, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 export const HowItWorksSection = () => {
+  const navigate = useNavigate();
+
   const steps = [
     {
       step: "1",
@@ -79,6 +84,22 @@ export const HowItWorksSection = () => {
               </Card>
             </div>
           ))}
+        </div>
+
+        {/* Call to Action */}
+        <div className="mt-16 text-center">
+          <h3 className="text-2xl font-semibold text-[#040480] mb-4">
+            Ready to Get Started?
+          </h3>
+          <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+            Our service is completely free for movers. Join our network and start receiving moving requests today!
+          </p>
+          <Button 
+            onClick={() => navigate('/request-move')}
+            className="bg-[#d2491f] hover:bg-[#84d21f] text-white font-semibold px-8 py-3 text-lg rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300"
+          >
+            Request Your Move Now
+          </Button>
         </div>
       </div>
     </section>

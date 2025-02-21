@@ -19,11 +19,13 @@ const CompanyInvoices = lazy(() => import("@/pages/company/Invoices"));
 const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
 const AdminBilling = lazy(() => import("@/pages/admin/Billing"));
 const ConfirmEmail = lazy(() => import("@/pages/auth/ConfirmEmail"));
+const HowItWorks = lazy(() => import("@/pages/HowItWorks"));
 
 export const publicRoutes: RouteConfig[] = [
   { path: "/", element: <Index /> },
   { path: "/services", element: <Services /> },
   { path: "/companies", element: <Companies /> },
+  { path: "/how-it-works", element: <HowItWorks /> },
   { path: "/privacy-policy", element: <PrivacyPolicy /> },
   { path: "/terms-and-conditions", element: <TermsAndConditions /> },
   { path: "/login", element: <Login /> },

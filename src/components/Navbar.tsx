@@ -83,6 +83,12 @@ export default function Navbar() {
               Services
             </Link>
             <Link 
+              to="/how-it-works" 
+              className="text-[#040480] hover:text-[#1f3dd2] font-medium transition-all duration-300 relative after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:-bottom-1 after:left-0 after:bg-[#1f3dd2] after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left"
+            >
+              How It Works
+            </Link>
+            <Link 
               to="/companies" 
               className="text-[#040480] hover:text-[#1f3dd2] font-medium transition-all duration-300 relative after:content-[''] after:absolute after:w-full after:scale-x-0 after:h-0.5 after:-bottom-1 after:left-0 after:bg-[#1f3dd2] after:origin-bottom-right after:transition-transform after:duration-300 hover:after:scale-x-100 hover:after:origin-bottom-left"
             >
