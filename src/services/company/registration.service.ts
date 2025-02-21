@@ -74,8 +74,9 @@ export async function registerCompany(data: CompanyRegistrationForm) {
       .insert([{
         id: authData.user.id,
         email: data.email,
-        role: 'company',
-        company_id: company.id
+        full_name: data.managerName, // Use manager name as full name
+        role: 'company' as const, // Explicitly type as "company"
+        is_active: true
       }]);
 
     if (userError) {
