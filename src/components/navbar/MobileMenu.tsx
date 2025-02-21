@@ -43,13 +43,6 @@ export default function MobileMenu({ isOpen, onClose, session, userRole }: Mobil
               Services
             </Link>
             <Link 
-              to="/how-it-works" 
-              className="block px-4 py-2 rounded-lg text-[#040480] hover:text-[#1f3dd2] hover:bg-gray-50 font-medium transition-colors duration-200"
-              onClick={onClose}
-            >
-              How It Works
-            </Link>
-            <Link 
               to="/companies" 
               className="block px-4 py-2 rounded-lg text-[#040480] hover:text-[#1f3dd2] hover:bg-gray-50 font-medium transition-colors duration-200"
               onClick={onClose}
