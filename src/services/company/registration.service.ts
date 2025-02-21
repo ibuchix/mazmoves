@@ -15,7 +15,7 @@ export async function registerCompany(data: CompanyRegistrationForm) {
     // Format data to match the expected CompanyRegistrationData type
     const registrationData = {
       name: data.name,
-      registration_number: data.registrationNumber,
+      registration_number: data.registrationNumber || null, // Make optional
       contact_email: data.email,
       contact_phone: data.phone,
       business_address: {

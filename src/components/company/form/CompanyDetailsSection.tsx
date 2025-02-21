@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { UseFormRegister, UseFormWatch } from "react-hook-form";
@@ -28,16 +29,16 @@ export function CompanyDetailsSection({ register, errors }: CompanyDetailsSectio
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="registrationNumber" className="text-sm font-medium text-[#040480]">
-            Company Registration Number <span className="text-red-500">*</span>
+          <Label htmlFor="registrationNumber" className="text-sm font-medium text-[#040480] flex items-center gap-2">
+            Company Registration Number
+            <span className="text-sm text-muted-foreground font-normal">(Optional)</span>
           </Label>
           <Input
             id="registrationNumber"
-            {...register("registrationNumber", { required: "Company registration number is required" })}
+            {...register("registrationNumber")}
             className="h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300"
             placeholder="Enter official registration number"
           />
-          {errors.registrationNumber && <p className="text-red-500 text-sm mt-1">{errors.registrationNumber.message}</p>}
         </div>
 
         <div className="space-y-2">
