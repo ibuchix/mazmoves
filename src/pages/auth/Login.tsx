@@ -1,3 +1,4 @@
+
 import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useNavigate, Link } from "react-router-dom";
@@ -76,19 +77,20 @@ export default function Login() {
               },
             }}
             theme="light"
-            providers={[]}
+            providers={[]} // Remove all social login providers
+            view="sign_in" // Only show sign in view
           />
         </div>
 
         <div className="mt-8 text-center">
-          <p className="text-sm text-gray-600 mb-2">
-            Don't have an account? <Link to="/company/register" className="text-[#1f3dd2] hover:underline">Sign up here</Link>
+          <p className="text-sm text-gray-600 mb-4">
+            Don't have an account? <Link to="/company/register" className="text-[#1f3dd2] hover:underline font-semibold">Sign up here</Link>
           </p>
-          <p className="text-sm text-gray-600 mb-2">
-            <Link to="/auth/forgot-password" className="text-[#1f3dd2] hover:underline">Forgot your password?</Link>
+          <p className="text-sm text-gray-600 mb-4">
+            <Link to="/auth/forgot-password" className="text-[#1f3dd2] hover:underline font-semibold">Forgot your password?</Link>
           </p>
           <p className="text-sm text-gray-600">
-            Need help? <a href="mailto:support@mazmoves.com" className="text-[#1f3dd2] hover:underline">Contact support</a>
+            Need help? <a href="mailto:support@mazmoves.com" className="text-[#1f3dd2] hover:underline font-semibold">Contact support</a>
           </p>
         </div>
       </div>
