@@ -40,17 +40,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F8F9FF] to-[#FFFFFF]">
-      <style>
-        {`
-          .auth-container a[href*="magic-link"],
-          .auth-container p:has(a[href*="magic-link"]),
-          .auth-container a[href*="forgotten"],
-          .auth-container a[href*="sign-up"],
-          .auth-container hr {
-            display: none !important;
-          }
-        `}
-      </style>
       <div className="max-w-md w-full p-10 bg-white rounded-xl shadow-xl">
         <div className="text-center space-y-4 mb-8">
           <h1 className="text-4xl font-bold text-[#040480]">Company Login</h1>
@@ -90,6 +79,7 @@ export default function Login() {
             theme="light"
             providers={[]} // Remove all social login providers
             view="sign_in" // Only show sign in view
+            showLinks={false} // This will remove the additional links like "Forgot password" and "Sign up"
           />
         </div>
 
