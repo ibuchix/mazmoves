@@ -12,10 +12,27 @@ export async function registerCompany(data: CompanyRegistrationForm) {
       addressFields: Object.keys(data.address || {})
     });
 
-    // Format data to match the expected CompanyRegistrationData type
-    const registrationData = {
+    // First, create the auth user
+    const { data: authData, error: authError } = await supabase.auth.signUp({
+      email: data.email,
+      password: data.password,
+    });
+
+    if (authError) {
+      console.error('Auth error:', authError);
+      throw new Error(authError.message);
+    }
+
+    if (!authData.user) {
+      throw new Error('Failed to create user account');
+    }
+
+    console.log('Auth user created successfully');
+
+    // Format company data
+    const companyData = {
       name: data.name,
-      registration_number: data.registrationNumber || null, // Make optional
+      registration_number: data.registrationNumber || null,
       contact_email: data.email,
       contact_phone: data.phone,
       business_address: {
@@ -25,49 +42,73 @@ export async function registerCompany(data: CompanyRegistrationForm) {
         zipCode: data.address.zipCode
       },
       manager_name: data.managerName,
-      password: data.password
+      auth_user_id: authData.user.id,
+      is_verified: false, // Companies start unverified
+      status: 'pending' as const
     };
 
-    console.log('Calling register-company-v2 edge function with data:', {
-      ...registrationData,
-      password: '[REDACTED]'
-    });
-    
-    const { data: response, error: registerError } = await supabase.functions.invoke(
-      'register-company-v2',
-      {
-        body: registrationData
-      }
-    );
+    // Create company record
+    const { data: company, error: companyError } = await supabase
+      .from('companies')
+      .insert([companyData])
+      .select()
+      .single();
 
-    if (registerError) {
-      console.error('Edge function error:', registerError);
+    if (companyError) {
+      console.error('Company creation error:', companyError);
       
-      // Try to parse error details if available
-      try {
-        const errorDetails = JSON.parse(registerError.message);
-        if (errorDetails.error === 'Validation failed') {
-          throw new Error(errorDetails.details.join(', '));
-        }
-        throw new Error(errorDetails.error || errorDetails.message || registerError.message);
-      } catch (parseError) {
-        // If parsing fails, throw the original error
-        throw registerError;
+      // Try to clean up the auth user if company creation fails
+      await supabase.auth.signOut();
+      
+      if (companyError.code === '23505') { // Unique violation
+        throw new Error('A company with this email already exists');
       }
+      throw new Error(companyError.message);
     }
 
-    if (!response?.success) {
-      console.error('Registration failed with response:', response);
-      throw new Error(response?.message || 'Registration failed');
+    console.log('Company record created:', company);
+
+    // Create user record with company role
+    const { error: userError } = await supabase
+      .from('users')
+      .insert([{
+        id: authData.user.id,
+        email: data.email,
+        role: 'company',
+        company_id: company.id
+      }]);
+
+    if (userError) {
+      console.error('User record creation error:', userError);
+      throw new Error('Failed to set up user profile');
     }
 
-    console.log('Registration successful:', response);
-    return response;
+    // Try to send welcome email through edge function as final step
+    try {
+      await supabase.functions.invoke('send-welcome-email', {
+        body: { 
+          companyId: company.id,
+          email: data.email,
+          companyName: data.name
+        }
+      });
+    } catch (emailError) {
+      // Don't fail registration if email fails
+      console.warn('Welcome email failed to send:', emailError);
+    }
+
+    return {
+      success: true,
+      company: {
+        id: company.id,
+        name: company.name,
+        email: company.contact_email
+      }
+    };
 
   } catch (error: any) {
     console.error('Registration service error:', error);
     
-    // Handle specific error cases
     if (typeof error.message === 'string') {
       if (error.message.includes('already exists')) {
         throw new Error('A company with this email already exists');
@@ -75,12 +116,8 @@ export async function registerCompany(data: CompanyRegistrationForm) {
       if (error.message.includes('rate limit')) {
         throw new Error('Too many registration attempts. Please try again later');
       }
-      if (error.message.includes('validation')) {
-        throw new Error(error.message);
-      }
     }
     
-    // For unexpected errors
     throw new Error(error.message || 'An unexpected error occurred during registration');
   }
 }
