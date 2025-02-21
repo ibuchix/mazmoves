@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Session } from "@supabase/supabase-js";
@@ -19,20 +20,51 @@ interface AuthButtonProps {
 export default function AuthButton({ session }: AuthButtonProps) {
   const navigate = useNavigate();
 
-  // Query to get user role
-  const { data: userData } = useQuery({
+  // Query to get user role and company data
+  const { data: userData, isLoading } = useQuery({
     queryKey: ["user-role", session?.user?.id],
     queryFn: async () => {
       if (!session?.user?.id) return null;
       
-      const { data, error } = await supabase
+      console.log("Fetching user data for:", session.user.email);
+      
+      // First check if there's a company profile
+      const { data: companyData, error: companyError } = await supabase
+        .from("companies")
+        .select("*")
+        .eq("contact_email", session.user.email)
+        .single();
+      
+      if (companyError) {
+        console.error("Error fetching company:", companyError);
+        return null;
+      }
+
+      if (!companyData) {
+        console.log("No company profile found for:", session.user.email);
+        toast.error("Company profile not found", {
+          description: "Please contact support if you believe this is an error"
+        });
+        return null;
+      }
+
+      console.log("Company data found:", companyData);
+      
+      const { data: userData, error: userError } = await supabase
         .from("users")
         .select("role")
         .eq("id", session.user.id)
         .maybeSingle();
       
-      if (error) throw error;
-      return data;
+      if (userError) {
+        console.error("Error fetching user role:", userError);
+        return null;
+      }
+
+      return {
+        role: userData?.role || 'company',
+        company: companyData
+      };
     },
     enabled: !!session?.user?.id,
   });
@@ -43,14 +75,24 @@ export default function AuthButton({ session }: AuthButtonProps) {
       return;
     }
 
-    // Navigate based on user role
-    if (userData?.role === 'admin') {
-      navigate('/admin/dashboard');
-    } else if (userData?.role === 'company') {
+    if (isLoading) {
+      toast.info("Loading your profile...");
+      return;
+    }
+
+    // Navigate based on user role and company status
+    if (userData?.company) {
+      if (!userData.company.is_verified) {
+        toast.error("Your company is pending verification", {
+          description: "You will be notified once verified"
+        });
+        return;
+      }
       navigate('/company/dashboard');
     } else {
-      // For other roles or if role not found
-      navigate('/');
+      toast.error("No company profile found", {
+        description: "Please contact support if you believe this is an error"
+      });
     }
   };
 
