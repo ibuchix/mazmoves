@@ -1,6 +1,6 @@
 
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, ClipboardList, BarChart3, Calendar, CheckCircle, DollarSign } from "lucide-react";
+import { ArrowRight, ClipboardList, BarChart3, Calendar, CheckCircle, PoundSterling } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -50,7 +50,7 @@ export const HowItWorksSection = () => {
           
           {/* Free Service Badge */}
           <div className="mt-6 inline-flex items-center gap-2 bg-[#84d21f]/20 px-4 py-2 rounded-full">
-            <DollarSign className="w-5 h-5 text-[#84d21f]" />
+            <PoundSterling className="w-5 h-5 text-[#84d21f]" />
             <span className="text-[#040480] font-semibold">100% Free Service for Customers</span>
           </div>
         </div>
