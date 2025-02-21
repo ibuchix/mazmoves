@@ -40,6 +40,17 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#F8F9FF] to-[#FFFFFF]">
+      <style>
+        {`
+          .auth-container a[href*="magic-link"],
+          .auth-container p:has(a[href*="magic-link"]),
+          .auth-container a[href*="forgotten"],
+          .auth-container a[href*="sign-up"],
+          .auth-container hr {
+            display: none !important;
+          }
+        `}
+      </style>
       <div className="max-w-md w-full p-10 bg-white rounded-xl shadow-xl">
         <div className="text-center space-y-4 mb-8">
           <h1 className="text-4xl font-bold text-[#040480]">Company Login</h1>
@@ -74,8 +85,6 @@ export default function Login() {
                 button: 'auth-button',
                 input: 'auth-input',
                 label: 'text-sm font-medium text-gray-700',
-                anchor: 'hidden', // Hide all anchor elements (links)
-                divider: 'hidden', // Hide all dividers
               },
             }}
             theme="light"
