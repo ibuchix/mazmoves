@@ -21,7 +21,7 @@ export function useSubmitMoveRequest(): SubmitMoveRequestHook {
   const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = async (data: MoveRequestForm) => {
+  const handleSubmit = async (data: MoveRequestForm): Promise<void> => {
     if (isSubmitting) {
       console.log("Submission already in progress");
       return;
@@ -30,17 +30,14 @@ export function useSubmitMoveRequest(): SubmitMoveRequestHook {
     setIsSubmitting(true);
     
     try {
-      console.log("Processing move request");
+      console.log("Processing move request", data);
 
-      await supabase.functions.invoke(
-        'send-confirmation-email',
-        {
-          body: {
-            customerEmail: data.email,
-            customerName: data.fullName
-          }
+      await supabase.functions.invoke('send-confirmation-email', {
+        body: {
+          customerEmail: data.email,
+          customerName: data.fullName
         }
-      );
+      });
 
       setShowSuccess(true);
       
@@ -59,6 +56,7 @@ export function useSubmitMoveRequest(): SubmitMoveRequestHook {
     navigate("/");
   };
 
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
       setIsSubmitting(false);
