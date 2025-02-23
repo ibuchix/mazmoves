@@ -14,6 +14,32 @@ export interface SubmitMoveRequestHook {
   handleSuccessClose: () => void;
 }
 
+const sendConfirmationEmail = async (email: string, fullName: string): Promise<void> => {
+  try {
+    const { error } = await supabase.functions.invoke(
+      'send-confirmation-email',
+      {
+        body: {
+          customerEmail: email,
+          customerName: fullName
+        }
+      }
+    );
+
+    if (error) throw error;
+  } catch (error) {
+    console.error('Email error:', error);
+    throw new Error('Failed to send confirmation email');
+  }
+};
+
+const submitMainRequest = async (data: MoveRequestForm): Promise<void> => {
+  // Main submission logic would go here
+  // For now, just simulating a delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  console.log("Main request submitted:", data);
+};
+
 export function useSubmitMoveRequest(): SubmitMoveRequestHook {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGeocodingPickup, setIsGeocodingPickup] = useState(false);
@@ -26,24 +52,20 @@ export function useSubmitMoveRequest(): SubmitMoveRequestHook {
       console.log("Submission already in progress");
       return;
     }
-    
+
     setIsSubmitting(true);
     
     try {
-      console.log("Processing move request", data);
-
-      await supabase.functions.invoke('send-confirmation-email', {
-        body: {
-          customerEmail: data.email,
-          customerName: data.fullName
-        }
-      });
-
-      setShowSuccess(true);
+      // Process in parallel
+      await Promise.all([
+        sendConfirmationEmail(data.email, data.fullName),
+        submitMainRequest(data)
+      ]);
       
+      setShowSuccess(true);
     } catch (error) {
       console.error("Submission error:", error);
-      toast.error("Failed to submit move request");
+      toast.error(error instanceof Error ? error.message : 'Submission failed');
     } finally {
       setIsSubmitting(false);
       setIsGeocodingPickup(false);

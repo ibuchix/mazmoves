@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { MoveRequestForm, MoveType } from "@/types/move-request";
@@ -40,6 +39,41 @@ export function useMoveRequestForm() {
       setStep(1);
     }
   }, [moveType, step]);
+
+  const onSubmit = handleSubmit(async (formData: MoveRequestForm) => {
+    try {
+      if (!moveType) {
+        toast({
+          title: "Error",
+          description: "Please select a move type",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!validateAddress(formData.pickupAddress, 'pickup') || 
+          !validateAddress(formData.deliveryAddress, 'delivery') || 
+          !validatePropertySize(formData.propertySize)) {
+        return;
+      }
+
+      const result = await handleFormSubmit(formData, moveType, { 
+        validateField, 
+        sanitizeInput 
+      });
+
+      if (result.success && result.submissionData) {
+        await submitMoveRequest(result.submissionData);
+        setStep(1);
+      }
+    } catch (error) {
+      toast({
+        title: "Submission Error",
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+        variant: "destructive"
+      });
+    }
+  });
 
   const totalSteps = 5;
   const isProcessing = isSubmitting || isGeocodingPickup || isGeocodingDelivery;
@@ -98,40 +132,8 @@ export function useMoveRequestForm() {
     setStep(2);
   };
 
-  const onSubmit = handleSubmit(async (formData: MoveRequestForm) => {
-    console.log("Form submission started");
-    
-    if (!moveType) {
-      toast({
-        title: "Error",
-        description: "Please select a move type",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    if (!validateAddress(formData.pickupAddress, 'pickup') || 
-        !validateAddress(formData.deliveryAddress, 'delivery') || 
-        !validatePropertySize(formData.propertySize)) {
-      return;
-    }
-
-    try {
-      const result = await handleFormSubmit(formData, moveType, { validateField, sanitizeInput });
-      
-      if (result.success && result.submissionData) {
-        await submitMoveRequest(result.submissionData);
-        setStep(1);
-      }
-    } catch (error) {
-      console.error("Form submission error:", error);
-      toast({
-        title: "Submission Error",
-        description: "An error occurred while submitting your request. Please try again.",
-        variant: "destructive"
-      });
-    }
-  });
+  const propertySize = watch('propertySize');
+  const isValid = isCurrentStepValid();
 
   return {
     step,
@@ -150,7 +152,7 @@ export function useMoveRequestForm() {
     prevStep,
     isGeocodingPickup,
     isGeocodingDelivery,
-    propertySize: watch('propertySize'),
-    isValid: isCurrentStepValid()
+    propertySize,
+    isValid
   };
 }
