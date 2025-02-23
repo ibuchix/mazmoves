@@ -1,21 +1,33 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { verifyOrigin, corsHeaders } from "../_shared/verify-origin.ts";
+import { corsHeaders } from "../_shared/cors.ts";
+import { verifyOrigin } from "../_shared/verify-origin.ts";
 import { Resend } from "npm:resend@2.0.0";
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const MAX_RETRIES = parseInt(Deno.env.get('MAX_RETRIES') || '3');
 const RETRY_DELAY = parseInt(Deno.env.get('RETRY_DELAY') || '1000');
 
+interface EmailData {
+  to: string;
+  customerName: string;
+}
+
 async function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-async function sendEmailWithRetry(emailData: any, attempt: number = 1): Promise<Response> {
+async function sendEmailWithRetry(emailData: EmailData, attempt: number = 1): Promise<Response> {
   try {
     if (!RESEND_API_KEY) {
       console.error('RESEND_API_KEY is not set');
       throw new Error('RESEND_API_KEY is not configured');
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailData.to)) {
+      throw new Error('Invalid email format');
     }
 
     const resend = new Resend(RESEND_API_KEY);
@@ -35,12 +47,14 @@ async function sendEmailWithRetry(emailData: any, attempt: number = 1): Promise<
       `
     });
 
-    const responseText = JSON.stringify(emailResponse);
-    console.log(`Attempt ${attempt} - Resend API response:`, responseText);
+    console.log(`Attempt ${attempt} - Resend API response:`, JSON.stringify(emailResponse));
 
     if (!emailResponse) {
       throw new Error('No response from Resend API');
     }
+
+    // Log successful email send
+    console.log('Email sent successfully to:', emailData.to);
 
     return new Response(JSON.stringify({ success: true, data: emailResponse }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -62,6 +76,7 @@ async function sendEmailWithRetry(emailData: any, attempt: number = 1): Promise<
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -69,6 +84,7 @@ serve(async (req) => {
   try {
     // Verify the request origin
     if (!verifyOrigin(req)) {
+      console.error('Unauthorized origin attempt');
       return new Response(
         JSON.stringify({ error: 'Unauthorized origin' }),
         { 
@@ -80,9 +96,13 @@ serve(async (req) => {
 
     const { customerEmail, customerName } = await req.json();
     
+    if (!customerEmail || !customerName) {
+      throw new Error('Missing required fields: customerEmail or customerName');
+    }
+
     console.log('Attempting to send confirmation email to:', customerEmail);
 
-    const emailData = {
+    const emailData: EmailData = {
       to: customerEmail,
       customerName: customerName
     };
@@ -92,7 +112,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in send-confirmation-email function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error instanceof Error ? error.message : 'Unknown error occurred',
+        success: false
+      }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
