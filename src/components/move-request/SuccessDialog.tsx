@@ -6,7 +6,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Clock, Mail, Phone } from "lucide-react";
+import { CheckCircle, Clock, Mail } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 interface SuccessDialogProps {
@@ -34,19 +34,11 @@ export function SuccessDialog({ isOpen, onClose }: SuccessDialogProps) {
               <h4 className="font-semibold text-[#040480] font-montserrat">What happens next?</h4>
               <div className="flex items-center gap-2 justify-center text-sm">
                 <Clock className="h-4 w-4 text-[#1f3dd2]" />
-                <span>Companies will respond within 24 hours</span>
+                <span>Companies will respond within 2 hours</span>
               </div>
               <div className="flex items-center gap-2 justify-center text-sm">
                 <Mail className="h-4 w-4 text-[#1f3dd2]" />
                 <span>Check your email for confirmation details</span>
-              </div>
-            </div>
-            <Separator className="my-4" />
-            <div className="space-y-2">
-              <h4 className="font-semibold text-[#040480] font-montserrat">Need assistance?</h4>
-              <div className="flex items-center gap-2 justify-center text-sm">
-                <Phone className="h-4 w-4 text-[#1f3dd2]" />
-                <span>Contact support: 1-800-MAZ-MOVE</span>
               </div>
             </div>
           </div>
