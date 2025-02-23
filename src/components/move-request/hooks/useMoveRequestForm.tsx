@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { MoveRequestForm, MoveType } from "@/types/move-request";
@@ -115,11 +116,20 @@ export function useMoveRequestForm() {
       return;
     }
 
-    const result = await handleFormSubmit(formData, moveType, { validateField, sanitizeInput });
-    
-    if (result.success && result.submissionData) {
-      await submitMoveRequest(result.submissionData);
-      setStep(1);
+    try {
+      const result = await handleFormSubmit(formData, moveType, { validateField, sanitizeInput });
+      
+      if (result.success && result.submissionData) {
+        await submitMoveRequest(result.submissionData);
+        setStep(1);
+      }
+    } catch (error) {
+      console.error("Form submission error:", error);
+      toast({
+        title: "Submission Error",
+        description: "An error occurred while submitting your request. Please try again.",
+        variant: "destructive"
+      });
     }
   });
 
