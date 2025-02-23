@@ -104,7 +104,7 @@ export function useMoveRequestForm() {
     setStep(2);
   };
 
-  const onSubmit = handleSubmit((data: MoveRequestForm) => {
+  const onSubmit = handleSubmit(async (data: MoveRequestForm) => {
     if (!moveType) {
       toast({
         title: "Error",
@@ -121,7 +121,12 @@ export function useMoveRequestForm() {
       return;
     }
 
-    handleFormSubmit(data, moveType, validateField, sanitizeInput);
+    // Pass validation functions as an object
+    const result = await handleFormSubmit(data, moveType, { validateField, sanitizeInput });
+    
+    if (result.success) {
+      setStep(1); // Reset form on success
+    }
   });
 
   return {
