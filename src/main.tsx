@@ -12,6 +12,41 @@ import { useNavigate } from 'react-router-dom'
 // Initialize error monitoring in production
 initializeErrorMonitoring();
 
+// Script loading with retry logic
+function loadScript(src: string, retries = 3): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.onload = () => resolve();
+    script.onerror = () => {
+      if (retries > 0) {
+        console.log(`Retrying script load: ${src}, ${retries} attempts remaining`);
+        setTimeout(() => {
+          script.remove(); // Remove failed script
+          loadScript(src, retries - 1)
+            .then(resolve)
+            .catch(reject);
+        }, 1000);
+      } else {
+        reject(new Error(`Failed to load script ${src}`));
+      }
+    };
+    document.head.appendChild(script);
+  });
+}
+
+// Chunk loading error handler
+window.addEventListener('error', (event) => {
+  if (event.message === 'Loading chunk failed') {
+    console.error('Chunk loading failed, attempting retry...');
+    event.preventDefault();
+    loadScript(event.filename as string)
+      .catch((error) => {
+        console.error('Final chunk load attempt failed:', error);
+      });
+  }
+}, true);
+
 const ErrorFallback = () => {
   const navigate = useNavigate();
 
