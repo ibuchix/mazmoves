@@ -1,21 +1,29 @@
 
-import { useToast } from "@/hooks/use-toast";
-import { MoveRequestForm, MoveType } from "@/types/move-request";
-import { useSubmissionTracking } from "@/hooks/move-request/use-submission-tracking";
+import type { MoveRequestForm, MoveType } from "@/types/move-request";
 import { useCallback } from "react";
+import { useToast } from "@/hooks/use-toast";
+import { useSubmissionTracking } from "@/hooks/move-request/use-submission-tracking";
 
-type ValidationFunctions = {
+interface ValidationFunctions {
   validateField: (value: string, pattern: RegExp, minLength?: number) => boolean;
   sanitizeInput: (input: string) => string;
-};
+}
 
-type SubmissionResult = {
+interface SubmissionResult {
   success: boolean;
   error?: string;
   submissionData?: MoveRequestForm;
-};
+}
 
-export function useFormSubmission() {
+export interface FormSubmissionHook {
+  handleFormSubmit: (
+    data: MoveRequestForm,
+    moveType: MoveType | null,
+    validationFns: ValidationFunctions
+  ) => Promise<SubmissionResult>;
+}
+
+export function useFormSubmission(): FormSubmissionHook {
   const { toast } = useToast();
   const { logSubmissionAttempt, logSubmissionError, logSubmissionSuccess } = useSubmissionTracking();
 

@@ -3,9 +3,18 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { MoveRequestForm } from "@/types/move-request";
+import type { MoveRequestForm } from "@/types/move-request";
 
-export function useSubmitMoveRequest() {
+export interface SubmitMoveRequestHook {
+  isSubmitting: boolean;
+  isGeocodingPickup: boolean;
+  isGeocodingDelivery: boolean;
+  showSuccess: boolean;
+  handleSubmit: (data: MoveRequestForm) => Promise<void>;
+  handleSuccessClose: () => void;
+}
+
+export function useSubmitMoveRequest(): SubmitMoveRequestHook {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isGeocodingPickup, setIsGeocodingPickup] = useState(false);
   const [isGeocodingDelivery, setIsGeocodingDelivery] = useState(false);
@@ -23,7 +32,6 @@ export function useSubmitMoveRequest() {
     try {
       console.log("Processing move request");
 
-      // Send confirmation email
       await supabase.functions.invoke(
         'send-confirmation-email',
         {
