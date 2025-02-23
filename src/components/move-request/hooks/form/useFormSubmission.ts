@@ -10,6 +10,13 @@ type ValidationFunctions = {
   sanitizeInput: (input: string) => string;
 };
 
+// Define return type for handleFormSubmit
+type SubmissionResult = {
+  success: boolean;
+  error?: string;
+  submissionData?: MoveRequestForm;
+};
+
 export function useFormSubmission() {
   const { toast } = useToast();
   const { logSubmissionAttempt, logSubmissionError, logSubmissionSuccess } = useSubmissionTracking();
@@ -53,7 +60,7 @@ export function useFormSubmission() {
     data: MoveRequestForm,
     moveType: MoveType | null,
     { validateField, sanitizeInput }: ValidationFunctions
-  ): Promise<{ success: boolean; error?: string }> => {
+  ): Promise<SubmissionResult> => {
     return new Promise((resolve) => {
       try {
         console.log("Starting form submission");
@@ -85,7 +92,7 @@ export function useFormSubmission() {
         
         resolve({ 
           success: true, 
-          data: submissionData 
+          submissionData 
         });
 
       } catch (error) {

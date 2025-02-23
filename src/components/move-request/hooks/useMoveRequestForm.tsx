@@ -30,7 +30,7 @@ export function useMoveRequestForm() {
   const { register, handleSubmit, watch, formState: { errors }, setValue, getValues } = form;
   const { validateField, sanitizeInput, validatePropertySize, validateAddress } = useFormValidation();
   const { handleFormSubmit } = useFormSubmission();
-  const { isSubmitting, isGeocodingPickup, isGeocodingDelivery, showSuccess, handleSuccessClose } = useSubmitMoveRequest();
+  const { handleSubmit: submitMoveRequest, isSubmitting, isGeocodingPickup, isGeocodingDelivery, showSuccess, handleSuccessClose } = useSubmitMoveRequest();
 
   useUrlParams(step, moveType);
 
@@ -97,7 +97,7 @@ export function useMoveRequestForm() {
     setStep(2);
   };
 
-  const onSubmit = handleSubmit((data: MoveRequestForm) => {
+  const onSubmit = handleSubmit(async (formData: MoveRequestForm) => {
     console.log("Form submission started");
     
     if (!moveType) {
@@ -109,29 +109,18 @@ export function useMoveRequestForm() {
       return;
     }
 
-    if (!validateAddress(data.pickupAddress, 'pickup') || 
-        !validateAddress(data.deliveryAddress, 'delivery') || 
-        !validatePropertySize(data.propertySize)) {
+    if (!validateAddress(formData.pickupAddress, 'pickup') || 
+        !validateAddress(formData.deliveryAddress, 'delivery') || 
+        !validatePropertySize(formData.propertySize)) {
       return;
     }
 
-    handleFormSubmit(data, moveType, { validateField, sanitizeInput })
-      .then((result) => {
-        if (result.success) {
-          return handleSubmit(data);
-        }
-      })
-      .then(() => {
-        setStep(1);
-      })
-      .catch((error) => {
-        console.error("Form submission error:", error);
-        toast({
-          title: "Submission Error",
-          description: "An error occurred while submitting your request. Please try again.",
-          variant: "destructive"
-        });
-      });
+    const result = await handleFormSubmit(formData, moveType, { validateField, sanitizeInput });
+    
+    if (result.success && result.submissionData) {
+      await submitMoveRequest(result.submissionData);
+      setStep(1);
+    }
   });
 
   return {
