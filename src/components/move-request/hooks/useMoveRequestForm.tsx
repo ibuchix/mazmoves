@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { MoveRequestForm, MoveType, PropertySize } from "@/types/move-request";
+import { MoveRequestForm, MoveType } from "@/types/move-request";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { useFormValidation } from "./form/useFormValidation";
 import { useUrlParams } from "./url/useUrlParams";
@@ -61,7 +61,6 @@ export function useMoveRequestForm() {
   // Helper function to check if current step is valid
   const isCurrentStepValid = () => {
     const currentValues = getValues();
-    
     try {
       switch (step) {
         case 1:
@@ -104,7 +103,7 @@ export function useMoveRequestForm() {
     setStep(2);
   };
 
-  const onSubmit = handleSubmit(async (data: MoveRequestForm) => {
+  const onSubmit = handleSubmit((data: MoveRequestForm) => {
     if (!moveType) {
       toast({
         title: "Error",
@@ -121,12 +120,16 @@ export function useMoveRequestForm() {
       return;
     }
 
-    // Pass validation functions as an object
-    const result = await handleFormSubmit(data, moveType, { validateField, sanitizeInput });
-    
-    if (result.success) {
-      setStep(1); // Reset form on success
-    }
+    // Handle form submission
+    handleFormSubmit(data, moveType, { validateField, sanitizeInput })
+      .then((result) => {
+        if (result.success) {
+          setStep(1); // Reset form on success
+        }
+      })
+      .catch((error) => {
+        console.error("Form submission error:", error);
+      });
   });
 
   return {
