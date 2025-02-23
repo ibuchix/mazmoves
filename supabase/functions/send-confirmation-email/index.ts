@@ -2,7 +2,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
 import { verifyOrigin } from "../_shared/verify-origin.ts";
-import { Resend } from "npm:resend@2.0.0";
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const MAX_RETRIES = parseInt(Deno.env.get('MAX_RETRIES') || '3');
@@ -30,27 +29,34 @@ async function sendEmailWithRetry(emailData: EmailData, attempt: number = 1): Pr
       throw new Error('Invalid email format');
     }
 
-    const resend = new Resend(RESEND_API_KEY);
     console.log(`Attempt ${attempt} - Sending email to:`, emailData.to);
 
-    const emailResponse = await resend.emails.send({
-      from: 'MAZ Moves <notifications@mazmoves.com>',
-      to: [emailData.to],
-      subject: 'Move Request Confirmation',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-          <h2 style="color: #040480;">Thank you for your move request, ${emailData.customerName}!</h2>
-          <p>We have received your move request and our verified moving companies in your area will be notified.</p>
-          <p>You will be contacted directly by the moving companies to discuss your requirements in detail.</p>
-          <p style="margin-top: 20px;">Best regards,<br>MAZ Moves Team</p>
-        </div>
-      `
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: 'MAZ Moves <notifications@mazmoves.com>',
+        to: [emailData.to],
+        subject: 'Move Request Confirmation',
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <h2 style="color: #040480;">Thank you for your move request, ${emailData.customerName}!</h2>
+            <p>We have received your move request and our verified moving companies in your area will be notified.</p>
+            <p>You will be contacted directly by the moving companies to discuss your requirements in detail.</p>
+            <p style="margin-top: 20px;">Best regards,<br>MAZ Moves Team</p>
+          </div>
+        `
+      })
     });
 
+    const emailResponse = await response.json();
     console.log(`Attempt ${attempt} - Resend API response:`, JSON.stringify(emailResponse));
 
-    if (!emailResponse) {
-      throw new Error('No response from Resend API');
+    if (!response.ok) {
+      throw new Error(emailResponse.message || 'Failed to send email');
     }
 
     // Log successful email send
