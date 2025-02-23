@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { MoveRequestForm, MoveType } from "@/types/move-request";
@@ -14,7 +13,6 @@ export function useMoveRequestForm() {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
   
-  // Ensure we have valid initial values
   const initialMoveType = searchParams.get("moveType") as MoveType || null;
   const initialStep = searchParams.get("step") ? Math.max(1, parseInt(searchParams.get("step")!)) : 1;
   
@@ -34,10 +32,8 @@ export function useMoveRequestForm() {
   const { handleFormSubmit } = useFormSubmission();
   const { isSubmitting, isGeocodingPickup, isGeocodingDelivery, showSuccess, handleSuccessClose } = useSubmitMoveRequest();
 
-  // Set up URL params
   useUrlParams(step, moveType);
 
-  // Ensure step is valid based on moveType
   useEffect(() => {
     if (!moveType && step > 1) {
       setStep(1);
@@ -47,7 +43,6 @@ export function useMoveRequestForm() {
   const totalSteps = 5;
   const isProcessing = isSubmitting || isGeocodingPickup || isGeocodingDelivery;
 
-  // Helper function to safely validate an optional value
   const safeValidate = <T,>(value: T | undefined, validatorFn: (val: T) => boolean): boolean => {
     if (value === undefined) return false;
     try {
@@ -58,7 +53,6 @@ export function useMoveRequestForm() {
     }
   };
 
-  // Helper function to check if current step is valid
   const isCurrentStepValid = () => {
     const currentValues = getValues();
     try {
@@ -104,6 +98,8 @@ export function useMoveRequestForm() {
   };
 
   const onSubmit = handleSubmit((data: MoveRequestForm) => {
+    console.log("Form submission started");
+    
     if (!moveType) {
       toast({
         title: "Error",
@@ -113,22 +109,28 @@ export function useMoveRequestForm() {
       return;
     }
 
-    // Validate all required fields before submission
     if (!validateAddress(data.pickupAddress, 'pickup') || 
         !validateAddress(data.deliveryAddress, 'delivery') || 
         !validatePropertySize(data.propertySize)) {
       return;
     }
 
-    // Handle form submission
     handleFormSubmit(data, moveType, { validateField, sanitizeInput })
       .then((result) => {
         if (result.success) {
-          setStep(1); // Reset form on success
+          return handleSubmit(data);
         }
+      })
+      .then(() => {
+        setStep(1);
       })
       .catch((error) => {
         console.error("Form submission error:", error);
+        toast({
+          title: "Submission Error",
+          description: "An error occurred while submitting your request. Please try again.",
+          variant: "destructive"
+        });
       });
   });
 
