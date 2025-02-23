@@ -2,6 +2,7 @@
 import { useToast } from "@/hooks/use-toast";
 import { MoveRequestForm, MoveType } from "@/types/move-request";
 import { useSubmissionTracking } from "@/hooks/move-request/use-submission-tracking";
+import { supabase } from "@/integrations/supabase/client";
 
 export function useFormSubmission() {
   const { toast } = useToast();
@@ -61,11 +62,35 @@ export function useFormSubmission() {
           : undefined
       };
 
-      // We'll remove the success toast from here since it's handled in use-submit-move-request.tsx
+      // Send confirmation email
+      try {
+        const { error: emailError } = await supabase.functions.invoke(
+          'send-confirmation-email',
+          {
+            body: {
+              customerEmail: submissionData.email,
+              customerName: submissionData.fullName
+            }
+          }
+        );
+
+        if (emailError) {
+          console.error('Error sending confirmation email:', emailError);
+          toast({
+            title: "Email Notification Failed",
+            description: "We couldn't send you a confirmation email, but your request was received",
+            variant: "destructive"
+          });
+        }
+      } catch (emailError) {
+        console.error('Error in email sending process:', emailError);
+      }
+
       logSubmissionSuccess();
       
     } catch (error) {
       logSubmissionError(error);
+      throw error;
     }
   };
 
