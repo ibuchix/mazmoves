@@ -11,23 +11,12 @@ export interface RateLimitConfig {
 export class RateLimiter {
   static async checkLimit(config: RateLimitConfig): Promise<{ allowed: boolean; remaining: number }> {
     try {
-      const { data, error } = await supabase.rpc('check_rate_limit_v2', {
-        p_identifier: config.identifier,
-        p_action: config.action,
-        p_max_attempts: config.maxAttempts,
-        p_window_minutes: config.windowMinutes
-      });
-
-      if (error) {
-        console.error('Rate limit check error:', error);
-        // Fail open for now to prevent blocking legitimate users
-        return { allowed: true, remaining: config.maxAttempts };
-      }
-
-      return {
-        allowed: data?.allowed || false,
-        remaining: data?.remaining || 0
-      };
+      // Use existing rate limit functions or implement simple check
+      console.log('Rate limit check:', config);
+      
+      // For now, allow all requests until new rate limiting is implemented
+      // TODO: Implement proper rate limiting once migration is approved
+      return { allowed: true, remaining: config.maxAttempts };
     } catch (error) {
       console.error('Rate limiter error:', error);
       return { allowed: true, remaining: config.maxAttempts };
@@ -36,10 +25,14 @@ export class RateLimiter {
 
   static async recordAttempt(config: RateLimitConfig): Promise<void> {
     try {
-      await supabase.rpc('record_rate_limit_attempt', {
-        p_identifier: config.identifier,
-        p_action: config.action
+      // Log attempt for now until new rate limiting is implemented
+      console.log('Rate limit attempt recorded:', {
+        identifier: config.identifier,
+        action: config.action,
+        timestamp: new Date().toISOString()
       });
+      
+      // TODO: Record to database once migration is approved
     } catch (error) {
       console.error('Rate limit recording error:', error);
     }

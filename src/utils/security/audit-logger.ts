@@ -15,21 +15,21 @@ export interface AuditEvent {
 export class AuditLogger {
   static async logEvent(event: AuditEvent): Promise<void> {
     try {
-      const { error } = await supabase.from('security_audit_logs').insert({
+      // For now, log to console until security_audit_logs table is created
+      console.log('Security Audit Event:', {
+        timestamp: new Date().toISOString(),
         action: event.action,
         resource: event.resource,
-        resource_id: event.resourceId,
-        user_id: event.userId,
-        ip_address: event.ipAddress,
-        user_agent: event.userAgent,
+        resourceId: event.resourceId,
+        userId: event.userId,
+        ipAddress: event.ipAddress,
+        userAgent: event.userAgent,
         details: event.details,
-        severity: event.severity,
-        created_at: new Date().toISOString()
+        severity: event.severity
       });
 
-      if (error) {
-        console.error('Audit logging error:', error);
-      }
+      // TODO: Replace with database logging once migration is approved
+      // const { error } = await supabase.from('security_audit_logs').insert({...});
     } catch (error) {
       console.error('Audit logger error:', error);
     }
