@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MoveType } from "@/types/move-request";
-import { HeroSection } from "@/components/home/HeroSection";
+import { HeroSection } from "@/components/home/hero/HeroSection";
 import { HowItWorksSection } from "@/components/home/HowItWorksSection";
 import { TestimonialsSection } from "@/components/home/TestimonialsSection";
 import { ServicesSection } from "@/components/home/ServicesSection";
