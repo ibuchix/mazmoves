@@ -6,7 +6,6 @@ import { HeroSection } from "@/components/home/hero/HeroSection";
 import { HowItWorksSection } from "@/components/home/HowItWorksSection";
 import { TestimonialsSection } from "@/components/home/TestimonialsSection";
 import { ServicesSection } from "@/components/home/ServicesSection";
-import { CallToAction } from "@/components/home/CallToAction";
 import { AsyncContent } from "@/components/ui/async-content";
 
 export default function Index() {
@@ -38,7 +37,6 @@ export default function Index() {
         <HowItWorksSection />
         <ServicesSection />
         <TestimonialsSection />
-        <CallToAction />
       </AsyncContent>
     </div>
   );
