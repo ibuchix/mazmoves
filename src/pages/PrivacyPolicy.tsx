@@ -139,7 +139,7 @@ export default function PrivacyPolicy() {
             For any privacy-related queries or to exercise your data rights:
           </p>
           <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-gray-700">Email: ask@mazmoves.com</p>
+            <p className="text-gray-700">Email: ask@housemove.com</p>
             <p className="text-gray-700">Phone: +447388449110</p>
             <p className="text-gray-700">Address: 124 City Road, London, EC1V 2NX</p>
           </div>

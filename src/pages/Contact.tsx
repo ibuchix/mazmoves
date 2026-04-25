@@ -8,7 +8,7 @@ export default function Contact() {
           <div className="space-y-4">
             <p className="flex items-center text-gray-600">
               <span className="font-semibold mr-2">Email:</span>
-              info@mazmoves.com
+              info@housemove.com
             </p>
             <p className="flex items-center text-gray-600">
               <span className="font-semibold mr-2">Phone:</span>

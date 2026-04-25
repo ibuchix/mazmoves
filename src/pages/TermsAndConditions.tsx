@@ -9,7 +9,7 @@ export default function TermsAndConditions() {
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold text-[#1f3dd2]">1. Introduction</h2>
           <p className="text-gray-700 leading-relaxed">
-            Welcome to MAZ Moves Ltd. These terms and conditions outline the rules and regulations
+            Welcome to HouseMove Ltd. These terms and conditions outline the rules and regulations
             for the use of our services.
           </p>
         </section>
@@ -17,7 +17,7 @@ export default function TermsAndConditions() {
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold text-[#1f3dd2]">2. Services</h2>
           <p className="text-gray-700 leading-relaxed">
-            MAZ Moves Ltd provides moving services including but not limited to residential moves,
+            HouseMove Ltd provides moving services including but not limited to residential moves,
             commercial moves, and international relocations.
           </p>
         </section>

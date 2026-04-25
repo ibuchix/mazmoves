@@ -91,7 +91,7 @@ export default function Login() {
             <Link to="/auth/forgot-password" className="text-[#1f3dd2] hover:underline font-semibold">Forgot your password?</Link>
           </p>
           <p className="text-sm text-gray-600">
-            Need help? <a href="mailto:support@mazmoves.com" className="text-[#1f3dd2] hover:underline font-semibold">Contact support</a>
+            Need help? <a href="mailto:support@housemove.com" className="text-[#1f3dd2] hover:underline font-semibold">Contact support</a>
           </p>
         </div>
       </div>
