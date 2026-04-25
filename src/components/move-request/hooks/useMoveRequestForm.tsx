@@ -1,3 +1,11 @@
+// useMoveRequestForm
+// Wizard state hook for the multi-step move request form.
+// Persists step, moveType, and all field values to sessionStorage so the user
+// can navigate to the Home page (or anywhere within the SPA) and return to
+// /request-move with their progress fully intact. URL params take precedence
+// over storage when present, then storage, then defaults. Storage is cleared
+// after a successful submission.
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { MoveRequestForm, MoveType } from "@/types/move-request";
@@ -8,21 +16,56 @@ import { useFormSubmission } from "./form/useFormSubmission";
 import { useSubmitMoveRequest } from "@/hooks/use-submit-move-request";
 import { useToast } from "@/hooks/use-toast";
 
+const STORAGE_KEY = "moveRequestForm:v1";
+
+interface PersistedState {
+  step: number;
+  moveType: MoveType | null;
+  values: Partial<MoveRequestForm>;
+}
+
+function loadPersisted(): PersistedState | null {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as PersistedState;
+  } catch {
+    return null;
+  }
+}
+
+function clearPersisted() {
+  try {
+    sessionStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
 export function useMoveRequestForm() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
-  
-  const initialMoveType = searchParams.get("moveType") as MoveType || null;
-  const initialStep = searchParams.get("step") ? Math.max(1, parseInt(searchParams.get("step")!)) : 1;
-  
+
+  const persisted = loadPersisted();
+
+  const urlMoveType = searchParams.get("moveType") as MoveType | null;
+  const urlStepRaw = searchParams.get("step");
+
+  const initialMoveType: MoveType | null =
+    urlMoveType || persisted?.moveType || null;
+  const initialStep = urlStepRaw
+    ? Math.max(1, parseInt(urlStepRaw))
+    : persisted?.step ?? 1;
+
   const [step, setStep] = useState(initialStep);
   const [moveType, setMoveType] = useState<MoveType | null>(initialMoveType);
 
   const form = useForm<MoveRequestForm>({
     defaultValues: {
-      moveType: initialMoveType || undefined,
-      propertySize: undefined
+      ...(persisted?.values ?? {}),
+      moveType: initialMoveType || persisted?.values?.moveType || undefined,
+      propertySize: persisted?.values?.propertySize ?? undefined,
     },
     mode: "onChange"
   });
@@ -33,6 +76,35 @@ export function useMoveRequestForm() {
   const { handleSubmit: submitMoveRequest, isSubmitting, isGeocodingPickup, isGeocodingDelivery, showSuccess, handleSuccessClose } = useSubmitMoveRequest();
 
   useUrlParams(step, moveType);
+
+  // Persist wizard progress to sessionStorage on every change so the user can
+  // navigate away (e.g. Home button on step 1) and return without losing input.
+  useEffect(() => {
+    const subscription = watch((values) => {
+      try {
+        const payload: PersistedState = {
+          step,
+          moveType,
+          values: values as Partial<MoveRequestForm>,
+        };
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch {
+        // Quota / serialization errors are non-fatal — ignore.
+      }
+    });
+    // Also persist immediately when step/moveType change (without a field edit).
+    try {
+      const payload: PersistedState = {
+        step,
+        moveType,
+        values: getValues() as Partial<MoveRequestForm>,
+      };
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch {
+      // ignore
+    }
+    return () => subscription.unsubscribe();
+  }, [watch, getValues, step, moveType]);
 
   useEffect(() => {
     if (!moveType && step > 1) {
@@ -64,6 +136,9 @@ export function useMoveRequestForm() {
 
       if (result.success && result.submissionData) {
         await submitMoveRequest(result.submissionData);
+        clearPersisted();
+        form.reset();
+        setMoveType(null);
         setStep(1);
       }
     } catch (error) {
