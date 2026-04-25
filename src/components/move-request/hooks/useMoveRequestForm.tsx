@@ -77,6 +77,35 @@ export function useMoveRequestForm() {
 
   useUrlParams(step, moveType);
 
+  // Persist wizard progress to sessionStorage on every change so the user can
+  // navigate away (e.g. Home button on step 1) and return without losing input.
+  useEffect(() => {
+    const subscription = watch((values) => {
+      try {
+        const payload: PersistedState = {
+          step,
+          moveType,
+          values: values as Partial<MoveRequestForm>,
+        };
+        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+      } catch {
+        // Quota / serialization errors are non-fatal — ignore.
+      }
+    });
+    // Also persist immediately when step/moveType change (without a field edit).
+    try {
+      const payload: PersistedState = {
+        step,
+        moveType,
+        values: getValues() as Partial<MoveRequestForm>,
+      };
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch {
+      // ignore
+    }
+    return () => subscription.unsubscribe();
+  }, [watch, getValues, step, moveType]);
+
   useEffect(() => {
     if (!moveType && step > 1) {
       setStep(1);
