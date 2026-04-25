@@ -81,17 +81,10 @@ export default function PrivacyPolicy() {
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold text-[#1f3dd2]">6. Data Deletion Request</h2>
           <p className="text-gray-700 leading-relaxed">
-            You can request deletion of your personal data at any time:
+            You can request deletion of your personal data at any time by emailing us at
+            {" "}<a href="mailto:ask@housemove.com" className="text-[#1f3dd2] underline hover:text-[#84d21f]">ask@housemove.com</a>.
+            Please include the email and phone number you used when submitting your move request.
           </p>
-          <div className="mt-4">
-            <Button 
-              onClick={handleDataDeletionRequest}
-              disabled={isSubmittingRequest}
-              className="bg-[#040480] hover:bg-[#1f3dd2]"
-            >
-              {isSubmittingRequest ? "Submitting..." : "Request Data Deletion"}
-            </Button>
-          </div>
           <p className="text-sm text-gray-600 mt-2">
             Note: Some data may be retained if required by law or legitimate business purposes.
           </p>
