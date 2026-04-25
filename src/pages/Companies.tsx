@@ -11,7 +11,7 @@ export default function Companies() {
       <div className="container mx-auto px-4 py-16">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h1 className="text-4xl md:text-5xl font-bold text-[#040480] mb-6">
-            Grow Your Moving Business with MAZ Moves
+            Grow Your Moving Business with HouseMove
           </h1>
           <p className="text-xl text-gray-600 mb-8">
             Join our platform for free and connect with customers actively looking for reliable moving services.
@@ -103,7 +103,7 @@ export default function Companies() {
             Ready to Expand Your Moving Business?
           </h2>
           <p className="text-xl text-gray-100 mb-8">
-            Join MAZ Moves today - it's completely free! Start receiving quality leads and grow your business.
+            Join HouseMove today - it's completely free! Start receiving quality leads and grow your business.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button 

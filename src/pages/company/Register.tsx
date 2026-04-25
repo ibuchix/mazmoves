@@ -8,7 +8,7 @@ export default function RegisterCompany() {
       <div className="bg-gradient-to-r from-[#040480] to-[#1f3dd2] text-white py-16">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-bold text-center mb-6">
-            Join MAZ Moves Today
+            Join HouseMove Today
           </h1>
           <p className="text-xl md:text-2xl text-center text-gray-100 max-w-3xl mx-auto">
             Partner with us for free and only pay when you receive qualified moving leads

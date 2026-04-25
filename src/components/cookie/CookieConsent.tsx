@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import CookiePreferences from "@/components/footer/CookiePreferences";
+import CookiePreferences from "@/components/cookie/CookiePreferences";
 
 interface CookiePreferences {
   necessary: boolean;
