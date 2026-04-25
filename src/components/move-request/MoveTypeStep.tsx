@@ -1,8 +1,12 @@
+// Step 1 of the move request wizard: pick the move type.
+// Selection is forwarded to the parent via onChange — the parent is responsible
+// for advancing the step. We do NOT auto-advance from inside this component,
+// because doing so would re-trigger when the user clicks Previous and the
+// previously-selected value is still present, trapping them on step 2.
 
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { MoveType } from "@/types/move-request";
-import { useEffect } from "react";
 
 interface MoveTypeStepProps {
   value: MoveType | null;
@@ -10,22 +14,12 @@ interface MoveTypeStepProps {
   onNext: () => void;
 }
 
-export function MoveTypeStep({ value, onChange, onNext }: MoveTypeStepProps) {
-  // Add a small delay before triggering onNext to ensure state updates have completed
-  useEffect(() => {
-    if (value) {
-      const timer = setTimeout(() => {
-        onNext();
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [value, onNext]);
-
+export function MoveTypeStep({ value, onChange }: MoveTypeStepProps) {
   return (
     <div className="space-y-4">
       <h3 className="text-lg font-semibold">What type of move is this?</h3>
       <RadioGroup
-        defaultValue={value || undefined}
+        value={value || undefined}
         onValueChange={(value: MoveType) => onChange(value)}
       >
         <div className="flex items-center space-x-2">
