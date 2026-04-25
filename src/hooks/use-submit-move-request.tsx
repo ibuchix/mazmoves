@@ -18,17 +18,19 @@ export interface SubmitMoveRequestHook {
 }
 
 const insertMoveRequest = async (data: MoveRequestForm): Promise<void> => {
-  const { error } = await supabase.from("move_requests").insert({
-    move_type: data.moveType,
-    estimated_size: data.propertySize,
-    pickup_address: data.pickupAddress as unknown as Record<string, unknown>,
-    delivery_address: data.deliveryAddress as unknown as Record<string, unknown>,
-    requested_date: data.moveDate,
-    customer_name: data.fullName,
-    customer_email: data.email,
-    customer_phone: data.phone,
-    special_instructions: data.specialInstructions ?? null,
-  });
+  const { error } = await supabase.from("move_requests").insert([
+    {
+      move_type: data.moveType,
+      estimated_size: data.propertySize,
+      pickup_address: data.pickupAddress as never,
+      delivery_address: data.deliveryAddress as never,
+      requested_date: data.moveDate,
+      customer_name: data.fullName,
+      customer_email: data.email,
+      customer_phone: data.phone,
+      special_instructions: data.specialInstructions ?? null,
+    },
+  ]);
 
   if (error) {
     console.error("Failed to insert move request:", error);
