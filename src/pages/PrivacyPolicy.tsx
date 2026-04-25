@@ -1,44 +1,8 @@
+// Privacy policy page. Removed authenticated data-deletion request flow
+// since the platform no longer has user accounts. Visitors can email us instead.
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 
 export default function PrivacyPolicy() {
-  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
-
-  const handleDataDeletionRequest = async () => {
-    try {
-      setIsSubmittingRequest(true);
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        toast.error("Please login to submit a data deletion request");
-        return;
-      }
-
-      const { error } = await supabase.functions.invoke('handle-data-request', {
-        body: { 
-          type: 'deletion',
-          userId: user.id,
-          userEmail: user.email
-        }
-      });
-
-      if (error) throw error;
-
-      toast.success("Data deletion request submitted successfully", {
-        description: "We will process your request within 30 days"
-      });
-    } catch (error) {
-      console.error('Error submitting data request:', error);
-      toast.error("Failed to submit request", {
-        description: "Please try again or contact support"
-      });
-    } finally {
-      setIsSubmittingRequest(false);
-    }
-  };
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
@@ -117,17 +81,10 @@ export default function PrivacyPolicy() {
         <section className="space-y-4">
           <h2 className="text-2xl font-semibold text-[#1f3dd2]">6. Data Deletion Request</h2>
           <p className="text-gray-700 leading-relaxed">
-            You can request deletion of your personal data at any time:
+            You can request deletion of your personal data at any time by emailing us at
+            {" "}<a href="mailto:ask@housemove.com" className="text-[#1f3dd2] underline hover:text-[#84d21f]">ask@housemove.com</a>.
+            Please include the email and phone number you used when submitting your move request.
           </p>
-          <div className="mt-4">
-            <Button 
-              onClick={handleDataDeletionRequest}
-              disabled={isSubmittingRequest}
-              className="bg-[#040480] hover:bg-[#1f3dd2]"
-            >
-              {isSubmittingRequest ? "Submitting..." : "Request Data Deletion"}
-            </Button>
-          </div>
           <p className="text-sm text-gray-600 mt-2">
             Note: Some data may be retained if required by law or legitimate business purposes.
           </p>

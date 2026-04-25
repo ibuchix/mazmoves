@@ -1,8 +1,8 @@
-
+// Hero form for selecting move type. Removed the "moving company? Join us" link
+// since registration has been removed from the platform.
 import { Button } from "@/components/ui/button";
 import { MoveTypeStep } from "@/components/move-request/MoveTypeStep";
 import { MoveType } from "@/types/move-request";
-import { Link } from "react-router-dom";
 
 interface HeroFormProps {
   moveType: MoveType | null;
@@ -22,21 +22,13 @@ export const HeroForm = ({ moveType, setMoveType, onGetQuotes }: HeroFormProps) 
           onChange={(value) => setMoveType(value)}
           onNext={onGetQuotes}
         />
-        <Button 
+        <Button
           className="w-full mt-6 bg-[#d2491f] hover:bg-[#84d21f] text-white text-lg font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
           onClick={onGetQuotes}
           disabled={!moveType}
         >
           Get Free Quotes
         </Button>
-        <div className="mt-4 text-center">
-          <Link 
-            to="/company/register"
-            className="inline-block text-[#1f3dd2] hover:text-[#84d21f] font-semibold transition-colors duration-200"
-          >
-            Are you a moving company? Join us →
-          </Link>
-        </div>
       </div>
     </div>
   );
