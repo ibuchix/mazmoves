@@ -1,3 +1,6 @@
+// Persists move requests to the `move_requests` table in Supabase.
+// The confirmation email is sent AFTER the insert and its failure no longer
+// blocks the success dialog — the request is saved either way.
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -14,30 +17,34 @@ export interface SubmitMoveRequestHook {
   handleSuccessClose: () => void;
 }
 
-const sendConfirmationEmail = async (email: string, fullName: string): Promise<void> => {
-  try {
-    const { error } = await supabase.functions.invoke(
-      'send-confirmation-email',
-      {
-        body: {
-          customerEmail: email,
-          customerName: fullName
-        }
-      }
-    );
+const insertMoveRequest = async (data: MoveRequestForm): Promise<void> => {
+  const { error } = await supabase.from("move_requests").insert({
+    move_type: data.moveType,
+    estimated_size: data.propertySize,
+    pickup_address: data.pickupAddress as unknown as Record<string, unknown>,
+    delivery_address: data.deliveryAddress as unknown as Record<string, unknown>,
+    requested_date: data.moveDate,
+    customer_name: data.fullName,
+    customer_email: data.email,
+    customer_phone: data.phone,
+    special_instructions: data.specialInstructions ?? null,
+  });
 
-    if (error) throw error;
-  } catch (error) {
-    console.error('Email error:', error);
-    throw new Error('Failed to send confirmation email');
+  if (error) {
+    console.error("Failed to insert move request:", error);
+    throw new Error(error.message || "Failed to save your move request");
   }
 };
 
-const submitMainRequest = async (data: MoveRequestForm): Promise<void> => {
-  // Main submission logic would go here
-  // For now, just simulating a delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  console.log("Main request submitted:", data);
+const sendConfirmationEmail = async (email: string, fullName: string): Promise<void> => {
+  const { error } = await supabase.functions.invoke("send-confirmation-email", {
+    body: {
+      customerEmail: email,
+      customerName: fullName,
+    },
+  });
+
+  if (error) throw error;
 };
 
 export function useSubmitMoveRequest(): SubmitMoveRequestHook {
@@ -54,18 +61,25 @@ export function useSubmitMoveRequest(): SubmitMoveRequestHook {
     }
 
     setIsSubmitting(true);
-    
+
     try {
-      // Process in parallel
-      await Promise.all([
-        sendConfirmationEmail(data.email, data.fullName),
-        submitMainRequest(data)
-      ]);
-      
+      // 1. Save the request first — this is the source of truth.
+      await insertMoveRequest(data);
+
+      // 2. Attempt the confirmation email. Failure is non-blocking.
+      try {
+        await sendConfirmationEmail(data.email, data.fullName);
+      } catch (emailError) {
+        console.error("Confirmation email failed (non-blocking):", emailError);
+        toast.warning(
+          "Your request was saved, but we couldn't send the confirmation email. We'll still be in touch."
+        );
+      }
+
       setShowSuccess(true);
     } catch (error) {
       console.error("Submission error:", error);
-      toast.error(error instanceof Error ? error.message : 'Submission failed');
+      toast.error(error instanceof Error ? error.message : "Submission failed");
     } finally {
       setIsSubmitting(false);
       setIsGeocodingPickup(false);
@@ -78,7 +92,6 @@ export function useSubmitMoveRequest(): SubmitMoveRequestHook {
     navigate("/");
   };
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       setIsSubmitting(false);
@@ -92,6 +105,6 @@ export function useSubmitMoveRequest(): SubmitMoveRequestHook {
     isGeocodingDelivery,
     showSuccess,
     handleSubmit,
-    handleSuccessClose
+    handleSuccessClose,
   };
 }
