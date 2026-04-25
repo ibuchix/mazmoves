@@ -1,48 +1,55 @@
-## HouseMove Redesign Plan
+# Plan: Save Move Requests to the Database
 
-### 1. Create reusable Logo component
+## What's wrong
 
-- Copy uploaded logo from `user-uploads://housemove_logo.png` to `src/assets/housemove-logo.png`.
-- Create `src/components/Logo.tsx` — a single reusable component:
-  - Props: `size` (`sm` | `md` | `lg` | `xl`), `withText` (boolean, default true), `className`.
-  - Imports the asset via ES6 (`import logo from "@/assets/housemove-logo.png"`).
-  - Renders the image plus the brand text "HouseMove" (using Montserrat / brand navy `#040480`) when `withText` is true.
-  - Wraps in a `Link to="/"` optionally via a `linkToHome` prop (default true).
+When a customer submits the move form, **nothing is written to the database**. The function in `src/hooks/use-submit-move-request.tsx` that's supposed to save the request is a leftover stub:
 
-### 2. Remove Navbar and Footer
+```ts
+const submitMainRequest = async (data: MoveRequestForm): Promise<void> => {
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  console.log("Main request submitted:", data);
+};
+```
 
-- Edit `src/components/layout/MainLayout.tsx`:
-  - Remove `<Navbar />`, the spacer `<div className="h-4" />`, and `<Footer />` and their imports.
-  - Keep `CookieConsent` and `Toaster`.
-- Delete the now-unused files:
-  - `src/components/Navbar.tsx`
-  - `src/components/Footer.tsx`
-  - Entire `src/components/navbar/` folder (`AuthButton.tsx`, `MobileMenu.tsx`, `RoleLinks.tsx`).
-  - Entire `src/components/footer/` folder (`BackToTop.tsx`, `ContactInfo.tsx`, `CookiePreferences.tsx`, `FooterLogo.tsx`, `LanguageSelector.tsx`, `LegalLinks.tsx`, `MobileCollapsibleSection.tsx`, `QuickLinks.tsx`, `SocialLinks.tsx`).
+It just waits and logs — there is no `supabase.from('move_requests').insert(...)` anywhere in the customer flow.
 
-### 3. Remove all "MAZ Moves" references and rebrand to "HouseMove"
+This is **not** an RLS issue. The `move_requests` table already has `Anyone can create move requests` (INSERT for `public`, `WITH CHECK (true)`), so anonymous inserts are allowed.
 
-Replace text in:
-- `index.html` — title, meta description, author, OG tags, twitter, canonical → "HouseMove". Update favicon/OG image path to the new logo (place a copy in `public/housemove-logo.png` for meta tags).
-- `src/pages/Companies.tsx` — "MAZ Moves" → "HouseMove" (lines 14, 106).
-- `src/pages/Contact.tsx` — `info@mazmoves.com` → `info@housemove.com`.
-- `src/pages/PrivacyPolicy.tsx` — `ask@mazmoves.com` → `ask@housemove.com`.
-- `src/pages/TermsAndConditions.tsx` — "MAZ Moves Ltd" → "HouseMove Ltd" (lines 12, 20).
-- `src/pages/auth/Login.tsx` — `support@mazmoves.com` → `support@housemove.com`.
-- `src/pages/company/Register.tsx` — "Join MAZ Moves Today" → "Join HouseMove Today".
+The correct destination is confirmed to be the `move_requests` table — the same table all the edge functions (`notify-companies`, `process-matches`, `check-move-distance`, `generate-invoice`) read from.
 
-### 4. Where the new Logo component is used
+## Fix
 
-Since the navbar and footer are being removed, the brand logo no longer appears in the global chrome. The new `Logo` component is created for reuse on pages that need branding (e.g. auth pages, register page, hero section if desired later). It will not be inserted into MainLayout — leaving placement decisions for follow-up requests.
+Replace the stub with a real Supabase insert into `move_requests`, and decouple the email from the insert so a Resend failure no longer hides a successful submission.
 
-### Files touched
+### Field mapping
 
-Created: `src/assets/housemove-logo.png`, `public/housemove-logo.png`, `src/components/Logo.tsx`
-Edited: `index.html`, `src/components/layout/MainLayout.tsx`, `src/pages/Companies.tsx`, `src/pages/Contact.tsx`, `src/pages/PrivacyPolicy.tsx`, `src/pages/TermsAndConditions.tsx`, `src/pages/auth/Login.tsx`, `src/pages/company/Register.tsx`
-Deleted: `src/components/Navbar.tsx`, `src/components/Footer.tsx`, all of `src/components/navbar/`, all of `src/components/footer/`
+| Form field | DB column |
+|---|---|
+| `moveType` | `move_type` |
+| `propertySize` | `estimated_size` |
+| `pickupAddress` (object) | `pickup_address` (jsonb) |
+| `deliveryAddress` (object) | `delivery_address` (jsonb) |
+| `moveDate` | `requested_date` |
+| `fullName` | `customer_name` |
+| `email` | `customer_email` |
+| `phone` | `customer_phone` |
+| `specialInstructions` | `special_instructions` |
 
-### Out of scope (not changing)
+`status` defaults to `'pending'`. Lat/lng columns stay null (geocoding isn't wired into this submit path; out of scope).
 
-- No design/color changes elsewhere.
-- No changes to backend, database, edge functions, or auth flows.
-- The previous security migration is still pending separately and unaffected.
+### New behaviour
+
+1. User completes the 5-step form and clicks Submit.
+2. The row is inserted into `move_requests` first. If this fails, an error toast is shown and the success dialog does not appear.
+3. After the insert succeeds, the confirmation email is attempted. If it fails (e.g. current Resend domain issue), a small warning toast appears but the success dialog still shows — the request is saved either way.
+
+## Files touched
+
+- `src/hooks/use-submit-move-request.tsx` — replace stub with real insert; reorder so email failure doesn't block success.
+
+## Out of scope
+
+- Resend domain re-verification (deferred per your instruction).
+- Triggering `notify-companies` after insert (no companies on the platform right now).
+- Adding geocoding into the submission path.
+- Any UI/design changes.
