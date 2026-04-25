@@ -136,6 +136,9 @@ export function useMoveRequestForm() {
 
       if (result.success && result.submissionData) {
         await submitMoveRequest(result.submissionData);
+        clearPersisted();
+        form.reset();
+        setMoveType(null);
         setStep(1);
       }
     } catch (error) {
