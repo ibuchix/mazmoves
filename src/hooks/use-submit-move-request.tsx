@@ -1,12 +1,25 @@
-// Persists move requests to the `move_requests` table in Supabase.
-// The confirmation email is sent AFTER the insert and its failure no longer
-// blocks the success dialog — the request is saved either way.
+// useSubmitMoveRequest
+// --------------------
+// Persists a move request to Supabase and wires it into the matching pipeline:
+//
+//   1. Geocode pickup + delivery addresses via the `geocode-address` edge fn
+//      (drives the spinner flags consumed by AddressStep). Geocoding failure
+//      is non-fatal — the request is still saved so the backstop matching
+//      cron can retry geocoding/matching later.
+//   2. Insert the row into `move_requests` with lat/lng included when
+//      available. A DB trigger converts those into the PostGIS
+//      pickup_location / delivery_location columns used by matching.
+//   3. Fire-and-forget invoke `notify-companies` so matched movers get an
+//      assignment row on their dashboard. Failure here is non-blocking.
+//   4. Send the customer confirmation email (non-blocking — to be revisited
+//      in the email follow-up task).
 
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { MoveRequestForm } from "@/types/move-request";
+import type { Address } from "@/types/address";
 
 export interface SubmitMoveRequestHook {
   isSubmitting: boolean;
@@ -17,35 +30,104 @@ export interface SubmitMoveRequestHook {
   handleSuccessClose: () => void;
 }
 
-const insertMoveRequest = async (data: MoveRequestForm): Promise<void> => {
-  const { error } = await supabase.from("move_requests").insert([
-    {
-      move_type: data.moveType,
-      estimated_size: data.propertySize,
-      pickup_address: data.pickupAddress as never,
-      delivery_address: data.deliveryAddress as never,
-      requested_date: data.moveDate,
-      customer_name: data.fullName,
-      customer_email: data.email,
-      customer_phone: data.phone,
-      special_instructions: data.specialInstructions ?? null,
-    },
-  ]);
+interface Coords {
+  latitude: number;
+  longitude: number;
+}
 
-  if (error) {
-    console.error("Failed to insert move request:", error);
-    throw new Error(error.message || "Failed to save your move request");
+const geocodeAddress = async (address: Address): Promise<Coords | null> => {
+  try {
+    const addressString = [
+      address.street,
+      address.city,
+      address.state,
+      address.zipCode,
+      address.country,
+    ]
+      .filter(Boolean)
+      .join(", ");
+
+    const { data, error } = await supabase.functions.invoke("geocode-address", {
+      body: { address: addressString },
+    });
+
+    if (error) {
+      console.error("geocode-address error:", error);
+      return null;
+    }
+
+    if (
+      typeof data?.latitude !== "number" ||
+      typeof data?.longitude !== "number"
+    ) {
+      console.error("geocode-address returned invalid payload:", data);
+      return null;
+    }
+
+    return { latitude: data.latitude, longitude: data.longitude };
+  } catch (err) {
+    console.error("Geocoding threw:", err);
+    return null;
   }
 };
 
-const sendConfirmationEmail = async (email: string, fullName: string): Promise<void> => {
-  const { error } = await supabase.functions.invoke("send-confirmation-email", {
-    body: {
-      customerEmail: email,
-      customerName: fullName,
-    },
-  });
+const insertMoveRequest = async (
+  data: MoveRequestForm,
+  pickupCoords: Coords | null,
+  deliveryCoords: Coords | null,
+): Promise<string> => {
+  const { data: inserted, error } = await supabase
+    .from("move_requests")
+    .insert([
+      {
+        move_type: data.moveType,
+        estimated_size: data.propertySize,
+        pickup_address: data.pickupAddress as never,
+        delivery_address: data.deliveryAddress as never,
+        requested_date: data.moveDate,
+        customer_name: data.fullName,
+        customer_email: data.email,
+        customer_phone: data.phone,
+        special_instructions: data.specialInstructions ?? null,
+        pickup_latitude: pickupCoords?.latitude ?? null,
+        pickup_longitude: pickupCoords?.longitude ?? null,
+        delivery_latitude: deliveryCoords?.latitude ?? null,
+        delivery_longitude: deliveryCoords?.longitude ?? null,
+      },
+    ])
+    .select("id")
+    .single();
 
+  if (error || !inserted) {
+    console.error("Failed to insert move request:", error);
+    throw new Error(error?.message || "Failed to save your move request");
+  }
+
+  return inserted.id as string;
+};
+
+const triggerMatching = async (moveRequestId: string): Promise<void> => {
+  // Fire-and-forget. The backstop process-matches cron will retry any
+  // request whose status stays `pending` because of an inline failure.
+  try {
+    const { error } = await supabase.functions.invoke("notify-companies", {
+      body: { moveRequestId },
+    });
+    if (error) {
+      console.error("notify-companies invocation error (non-blocking):", error);
+    }
+  } catch (err) {
+    console.error("notify-companies threw (non-blocking):", err);
+  }
+};
+
+const sendConfirmationEmail = async (
+  email: string,
+  fullName: string,
+): Promise<void> => {
+  const { error } = await supabase.functions.invoke("send-confirmation-email", {
+    body: { customerEmail: email, customerName: fullName },
+  });
   if (error) throw error;
 };
 
@@ -65,23 +147,48 @@ export function useSubmitMoveRequest(): SubmitMoveRequestHook {
     setIsSubmitting(true);
 
     try {
-      // 1. Save the request first — this is the source of truth.
-      await insertMoveRequest(data);
+      // 1. Geocode pickup, then delivery (sequential so the per-step spinner
+      // is meaningful to the user). Failures don't block submission.
+      setIsGeocodingPickup(true);
+      const pickupCoords = await geocodeAddress(data.pickupAddress);
+      setIsGeocodingPickup(false);
 
-      // 2. Attempt the confirmation email. Failure is non-blocking.
+      setIsGeocodingDelivery(true);
+      const deliveryCoords = await geocodeAddress(data.deliveryAddress);
+      setIsGeocodingDelivery(false);
+
+      // 2. Save the request — this is the source of truth.
+      const moveRequestId = await insertMoveRequest(
+        data,
+        pickupCoords,
+        deliveryCoords,
+      );
+
+      // 3. Kick off matching. Non-blocking.
+      if (pickupCoords || deliveryCoords) {
+        void triggerMatching(moveRequestId);
+      } else {
+        console.warn(
+          `Move request ${moveRequestId} saved without coordinates — matching deferred to backstop cron.`,
+        );
+      }
+
+      // 4. Confirmation email — non-blocking.
       try {
         await sendConfirmationEmail(data.email, data.fullName);
       } catch (emailError) {
         console.error("Confirmation email failed (non-blocking):", emailError);
         toast.warning(
-          "Your request was saved, but we couldn't send the confirmation email. We'll still be in touch."
+          "Your request was saved, but we couldn't send the confirmation email. We'll still be in touch.",
         );
       }
 
       setShowSuccess(true);
     } catch (error) {
       console.error("Submission error:", error);
-      toast.error(error instanceof Error ? error.message : "Submission failed");
+      toast.error(
+        error instanceof Error ? error.message : "Submission failed",
+      );
     } finally {
       setIsSubmitting(false);
       setIsGeocodingPickup(false);
