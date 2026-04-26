@@ -18,8 +18,9 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { RADIUS_MILES } from "../notify-companies/distance.ts";
 
+// Kept in sync with supabase/functions/notify-companies/distance.ts
+const RADIUS_MILES = 25;
 const BATCH_SIZE = 50;
 
 const corsHeaders = {
