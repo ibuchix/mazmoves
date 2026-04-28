@@ -36,16 +36,37 @@ const handler = async (req: Request): Promise<Response> => {
     const { companyId, verificationNotes } = await req.json() as VerificationRequest;
     console.log(`Processing verification for company ID: ${companyId}`);
 
-    // Get company details
+    // Get company details — include geocode coords so we can guard against
+    // verifying companies that have no usable location for matching.
     const { data: company, error: companyError } = await supabase
       .from('companies')
-      .select('name, contact_email')
+      .select('name, contact_email, latitude, longitude, location')
       .eq('id', companyId)
       .single();
 
     if (companyError || !company) {
       console.error('Error fetching company:', companyError);
       throw new Error('Company not found');
+    }
+
+    // Guard: a verified company MUST have valid coordinates and PostGIS
+    // location, otherwise it can never receive job assignments. Block
+    // verification and instruct admin to re-geocode the address first.
+    if (
+      company.latitude === null ||
+      company.longitude === null ||
+      company.location === null
+    ) {
+      return new Response(
+        JSON.stringify({
+          error:
+            'Company is missing geocoded coordinates. Re-geocode the business address before verifying.',
+        }),
+        {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        },
+      );
     }
 
     // Update company verification status

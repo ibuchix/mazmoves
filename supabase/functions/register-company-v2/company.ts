@@ -110,32 +110,55 @@ export async function sendWelcomeEmail(supabase: any, companyId: string, email: 
   }
 }
 
-async function geocodeAddress(address: any) {
-  try {
-    const response = await fetch(
-      `${Deno.env.get('SUPABASE_URL')}/functions/v1/geocode-address`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
-        },
-        body: JSON.stringify({ address })
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error('Failed to geocode address');
-    }
-
-    const geocoded = await response.json();
-    return {
-      location: `POINT(${geocoded.longitude} ${geocoded.latitude})`,
-      latitude: geocoded.latitude,
-      longitude: geocoded.longitude
-    };
-  } catch (error) {
-    console.error('Geocoding error:', error);
-    throw new Error('Failed to geocode company address');
+// Build a single, comma-separated address string. Defaults country to
+// "United Kingdom" so the existing company-app form (no country field)
+// still geocodes correctly. If the company app later sends a `country`,
+// it flows through automatically.
+function buildAddressString(address: any): string {
+  if (typeof address === 'string') return address.trim();
+  if (!address || typeof address !== 'object') {
+    throw new Error('Invalid business address: expected string or object');
   }
+  const { street, city, state, zipCode, country } = address;
+  const parts = [street, city, state, zipCode, country || 'United Kingdom']
+    .map((p) => (typeof p === 'string' ? p.trim() : ''))
+    .filter((p) => p.length > 0);
+  if (parts.length === 0) {
+    throw new Error('Invalid business address: all fields empty');
+  }
+  return parts.join(', ');
+}
+
+async function geocodeAddress(address: any) {
+  const addressString = buildAddressString(address);
+  console.log('Geocoding company address:', addressString);
+
+  const response = await fetch(
+    `${Deno.env.get('SUPABASE_URL')}/functions/v1/geocode-address`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`,
+      },
+      body: JSON.stringify({ address: addressString })
+    }
+  );
+
+  if (!response.ok) {
+    const errText = await response.text();
+    console.error('Geocoding failed:', response.status, errText);
+    throw new Error(`Failed to geocode company address: ${errText}`);
+  }
+
+  const geocoded = await response.json();
+  if (typeof geocoded.latitude !== 'number' || typeof geocoded.longitude !== 'number') {
+    throw new Error('Geocoding returned invalid coordinates');
+  }
+
+  return {
+    location: `POINT(${geocoded.longitude} ${geocoded.latitude})`,
+    latitude: geocoded.latitude,
+    longitude: geocoded.longitude
+  };
 }
