@@ -67,21 +67,35 @@ serve(async (req) => {
       );
     }
 
-    // 2. Find nearby companies — pickup first, then delivery.
-    let { assignments: matches, locationUsed } = await findNearbyCompanies(
-      supabase,
-      moveRequest,
-      false,
-    );
+    // 2. Find nearby companies — UNION of pickup AND delivery searches.
+    const pickupResult = await findNearbyCompanies(supabase, moveRequest, false);
+    const deliveryResult = await findNearbyCompanies(supabase, moveRequest, true);
 
-    if (matches.length === 0) {
-      const fallback = await findNearbyCompanies(supabase, moveRequest, true);
-      matches = fallback.assignments;
-      locationUsed = fallback.locationUsed;
+    // Dedupe by company.id; keep the smaller distance for logging purposes.
+    const matchMap = new Map<string, { match: typeof pickupResult.assignments[number]; sides: Set<"pickup" | "delivery"> }>();
+    for (const m of pickupResult.assignments) {
+      matchMap.set(m.company.id, { match: m, sides: new Set(["pickup"]) });
     }
+    for (const m of deliveryResult.assignments) {
+      const existing = matchMap.get(m.company.id);
+      if (existing) {
+        existing.sides.add("delivery");
+        if (m.distance < existing.match.distance) existing.match = m;
+      } else {
+        matchMap.set(m.company.id, { match: m, sides: new Set(["delivery"]) });
+      }
+    }
+    const matches = Array.from(matchMap.values()).map((v) => v.match);
+
+    const breakdown = {
+      pickup: pickupResult.assignments.length,
+      delivery: deliveryResult.assignments.length,
+      both: Array.from(matchMap.values()).filter((v) => v.sides.size === 2).length,
+      unique: matches.length,
+    };
 
     console.log(
-      `notify-companies: request ${moveRequestId} matched ${matches.length} companies via ${locationUsed} (radius ${RADIUS_MILES}mi)`,
+      `notify-companies: request ${moveRequestId} matched ${matches.length} unique companies (pickup=${breakdown.pickup}, delivery=${breakdown.delivery}, both=${breakdown.both}, radius=${RADIUS_MILES}mi)`,
     );
 
     // 3. Insert assignments. Let `status` use its default ('active').
