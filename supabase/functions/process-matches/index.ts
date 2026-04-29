@@ -6,12 +6,13 @@
 // companies were available at the time, etc.).
 //
 // For each pending request:
-//   1. Try matching against pickup_location (radius RADIUS_MILES).
-//   2. If no matches, fall back to delivery_location.
-//   3. Insert one move_assignments row per matched company (status defaults
-//      to 'active').
-//   4. Update the move_request status to 'assigned' or 'no_companies_found'
-//      so it isn't re-processed every cycle.
+//   1. Search verified+active companies within RADIUS_MILES of BOTH
+//      pickup_location AND delivery_location, then UNION + dedupe by
+//      company_id (a company near either endpoint is eligible).
+//   2. Insert one move_assignments row per unique matched company
+//      (status defaults to 'active').
+//   3. Update the move_request status to 'assigned' or
+//      'no_companies_found' so it isn't re-processed every cycle.
 //
 // Email notifications are intentionally NOT sent here — deferred to the
 // follow-up email task.
