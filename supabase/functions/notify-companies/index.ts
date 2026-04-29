@@ -133,7 +133,7 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         companiesMatched: matches.length,
-        locationUsed,
+        breakdown,
         status: newStatus,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
