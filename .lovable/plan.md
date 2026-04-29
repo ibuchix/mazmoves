@@ -1,58 +1,60 @@
-# Plan: Geocoding Pipeline — Mapbox + Address Object Fix
+## Context
 
-## Status: ✅ Implemented (backend) — UI follow-ups deferred to other repos
+Your last test submission (Bedford → Croydon) confirmed the matching pipeline works end-to-end:
+- Geocoding succeeded for both addresses
+- The move request was saved with all four coordinates
+- `notify-companies` matched **Buchi Ltd** (Bedford) and created a `move_assignments` row with `status='active'`
 
-This is the **customer app**. The shared Supabase backend has been fully
-patched. Form / admin UI work belongs in the company app and admin app
-repos respectively.
+So the pipeline is alive. Two gaps remain.
 
-## What changed in this round
+## Problem 1 — Matching only searches the second location if the first finds nothing
 
-### 1. `register-company-v2/company.ts` — address handling
-The internal `geocodeAddress()` helper now accepts either a string or an
-address object. When given an object it builds a single comma-separated
-string `"{street}, {city}, {state} {zipCode}, {country ?? 'United
-Kingdom'}"` before calling `geocode-address`. No fallback on failure —
-registration throws so the company app surfaces it.
+Today, `notify-companies` and `process-matches` do this:
 
-### 2. `verify-company` — coordinate guard
-Before flipping `is_verified = true`, the function now checks that the
-target company has non-NULL `latitude`, `longitude`, and `location`.
-Missing coords → 400 with a clear message instructing admin to re-geocode.
+```text
+1. Search companies within 25 mi of PICKUP
+2. If 0 found → search within 25 mi of DELIVERY
+3. Otherwise stop
+```
 
-### 3. Backfill — 4 stuck companies fixed
-The four companies sitting on the Budapest centroid
-(`47.5033354, 19.0488299`) were re-geocoded via Mapbox and updated:
+That's why only Buchi (near Bedford pickup) matched and **ABC Moving (near Croydon delivery, ~13 mi) did not**. Your spec is "match companies within 25 mi of *either* pickup *or* delivery" — that's a UNION, not a fallback.
 
-| Company        | Postcode | New coords              |
-|----------------|----------|-------------------------|
-| Phantom Moves  | MK40 2BJ | 52.13016, -0.33991      |
-| JOHN LTD       | MK40 2BJ | 52.13016, -0.33991      |
-| KRIS LTD       | MK43 7QG | 52.16608, -0.54807      |
-| buch ltd       | MK43 7QG | 52.16608, -0.54807      |
+### Fix
 
-PostGIS `location` was refreshed automatically by the existing trigger.
+Change both functions to always run both searches and de-duplicate by `company_id`.
 
-## Verified
+**`supabase/functions/notify-companies/index.ts`**
+- Call `findNearbyCompanies(supabase, request, false)` (pickup) AND `findNearbyCompanies(supabase, request, true)` (delivery), regardless of the pickup result.
+- Merge the two assignment lists into a `Map<companyId, Assignment>` so a company near both endpoints isn't duplicated.
+- Track per-company which side matched (for logging only): `"pickup" | "delivery" | "both"`.
+- Insert one `move_assignments` row per unique company_id (existing logic).
+- Return `companiesMatched: total, breakdown: { pickup: n, delivery: n, both: n }` for transparency.
 
-- `geocode-address` returns clean Bedford coords for both postcodes.
-- All 4 backfilled rows now show populated `location` geometry.
-- Verified production companies (ABC, Buchi) remain untouched and active.
+**`supabase/functions/process-matches/index.ts`**
+- Same change in the `matchOne` helper: run both `tryPoint(pickup)` and `tryPoint(delivery)`, union the resulting `companyIds`, dedupe.
 
-## Deferred to other repos
+No DB changes needed — the existing unique constraint pattern (one assignment per request+company) is already implicit in how rows are inserted.
 
-**Company app:**
-- Add a Country field to the registration form (default United Kingdom).
-- Validate UK postcode format on the form.
-- Surface a clearer toast/error when geocoding fails server-side.
+## Problem 2 — Confirmation email returns 500
 
-**Admin app:**
-- "Re-geocode address" button on the company-detail view (will need a
-  small admin-only edge function added when that work happens).
+`send-confirmation-email` returns:
+> `The mazmoves.com domain is not verified. Please, add and verify your domain on https://resend.com/domains`
 
-## Live test
+This is **not a code issue** — the customer record was still saved and matching still ran (the email is non-blocking). To fix, the `mazmoves.com` domain must be verified at resend.com (DNS records added). That's an account-level action you do in the Resend dashboard, not something I can fix in code. I'll flag this clearly in chat after implementation; no changes to the email function itself.
 
-Submit a customer move request whose pickup or delivery is within 25 mi
-of any of London (ABC), Bedford (Buchi/KRIS/buch — note these 4 are still
-unverified), and confirm assignments populate on the matched company's
-dashboard.
+## Out of scope (deferred to other repos)
+
+- Verifying the 4 backfilled companies (Phantom / JOHN / KRIS / buch) — that's an admin-app action. They'll start receiving matches automatically the moment an admin flips `is_verified = true` for them.
+- Adding a Country field to company registration (company app).
+
+## Files to edit
+
+- `supabase/functions/notify-companies/index.ts` — replace pickup-then-fallback with pickup-AND-delivery union + dedupe.
+- `supabase/functions/notify-companies/company-finder.ts` — minor: keep the helper as-is, just call it twice from `index.ts`.
+- `supabase/functions/process-matches/index.ts` — same union-and-dedupe change inside `matchOne`.
+
+## Verification after implementation
+
+1. Submit a fresh move request whose pickup is in Bedford and delivery is in London.
+2. Expect **both** Buchi Ltd (Bedford, near pickup) **and** ABC Moving (London, near delivery) to receive `move_assignments` rows.
+3. Confirm `notify-companies` response shows `companiesMatched: 2`.

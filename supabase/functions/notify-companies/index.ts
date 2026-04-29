@@ -2,11 +2,12 @@
 // ------------------------------
 // Given a `moveRequestId`, this function:
 //   1. Loads the move request.
-//   2. Finds verified, active companies within RADIUS_MILES of the pickup
-//      location. If none are found, falls back to the delivery location.
-//   3. Inserts one row per matched company into `move_assignments` so the
-//      job appears on each company's dashboard. Lets the `status` column
-//      use its DB default (`'active'`).
+//   2. Finds verified, active companies within RADIUS_MILES of BOTH the
+//      pickup AND delivery locations (union, deduped by company_id) — a
+//      company near either endpoint is eligible to receive the job.
+//   3. Inserts one row per unique matched company into `move_assignments`
+//      so the job appears on each company's dashboard. Lets the `status`
+//      column use its DB default (`'active'`).
 //   4. Updates the move request status to `'assigned'` if at least one
 //      assignment was created, otherwise `'no_companies_found'`.
 //
