@@ -39,7 +39,7 @@ interface PendingRequest {
 const matchOne = async (
   supabase: any,
   request: PendingRequest,
-): Promise<{ companyIds: string[]; locationUsed: "pickup" | "delivery" | null }> => {
+): Promise<{ companyIds: string[]; breakdown: { pickup: number; delivery: number; both: number; unique: number } }> => {
   const tryPoint = async (
     point: unknown,
     label: "pickup" | "delivery",
@@ -56,13 +56,23 @@ const matchOne = async (
     return (data ?? []).map((row: { id: string }) => row.id);
   };
 
-  let ids = await tryPoint(request.pickup_location, "pickup");
-  if (ids.length > 0) return { companyIds: ids, locationUsed: "pickup" };
+  const pickupIds = await tryPoint(request.pickup_location, "pickup");
+  const deliveryIds = await tryPoint(request.delivery_location, "delivery");
 
-  ids = await tryPoint(request.delivery_location, "delivery");
-  if (ids.length > 0) return { companyIds: ids, locationUsed: "delivery" };
+  const pickupSet = new Set(pickupIds);
+  const deliverySet = new Set(deliveryIds);
+  const unionSet = new Set<string>([...pickupIds, ...deliveryIds]);
+  const both = [...unionSet].filter((id) => pickupSet.has(id) && deliverySet.has(id)).length;
 
-  return { companyIds: [], locationUsed: null };
+  return {
+    companyIds: [...unionSet],
+    breakdown: {
+      pickup: pickupIds.length,
+      delivery: deliveryIds.length,
+      both,
+      unique: unionSet.size,
+    },
+  };
 };
 
 serve(async (req) => {
