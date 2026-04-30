@@ -119,9 +119,12 @@ serve(async (req) => {
         company_id: cid,
       }));
 
+      // Idempotent insert — relies on the (request_id, company_id) UNIQUE
+      // constraint to ignore rows already created by a prior cron sweep
+      // or by notify-companies at submission time.
       const { error: insertErr } = await supabase
         .from("move_assignments")
-        .insert(rows);
+        .upsert(rows, { onConflict: "request_id,company_id", ignoreDuplicates: true });
 
       if (insertErr) {
         console.error(`process-matches: insert failed for ${request.id}:`, insertErr);

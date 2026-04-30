@@ -105,9 +105,12 @@ serve(async (req) => {
         company_id: m.company.id,
       }));
 
+      // upsert + ignoreDuplicates makes this idempotent against the new
+      // (request_id, company_id) UNIQUE constraint, so retries by the cron
+      // or re-invocations don't create duplicate dashboard rows.
       const { error: assignmentError } = await supabase
         .from("move_assignments")
-        .insert(rows);
+        .upsert(rows, { onConflict: "request_id,company_id", ignoreDuplicates: true });
 
       if (assignmentError) {
         console.error("Failed to insert assignments:", assignmentError);
