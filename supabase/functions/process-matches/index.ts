@@ -6,12 +6,13 @@
 // companies were available at the time, etc.).
 //
 // For each pending request:
-//   1. Try matching against pickup_location (radius RADIUS_MILES).
-//   2. If no matches, fall back to delivery_location.
-//   3. Insert one move_assignments row per matched company (status defaults
-//      to 'active').
-//   4. Update the move_request status to 'assigned' or 'no_companies_found'
-//      so it isn't re-processed every cycle.
+//   1. Search verified+active companies within RADIUS_MILES of BOTH
+//      pickup_location AND delivery_location, then UNION + dedupe by
+//      company_id (a company near either endpoint is eligible).
+//   2. Insert one move_assignments row per unique matched company
+//      (status defaults to 'active').
+//   3. Update the move_request status to 'assigned' or
+//      'no_companies_found' so it isn't re-processed every cycle.
 //
 // Email notifications are intentionally NOT sent here — deferred to the
 // follow-up email task.
@@ -38,7 +39,7 @@ interface PendingRequest {
 const matchOne = async (
   supabase: any,
   request: PendingRequest,
-): Promise<{ companyIds: string[]; locationUsed: "pickup" | "delivery" | null }> => {
+): Promise<{ companyIds: string[]; breakdown: { pickup: number; delivery: number; both: number; unique: number } }> => {
   const tryPoint = async (
     point: unknown,
     label: "pickup" | "delivery",
@@ -55,13 +56,23 @@ const matchOne = async (
     return (data ?? []).map((row: { id: string }) => row.id);
   };
 
-  let ids = await tryPoint(request.pickup_location, "pickup");
-  if (ids.length > 0) return { companyIds: ids, locationUsed: "pickup" };
+  const pickupIds = await tryPoint(request.pickup_location, "pickup");
+  const deliveryIds = await tryPoint(request.delivery_location, "delivery");
 
-  ids = await tryPoint(request.delivery_location, "delivery");
-  if (ids.length > 0) return { companyIds: ids, locationUsed: "delivery" };
+  const pickupSet = new Set(pickupIds);
+  const deliverySet = new Set(deliveryIds);
+  const unionSet = new Set<string>([...pickupIds, ...deliveryIds]);
+  const both = [...unionSet].filter((id) => pickupSet.has(id) && deliverySet.has(id)).length;
 
-  return { companyIds: [], locationUsed: null };
+  return {
+    companyIds: [...unionSet],
+    breakdown: {
+      pickup: pickupIds.length,
+      delivery: deliveryIds.length,
+      both,
+      unique: unionSet.size,
+    },
+  };
 };
 
 serve(async (req) => {

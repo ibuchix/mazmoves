@@ -2,11 +2,12 @@
 // ------------------------------
 // Given a `moveRequestId`, this function:
 //   1. Loads the move request.
-//   2. Finds verified, active companies within RADIUS_MILES of the pickup
-//      location. If none are found, falls back to the delivery location.
-//   3. Inserts one row per matched company into `move_assignments` so the
-//      job appears on each company's dashboard. Lets the `status` column
-//      use its DB default (`'active'`).
+//   2. Finds verified, active companies within RADIUS_MILES of BOTH the
+//      pickup AND delivery locations (union, deduped by company_id) — a
+//      company near either endpoint is eligible to receive the job.
+//   3. Inserts one row per unique matched company into `move_assignments`
+//      so the job appears on each company's dashboard. Lets the `status`
+//      column use its DB default (`'active'`).
 //   4. Updates the move request status to `'assigned'` if at least one
 //      assignment was created, otherwise `'no_companies_found'`.
 //
@@ -66,21 +67,35 @@ serve(async (req) => {
       );
     }
 
-    // 2. Find nearby companies — pickup first, then delivery.
-    let { assignments: matches, locationUsed } = await findNearbyCompanies(
-      supabase,
-      moveRequest,
-      false,
-    );
+    // 2. Find nearby companies — UNION of pickup AND delivery searches.
+    const pickupResult = await findNearbyCompanies(supabase, moveRequest, false);
+    const deliveryResult = await findNearbyCompanies(supabase, moveRequest, true);
 
-    if (matches.length === 0) {
-      const fallback = await findNearbyCompanies(supabase, moveRequest, true);
-      matches = fallback.assignments;
-      locationUsed = fallback.locationUsed;
+    // Dedupe by company.id; keep the smaller distance for logging purposes.
+    const matchMap = new Map<string, { match: typeof pickupResult.assignments[number]; sides: Set<"pickup" | "delivery"> }>();
+    for (const m of pickupResult.assignments) {
+      matchMap.set(m.company.id, { match: m, sides: new Set(["pickup"]) });
     }
+    for (const m of deliveryResult.assignments) {
+      const existing = matchMap.get(m.company.id);
+      if (existing) {
+        existing.sides.add("delivery");
+        if (m.distance < existing.match.distance) existing.match = m;
+      } else {
+        matchMap.set(m.company.id, { match: m, sides: new Set(["delivery"]) });
+      }
+    }
+    const matches = Array.from(matchMap.values()).map((v) => v.match);
+
+    const breakdown = {
+      pickup: pickupResult.assignments.length,
+      delivery: deliveryResult.assignments.length,
+      both: Array.from(matchMap.values()).filter((v) => v.sides.size === 2).length,
+      unique: matches.length,
+    };
 
     console.log(
-      `notify-companies: request ${moveRequestId} matched ${matches.length} companies via ${locationUsed} (radius ${RADIUS_MILES}mi)`,
+      `notify-companies: request ${moveRequestId} matched ${matches.length} unique companies (pickup=${breakdown.pickup}, delivery=${breakdown.delivery}, both=${breakdown.both}, radius=${RADIUS_MILES}mi)`,
     );
 
     // 3. Insert assignments. Let `status` use its default ('active').
@@ -118,7 +133,7 @@ serve(async (req) => {
       JSON.stringify({
         success: true,
         companiesMatched: matches.length,
-        locationUsed,
+        breakdown,
         status: newStatus,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },
