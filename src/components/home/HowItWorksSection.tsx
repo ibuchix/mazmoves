@@ -89,23 +89,6 @@ export const HowItWorksSection = () => {
           ))}
         </div>
 
-        {/* Enhanced Call to Action */}
-        <div className="mt-16 text-center">
-          <div className="max-w-2xl mx-auto bg-white/80 backdrop-blur-sm rounded-xl p-8 shadow-lg">
-            <h3 className="text-2xl font-semibold text-[#040480] mb-4">
-              Ready to Start Your Moving Journey?
-            </h3>
-            <p className="text-gray-600 mb-8">
-              Get matched with professional movers at no cost to you. Our service is completely free for customers!
-            </p>
-            <Button 
-              onClick={() => navigate('/request-move')}
-              className="bg-[#d2491f] hover:bg-[#84d21f] text-white font-semibold px-8 py-6 text-lg rounded-lg shadow-md hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
-            >
-              Get Your Free Moving Quote Now
-            </Button>
-          </div>
-        </div>
       </div>
     </section>
   );
