@@ -1,6 +1,6 @@
 
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowRight, ClipboardList, BarChart3, Calendar, CheckCircle, PoundSterling } from "lucide-react";
+import { ArrowRight, ClipboardList, BarChart3, Calendar, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -35,11 +35,7 @@ export const HowItWorksSection = () => {
   ];
 
   return (
-    <section className="py-24 relative overflow-hidden">
-      {/* Enhanced gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#040480]/10 via-transparent to-[#84d21f]/10" />
-      <div className="absolute inset-0 bg-[url('/lovable-uploads/707ca792-48a2-4427-9149-26c38ef7ecd3.png')] opacity-5" />
-      
+    <section className="py-24 relative">
       {/* Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="text-center mb-16">
@@ -50,7 +46,6 @@ export const HowItWorksSection = () => {
           
           {/* Free Service Badge */}
           <div className="mt-6 inline-flex items-center gap-2 bg-[#84d21f]/20 px-4 py-2 rounded-full">
-            <PoundSterling className="w-5 h-5 text-[#84d21f]" />
             <span className="text-[#040480] font-semibold">100% Free Service for Customers</span>
           </div>
         </div>
@@ -70,7 +65,7 @@ export const HowItWorksSection = () => {
               <Card className="group hover:shadow-lg transition-all duration-300 bg-white/95 backdrop-blur-sm border-none w-full hover:scale-105">
                 <CardContent className="flex flex-col items-center p-8 h-full">
                   {/* Step Number with enhanced styling */}
-                  <div className="w-12 h-12 mb-6 flex items-center justify-center bg-gradient-to-r from-[#040480] to-[#1f3dd2] text-white rounded-full font-semibold text-lg group-hover:scale-110 transition-transform duration-300 shadow-lg">
+                  <div className="w-12 h-12 mb-6 flex items-center justify-center bg-gradient-to-r from-slate-700 to-slate-600 text-white rounded-full font-semibold text-lg group-hover:scale-110 transition-transform duration-300 shadow-lg">
                     {item.step}
                   </div>
                   
