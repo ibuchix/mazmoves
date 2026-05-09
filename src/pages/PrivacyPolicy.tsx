@@ -7,7 +7,7 @@ export default function PrivacyPolicy() {
   return (
     <div className="bg-background">
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <header className="mb-10 text-center">
+        <header className="mb-10 text-left">
           <h1 className="font-montserrat font-bold text-4xl md:text-5xl text-brand-slate mb-3">
             Privacy Policy
           </h1>
@@ -19,7 +19,7 @@ export default function PrivacyPolicy() {
           </p>
         </header>
 
-        <Card className="p-8 md:p-10 space-y-8 border border-brand-slate/15 shadow-sm font-roboto text-brand-slate leading-relaxed">
+        <Card className="p-8 md:p-10 space-y-8 border border-brand-slate/15 shadow-sm font-roboto text-brand-slate leading-relaxed text-left">
           <section className="space-y-3">
             <h2 className="font-montserrat font-semibold text-2xl text-brand-slate">
               1. Information We Collect
