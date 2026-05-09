@@ -27,8 +27,8 @@ export const HeroContent = () => {
 };
 
 const FeatureItem = ({ text }: { text: string }) => (
-  <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm p-4 rounded-xl transition-transform duration-300 hover:-translate-y-1">
-    <CheckCircle className="w-6 h-6 text-[#84d21f] flex-shrink-0" />
-    <span className="text-lg md:text-xl font-medium">{text}</span>
+  <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm p-3 rounded-xl transition-transform duration-300 hover:-translate-y-1">
+    <CheckCircle className="w-5 h-5 text-[#84d21f] flex-shrink-0" />
+    <span className="text-base md:text-lg font-medium">{text}</span>
   </div>
 );
