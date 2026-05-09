@@ -1,113 +1,124 @@
-// Privacy policy page. Removed authenticated data-deletion request flow
-// since the platform no longer has user accounts. Visitors can email us instead.
+// PrivacyPolicy.tsx - Dedicated, official Privacy Policy page.
+// Updated contact email to help@housemove.co; phone removed; address omitted.
+
 import { Card } from "@/components/ui/card";
 
 export default function PrivacyPolicy() {
-
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <h1 className="text-3xl font-bold text-brand-slate mb-6">Privacy Policy & Data Processing Agreement</h1>
-      
-      <Card className="p-6 space-y-6 shadow-lg">
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-brand-slateLight">1. Information We Collect</h2>
-          <p className="text-gray-700 leading-relaxed">
-            We collect information that you provide directly to us, including names, contact
-            information, and details about your move.
+    <div className="bg-background">
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <header className="mb-10 text-center">
+          <h1 className="font-montserrat font-bold text-4xl md:text-5xl text-brand-slate mb-3">
+            Privacy Policy
+          </h1>
+          <p className="font-roboto text-brand-slateMuted">
+            How HouseMove collects, uses and protects your personal data.
           </p>
-          <ul className="list-disc pl-6 text-gray-700 space-y-2">
-            <li>Contact information (email, phone, address)</li>
-            <li>Move details and preferences</li>
-            <li>Payment information</li>
-          </ul>
-        </section>
+          <p className="font-roboto text-sm text-brand-slateMuted mt-2">
+            Last updated: May 2026
+          </p>
+        </header>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-brand-slateLight">2. Legal Basis for Processing (GDPR)</h2>
-          <p className="text-gray-700 leading-relaxed">
-            We process your data under the following legal bases:
-          </p>
-          <ul className="list-disc pl-6 text-gray-700 space-y-2">
-            <li>Contract fulfillment - to provide our moving services</li>
-            <li>Legal obligation - to comply with legal requirements</li>
-            <li>Legitimate interests - to improve our services</li>
-            <li>Consent - for marketing communications</li>
-          </ul>
-        </section>
+        <Card className="p-8 md:p-10 space-y-8 border border-brand-slate/15 shadow-sm font-roboto text-brand-slate leading-relaxed">
+          <section className="space-y-3">
+            <h2 className="font-montserrat font-semibold text-2xl text-brand-slate">
+              1. Information We Collect
+            </h2>
+            <p>
+              We collect information you provide directly to us when you submit
+              a move request, including your name, email, and details about
+              your move (origin, destination, property size, dates).
+            </p>
+            <ul className="list-disc pl-6 space-y-1">
+              <li>Contact information (email)</li>
+              <li>Move details and preferences</li>
+              <li>Technical data (IP address, device, browser) for security</li>
+            </ul>
+          </section>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-brand-slateLight">3. Your Data Rights</h2>
-          <p className="text-gray-700 leading-relaxed">
-            Under GDPR, you have the following rights:
-          </p>
-          <ul className="list-disc pl-6 text-gray-700 space-y-2">
-            <li>Right to access your personal data</li>
-            <li>Right to rectification of inaccurate data</li>
-            <li>Right to erasure ("right to be forgotten")</li>
-            <li>Right to restrict processing</li>
-            <li>Right to data portability</li>
-            <li>Right to object to processing</li>
-          </ul>
-        </section>
+          <section className="space-y-3">
+            <h2 className="font-montserrat font-semibold text-2xl text-brand-slate">
+              2. Legal Basis for Processing (UK GDPR)
+            </h2>
+            <ul className="list-disc pl-6 space-y-1">
+              <li>Contract — to match you with moving companies.</li>
+              <li>Legitimate interests — to improve and secure our service.</li>
+              <li>Legal obligation — to comply with applicable law.</li>
+              <li>Consent — for any optional marketing communications.</li>
+            </ul>
+          </section>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-brand-slateLight">4. Data Processing Agreement</h2>
-          <p className="text-gray-700 leading-relaxed">
-            This section constitutes our data processing agreement:
-          </p>
-          <ul className="list-disc pl-6 text-gray-700 space-y-2">
-            <li>We process data only on documented instructions</li>
-            <li>We ensure confidentiality of processing</li>
-            <li>We implement appropriate security measures</li>
-            <li>We assist with data subject rights requests</li>
-            <li>We delete or return data at end of service</li>
-            <li>We provide information to demonstrate compliance</li>
-          </ul>
-        </section>
+          <section className="space-y-3">
+            <h2 className="font-montserrat font-semibold text-2xl text-brand-slate">
+              3. How We Share Your Data
+            </h2>
+            <p>
+              When you submit a move request, your contact and move details are
+              shared with vetted moving companies in the relevant area so they
+              can prepare a quote for you. We do not sell your data.
+            </p>
+          </section>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-brand-slateLight">5. Data Retention</h2>
-          <p className="text-gray-700 leading-relaxed">
-            We retain your data for as long as necessary to:
-          </p>
-          <ul className="list-disc pl-6 text-gray-700 space-y-2">
-            <li>Provide our services to you</li>
-            <li>Comply with legal obligations</li>
-            <li>Resolve disputes</li>
-            <li>Enforce our agreements</li>
-          </ul>
-        </section>
+          <section className="space-y-3">
+            <h2 className="font-montserrat font-semibold text-2xl text-brand-slate">
+              4. Your Rights
+            </h2>
+            <ul className="list-disc pl-6 space-y-1">
+              <li>Access your personal data</li>
+              <li>Request correction of inaccurate data</li>
+              <li>Request erasure ("right to be forgotten")</li>
+              <li>Restrict or object to processing</li>
+              <li>Data portability</li>
+              <li>Lodge a complaint with the ICO</li>
+            </ul>
+          </section>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-brand-slateLight">6. Data Deletion Request</h2>
-          <p className="text-gray-700 leading-relaxed">
-            You can request deletion of your personal data at any time by emailing us at
-            {" "}<a href="mailto:ask@housemove.com" className="text-brand-slateLight underline hover:text-brand-green">ask@housemove.com</a>.
-            Please include the email and phone number you used when submitting your move request.
-          </p>
-          <p className="text-sm text-gray-600 mt-2">
-            Note: Some data may be retained if required by law or legitimate business purposes.
-          </p>
-        </section>
+          <section className="space-y-3">
+            <h2 className="font-montserrat font-semibold text-2xl text-brand-slate">
+              5. Data Retention
+            </h2>
+            <p>
+              We retain your data only for as long as necessary to provide our
+              service, comply with legal obligations, resolve disputes and
+              enforce our agreements.
+            </p>
+          </section>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-brand-slateLight">7. Contact Us</h2>
-          <p className="text-gray-700 leading-relaxed">
-            For any privacy-related queries or to exercise your data rights:
-          </p>
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <p className="text-gray-700">Email: ask@housemove.com</p>
-            <p className="text-gray-700">Phone: +447388449110</p>
-            <p className="text-gray-700">Address: 124 City Road, London, EC1V 2NX</p>
-          </div>
-        </section>
+          <section className="space-y-3">
+            <h2 className="font-montserrat font-semibold text-2xl text-brand-slate">
+              6. Data Deletion Requests
+            </h2>
+            <p>
+              You can request deletion of your personal data at any time by
+              emailing{" "}
+              <a
+                href="mailto:help@housemove.co"
+                className="text-brand-orange hover:underline"
+              >
+                help@housemove.co
+              </a>
+              . Please include the email you used when submitting your move
+              request.
+            </p>
+          </section>
 
-        <div className="mt-8 pt-4 border-t border-gray-200">
-          <p className="text-sm text-gray-600">
-            Last updated: March 2024
-          </p>
-        </div>
-      </Card>
+          <section className="space-y-3">
+            <h2 className="font-montserrat font-semibold text-2xl text-brand-slate">
+              7. Contact
+            </h2>
+            <p>
+              For any privacy-related queries, contact us at{" "}
+              <a
+                href="mailto:help@housemove.co"
+                className="text-brand-orange hover:underline"
+              >
+                help@housemove.co
+              </a>
+              .
+            </p>
+          </section>
+        </Card>
+      </section>
     </div>
   );
 }
