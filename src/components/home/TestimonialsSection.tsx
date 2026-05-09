@@ -39,7 +39,7 @@ export const TestimonialsSection = () => {
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-slate-600 text-slate-600" />
+                    <Star key={i} className="w-5 h-5 fill-[#84d21f] text-[#84d21f]" />
                   ))}
                 </div>
                 <Quote className="w-8 h-8 text-slate-600 mb-4" />
