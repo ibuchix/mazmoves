@@ -23,6 +23,8 @@ export default {
 				brand: {
 					slate: '#334155',
 					slateLight: '#475569',
+					slateMuted: '#64748b',
+					slateSoft: '#94a3b8',
 					green: '#84d21f',
 					orange: '#d2491f',
 				},
