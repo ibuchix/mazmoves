@@ -36,7 +36,7 @@ export function AsyncContent({
         </Alert>
         <Button 
           onClick={() => navigate('/')}
-          className="bg-[#334155] hover:bg-[#475569] text-white font-semibold"
+          className="bg-brand-slate hover:bg-brand-slateLight text-white font-semibold"
         >
           Return Home
         </Button>

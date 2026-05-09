@@ -11,10 +11,10 @@ interface ContactStepProps {
 export function ContactStep({ register, errors }: ContactStepProps) {
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold text-[#334155]">Contact Information</h3>
+      <h3 className="text-lg font-semibold text-brand-slate">Contact Information</h3>
       <div className="grid gap-4">
         <div className="space-y-2">
-          <Label htmlFor="fullName" className="text-sm font-medium text-[#334155]">
+          <Label htmlFor="fullName" className="text-sm font-medium text-brand-slate">
             Full Name
             <span className="text-red-500 ml-1">*</span>
           </Label>
@@ -27,7 +27,7 @@ export function ContactStep({ register, errors }: ContactStepProps) {
                 message: "Name must be at least 2 characters"
               }
             })}
-            className={`h-11 border-[#475569] focus:ring-[#84d21f] transition-all duration-300 ${
+            className={`h-11 border-brand-slateLight focus:ring-brand-green transition-all duration-300 ${
               errors.fullName ? "border-red-500" : ""
             }`}
           />
@@ -37,7 +37,7 @@ export function ContactStep({ register, errors }: ContactStepProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-sm font-medium text-[#334155]">
+          <Label htmlFor="email" className="text-sm font-medium text-brand-slate">
             Email Address
             <span className="text-red-500 ml-1">*</span>
           </Label>
@@ -51,7 +51,7 @@ export function ContactStep({ register, errors }: ContactStepProps) {
                 message: "Please enter a valid email address"
               }
             })}
-            className={`h-11 border-[#475569] focus:ring-[#84d21f] transition-all duration-300 ${
+            className={`h-11 border-brand-slateLight focus:ring-brand-green transition-all duration-300 ${
               errors.email ? "border-red-500" : ""
             }`}
           />
@@ -61,7 +61,7 @@ export function ContactStep({ register, errors }: ContactStepProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="phone" className="text-sm font-medium text-[#334155]">
+          <Label htmlFor="phone" className="text-sm font-medium text-brand-slate">
             Phone Number
             <span className="text-red-500 ml-1">*</span>
           </Label>
@@ -75,7 +75,7 @@ export function ContactStep({ register, errors }: ContactStepProps) {
                 message: "Please enter a valid phone number"
               }
             })}
-            className={`h-11 border-[#475569] focus:ring-[#84d21f] transition-all duration-300 ${
+            className={`h-11 border-brand-slateLight focus:ring-brand-green transition-all duration-300 ${
               errors.phone ? "border-red-500" : ""
             }`}
           />
@@ -85,7 +85,7 @@ export function ContactStep({ register, errors }: ContactStepProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="moveDate" className="text-sm font-medium text-[#334155]">
+          <Label htmlFor="moveDate" className="text-sm font-medium text-brand-slate">
             Preferred Move Date
             <span className="text-red-500 ml-1">*</span>
           </Label>
@@ -101,7 +101,7 @@ export function ContactStep({ register, errors }: ContactStepProps) {
                 return date >= today || "Move date cannot be in the past";
               }
             })}
-            className={`h-11 border-[#475569] focus:ring-[#84d21f] transition-all duration-300 ${
+            className={`h-11 border-brand-slateLight focus:ring-brand-green transition-all duration-300 ${
               errors.moveDate ? "border-red-500" : ""
             }`}
           />
@@ -111,13 +111,13 @@ export function ContactStep({ register, errors }: ContactStepProps) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="specialInstructions" className="text-sm font-medium text-[#334155]">
+          <Label htmlFor="specialInstructions" className="text-sm font-medium text-brand-slate">
             Special Instructions (Optional)
           </Label>
           <Input
             id="specialInstructions"
             {...register("specialInstructions")}
-            className="h-11 border-[#475569] focus:ring-[#84d21f] transition-all duration-300"
+            className="h-11 border-brand-slateLight focus:ring-brand-green transition-all duration-300"
           />
         </div>
       </div>

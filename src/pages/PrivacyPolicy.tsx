@@ -6,11 +6,11 @@ export default function PrivacyPolicy() {
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <h1 className="text-3xl font-bold text-[#334155] mb-6">Privacy Policy & Data Processing Agreement</h1>
+      <h1 className="text-3xl font-bold text-brand-slate mb-6">Privacy Policy & Data Processing Agreement</h1>
       
       <Card className="p-6 space-y-6 shadow-lg">
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-[#475569]">1. Information We Collect</h2>
+          <h2 className="text-2xl font-semibold text-brand-slateLight">1. Information We Collect</h2>
           <p className="text-gray-700 leading-relaxed">
             We collect information that you provide directly to us, including names, contact
             information, and details about your move.
@@ -23,7 +23,7 @@ export default function PrivacyPolicy() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-[#475569]">2. Legal Basis for Processing (GDPR)</h2>
+          <h2 className="text-2xl font-semibold text-brand-slateLight">2. Legal Basis for Processing (GDPR)</h2>
           <p className="text-gray-700 leading-relaxed">
             We process your data under the following legal bases:
           </p>
@@ -36,7 +36,7 @@ export default function PrivacyPolicy() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-[#475569]">3. Your Data Rights</h2>
+          <h2 className="text-2xl font-semibold text-brand-slateLight">3. Your Data Rights</h2>
           <p className="text-gray-700 leading-relaxed">
             Under GDPR, you have the following rights:
           </p>
@@ -51,7 +51,7 @@ export default function PrivacyPolicy() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-[#475569]">4. Data Processing Agreement</h2>
+          <h2 className="text-2xl font-semibold text-brand-slateLight">4. Data Processing Agreement</h2>
           <p className="text-gray-700 leading-relaxed">
             This section constitutes our data processing agreement:
           </p>
@@ -66,7 +66,7 @@ export default function PrivacyPolicy() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-[#475569]">5. Data Retention</h2>
+          <h2 className="text-2xl font-semibold text-brand-slateLight">5. Data Retention</h2>
           <p className="text-gray-700 leading-relaxed">
             We retain your data for as long as necessary to:
           </p>
@@ -79,10 +79,10 @@ export default function PrivacyPolicy() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-[#475569]">6. Data Deletion Request</h2>
+          <h2 className="text-2xl font-semibold text-brand-slateLight">6. Data Deletion Request</h2>
           <p className="text-gray-700 leading-relaxed">
             You can request deletion of your personal data at any time by emailing us at
-            {" "}<a href="mailto:ask@housemove.com" className="text-[#475569] underline hover:text-[#84d21f]">ask@housemove.com</a>.
+            {" "}<a href="mailto:ask@housemove.com" className="text-brand-slateLight underline hover:text-brand-green">ask@housemove.com</a>.
             Please include the email and phone number you used when submitting your move request.
           </p>
           <p className="text-sm text-gray-600 mt-2">
@@ -91,7 +91,7 @@ export default function PrivacyPolicy() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-[#475569]">7. Contact Us</h2>
+          <h2 className="text-2xl font-semibold text-brand-slateLight">7. Contact Us</h2>
           <p className="text-gray-700 leading-relaxed">
             For any privacy-related queries or to exercise your data rights:
           </p>

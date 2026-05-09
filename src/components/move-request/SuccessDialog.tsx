@@ -20,8 +20,8 @@ export function SuccessDialog({ isOpen, onClose }: SuccessDialogProps) {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-center flex flex-col items-center gap-4">
-            <CheckCircle className="h-12 w-12 text-[#84d21f]" />
-            <span className="text-[#334155] text-xl font-montserrat">Request Submitted Successfully!</span>
+            <CheckCircle className="h-12 w-12 text-brand-green" />
+            <span className="text-brand-slate text-xl font-montserrat">Request Submitted Successfully!</span>
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-6 font-roboto">
@@ -31,13 +31,13 @@ export function SuccessDialog({ isOpen, onClose }: SuccessDialogProps) {
             </p>
             <Separator className="my-4" />
             <div className="space-y-4">
-              <h4 className="font-semibold text-[#334155] font-montserrat">What happens next?</h4>
+              <h4 className="font-semibold text-brand-slate font-montserrat">What happens next?</h4>
               <div className="flex items-center gap-2 justify-center text-sm">
-                <Clock className="h-4 w-4 text-[#475569]" />
+                <Clock className="h-4 w-4 text-brand-slateLight" />
                 <span>Companies will respond within 2 hours</span>
               </div>
               <div className="flex items-center gap-2 justify-center text-sm">
-                <Mail className="h-4 w-4 text-[#475569]" />
+                <Mail className="h-4 w-4 text-brand-slateLight" />
                 <span>Check your email for confirmation details</span>
               </div>
             </div>
@@ -45,7 +45,7 @@ export function SuccessDialog({ isOpen, onClose }: SuccessDialogProps) {
           <div className="flex justify-center">
             <Button 
               onClick={onClose} 
-              className="bg-[#334155] hover:bg-[#475569] text-white w-full sm:w-auto font-montserrat shadow-md"
+              className="bg-brand-slate hover:bg-brand-slateLight text-white w-full sm:w-auto font-montserrat shadow-md"
             >
               Return to Home
             </Button>

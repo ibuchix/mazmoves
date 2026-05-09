@@ -7,7 +7,7 @@ export const HeroContent = () => {
       <div className="space-y-4">
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">
           Get Instant Quotes from 
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-[#84d21f] to-white ml-2">
+          <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-brand-green to-white ml-2">
             Trusted Movers
           </span>
         </h1>
@@ -28,7 +28,7 @@ export const HeroContent = () => {
 
 const FeatureItem = ({ text }: { text: string }) => (
   <div className="flex items-center space-x-3 bg-white/10 backdrop-blur-sm p-3 rounded-xl transition-transform duration-300 hover:-translate-y-1">
-    <CheckCircle className="w-5 h-5 text-[#84d21f] flex-shrink-0" />
+    <CheckCircle className="w-5 h-5 text-brand-green flex-shrink-0" />
     <span className="text-base md:text-lg font-medium">{text}</span>
   </div>
 );
