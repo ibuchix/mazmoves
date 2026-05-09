@@ -29,7 +29,7 @@ export function Navbar() {
     }`;
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-transparent">
+    <header className="relative z-40 w-full bg-transparent border-b border-brand-slate/40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <Logo size="lg" withText={false} linkToHome />
 
