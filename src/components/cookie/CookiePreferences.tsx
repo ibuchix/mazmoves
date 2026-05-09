@@ -104,7 +104,7 @@ export default function CookiePreferences() {
           </div>
         </div>
         <div className="flex justify-end">
-          <Button onClick={save} className="bg-[#040480] hover:bg-[#1f3dd2]">
+          <Button onClick={save} className="bg-[#334155] hover:bg-[#475569]">
             Save preferences
           </Button>
         </div>

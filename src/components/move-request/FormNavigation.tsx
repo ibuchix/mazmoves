@@ -62,7 +62,7 @@ export function FormNavigation({
         <Button
           type="button"
           onClick={onNext}
-          className="bg-[#040480] hover:bg-[#1f3dd2] text-white ml-auto"
+          className="bg-[#334155] hover:bg-[#475569] text-white ml-auto"
           disabled={!canProceed}
         >
           Next
@@ -73,7 +73,7 @@ export function FormNavigation({
           className={`ml-auto inline-flex items-center space-x-2 ${
             !canProceed
               ? "bg-gray-400 cursor-not-allowed"
-              : "bg-[#040480] hover:bg-[#1f3dd2]"
+              : "bg-[#334155] hover:bg-[#475569]"
           } text-white`}
           disabled={!canProceed}
         >

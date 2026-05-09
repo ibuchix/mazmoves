@@ -1,10 +1,10 @@
 export default function Contact() {
   return (
     <div className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      <h1 className="text-3xl font-bold text-[#040480] mb-8">Contact Us</h1>
+      <h1 className="text-3xl font-bold text-[#334155] mb-8">Contact Us</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
         <div>
-          <h2 className="text-xl font-semibold text-[#040480] mb-4">Get in Touch</h2>
+          <h2 className="text-xl font-semibold text-[#334155] mb-4">Get in Touch</h2>
           <div className="space-y-4">
             <p className="flex items-center text-gray-600">
               <span className="font-semibold mr-2">Email:</span>
@@ -21,7 +21,7 @@ export default function Contact() {
           </div>
         </div>
         <div>
-          <h2 className="text-xl font-semibold text-[#040480] mb-4">Business Hours</h2>
+          <h2 className="text-xl font-semibold text-[#334155] mb-4">Business Hours</h2>
           <div className="space-y-2 text-gray-600">
             <p>Monday - Friday: 8:00 AM - 6:00 PM</p>
             <p>Saturday: 9:00 AM - 4:00 PM</p>

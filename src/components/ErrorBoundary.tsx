@@ -39,13 +39,13 @@ const ErrorFallback = () => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-background">
       <div className="text-center space-y-6 max-w-md">
-        <h2 className="text-2xl font-bold text-[#040480]">Oops! An error has occurred</h2>
+        <h2 className="text-2xl font-bold text-[#334155]">Oops! An error has occurred</h2>
         <p className="text-gray-600">
           We apologize for the inconvenience. Please try returning to the home page.
         </p>
         <Button 
           onClick={() => navigate('/')}
-          className="bg-[#040480] hover:bg-[#1f3dd2] text-white font-semibold"
+          className="bg-[#334155] hover:bg-[#475569] text-white font-semibold"
         >
           Return Home
         </Button>
