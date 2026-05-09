@@ -1,57 +1,108 @@
+// TermsAndConditions.tsx - Dedicated, official Terms & Conditions page.
+// Updated contact email to help@housemove.co; phone removed; address omitted.
+
 import { Card } from "@/components/ui/card";
 
 export default function TermsAndConditions() {
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <h1 className="text-3xl font-bold text-brand-slate mb-6">Terms and Conditions</h1>
-      
-      <Card className="p-6 space-y-6 shadow-lg">
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-brand-slateLight">1. Introduction</h2>
-          <p className="text-gray-700 leading-relaxed">
-            Welcome to HouseMove Ltd. These terms and conditions outline the rules and regulations
-            for the use of our services.
+    <div className="bg-background">
+      <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <header className="mb-10 text-center">
+          <h1 className="font-montserrat font-bold text-4xl md:text-5xl text-brand-slate mb-3">
+            Terms &amp; Conditions
+          </h1>
+          <p className="font-roboto text-brand-slateMuted">
+            The rules that govern your use of the HouseMove platform.
           </p>
-        </section>
+          <p className="font-roboto text-sm text-brand-slateMuted mt-2">
+            Last updated: May 2026
+          </p>
+        </header>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-brand-slateLight">2. Services</h2>
-          <p className="text-gray-700 leading-relaxed">
-            HouseMove Ltd provides moving services including but not limited to residential moves,
-            commercial moves, and international relocations.
-          </p>
-        </section>
+        <Card className="p-8 md:p-10 space-y-8 border border-brand-slate/15 shadow-sm font-roboto text-brand-slate leading-relaxed">
+          <section className="space-y-3">
+            <h2 className="font-montserrat font-semibold text-2xl text-brand-slate">
+              1. Introduction
+            </h2>
+            <p>
+              These terms govern your use of HouseMove ("we", "us", "our"). By
+              submitting a move request or otherwise using the service, you
+              agree to these terms.
+            </p>
+          </section>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-brand-slateLight">3. Booking and Payments</h2>
-          <p className="text-gray-700 leading-relaxed">
-            All bookings are subject to availability and confirmation. Payment terms and
-            conditions apply as specified in your moving quote.
-          </p>
-        </section>
+          <section className="space-y-3">
+            <h2 className="font-montserrat font-semibold text-2xl text-brand-slate">
+              2. Our Service
+            </h2>
+            <p>
+              HouseMove is a free service for movers. We connect you with
+              vetted moving companies who can quote for your move. We are not
+              the moving company and do not perform the move ourselves.
+            </p>
+          </section>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-brand-slateLight">4. Liability</h2>
-          <p className="text-gray-700 leading-relaxed">
-            Our liability is limited as per industry standards and applicable laws. We recommend
-            reviewing our insurance options for additional protection.
-          </p>
-        </section>
+          <section className="space-y-3">
+            <h2 className="font-montserrat font-semibold text-2xl text-brand-slate">
+              3. Quotes &amp; Bookings
+            </h2>
+            <p>
+              Any quote, booking, contract or payment for the move itself is
+              made directly between you and the chosen moving company. Their
+              terms, pricing and cancellation policy apply to that booking.
+            </p>
+          </section>
 
-        <section className="space-y-4">
-          <h2 className="text-2xl font-semibold text-brand-slateLight">5. Cancellation Policy</h2>
-          <p className="text-gray-700 leading-relaxed">
-            Cancellation terms vary depending on the service booked and timing of cancellation.
-            Please refer to your booking confirmation for specific details.
-          </p>
-        </section>
+          <section className="space-y-3">
+            <h2 className="font-montserrat font-semibold text-2xl text-brand-slate">
+              4. Your Responsibilities
+            </h2>
+            <ul className="list-disc pl-6 space-y-1">
+              <li>Provide accurate move details.</li>
+              <li>Use the service for lawful purposes only.</li>
+              <li>Communicate respectfully with partner companies.</li>
+            </ul>
+          </section>
 
-        <div className="mt-8 pt-4 border-t border-gray-200">
-          <p className="text-sm text-gray-600">
-            Last updated: March 2024
-          </p>
-        </div>
-      </Card>
+          <section className="space-y-3">
+            <h2 className="font-montserrat font-semibold text-2xl text-brand-slate">
+              5. Liability
+            </h2>
+            <p>
+              To the maximum extent permitted by law, HouseMove is not liable
+              for the conduct, performance, or pricing of any moving company
+              you engage through the platform. Nothing in these terms limits
+              liability that cannot lawfully be limited.
+            </p>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="font-montserrat font-semibold text-2xl text-brand-slate">
+              6. Changes to These Terms
+            </h2>
+            <p>
+              We may update these terms from time to time. The "Last updated"
+              date above shows when the latest version took effect.
+            </p>
+          </section>
+
+          <section className="space-y-3">
+            <h2 className="font-montserrat font-semibold text-2xl text-brand-slate">
+              7. Contact
+            </h2>
+            <p>
+              Questions about these terms? Email{" "}
+              <a
+                href="mailto:help@housemove.co"
+                className="text-brand-orange hover:underline"
+              >
+                help@housemove.co
+              </a>
+              .
+            </p>
+          </section>
+        </Card>
+      </section>
     </div>
   );
 }
