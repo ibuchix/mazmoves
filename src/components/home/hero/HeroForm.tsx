@@ -14,7 +14,7 @@ export const HeroForm = ({ moveType, setMoveType, onGetQuotes }: HeroFormProps) 
   return (
     <div className="overflow-hidden rounded-2xl bg-white/95 backdrop-blur-sm shadow-[0_0_15px_rgba(0,0,0,0.1)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,0,0,0.15)]">
       <div className="p-6 md:p-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-brand-slate mb-6">
+        <h2 className="text-2xl md:text-3xl font-bold text-brand-slate mb-3">
           Start Your Move
         </h2>
         <MoveTypeStep

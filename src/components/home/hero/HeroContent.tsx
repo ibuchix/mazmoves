@@ -4,7 +4,7 @@ import { CheckCircle } from "lucide-react";
 export const HeroContent = () => {
   return (
     <div className="text-white flex flex-col justify-between h-full">
-      <div className="space-y-4">
+      <div className="space-y-1">
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">
           Get Instant Quotes from 
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-brand-green to-white ml-2">
