@@ -1,17 +1,16 @@
 // Centralised brand colour tokens for the customer app.
-// Single source of truth — import from here OR use the matching Tailwind tokens
-// defined in tailwind.config.ts (brand.slate, brand.slateLight, brand.green, brand.orange).
+// Single source of truth for hex values. Mirrored as Tailwind tokens
+// (brand.slate, brand.slateLight, brand.slateMuted, brand.slateSoft, brand.green, brand.orange)
+// in tailwind.config.ts and as CSS variables in index.css (--brand-*).
 // NOTE: Blue has been retired in favour of slate grey across the app.
 
 export const BRAND_COLORS = {
-  // Primary brand colour (replaces the old navy blue #334155)
-  slate: "#334155",       // slate-700
-  // Secondary slate (replaces the old royal blue #475569) — used for hovers, gradients, secondary accents
-  slateLight: "#475569",  // slate-600
-  // Accent green — success states, highlights, star ratings
-  green: "#84d21f",
-  // Accent orange — alerts, secondary CTAs
-  orange: "#d2491f",
+  slate: "#334155",       // primary text/CTA (slate-700)
+  slateLight: "#475569",  // hovers, gradients, secondary accents (slate-600)
+  slateMuted: "#64748b",  // muted body copy (slate-500)
+  slateSoft: "#94a3b8",   // soft dividers / faint gradients (slate-400)
+  green: "#84d21f",       // success, highlights, ratings
+  orange: "#d2491f",      // alerts, secondary CTAs
 } as const;
 
 export type BrandColor = keyof typeof BRAND_COLORS;

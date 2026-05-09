@@ -4,6 +4,14 @@
 
 @layer base {
   :root {
+    /* Brand palette — keep in sync with src/theme/brand.ts and tailwind.config.ts */
+    --brand-slate: #334155;
+    --brand-slate-light: #475569;
+    --brand-slate-muted: #64748b;
+    --brand-slate-soft: #94a3b8;
+    --brand-green: #84d21f;
+    --brand-orange: #d2491f;
+
     --background: 0 0% 100%;
     --foreground: 222.2 84% 4.9%;
 
@@ -89,6 +97,6 @@
   }
 
   body {
-    @apply bg-gradient-to-bl from-[#84d21f]/5 to-[#d2491f]/5 text-foreground min-h-screen;
+    @apply bg-gradient-to-bl from-brand-green/5 to-brand-orange/5 text-foreground min-h-screen;
   }
 }

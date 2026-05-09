@@ -14,13 +14,13 @@ export const TestimonialCard = ({ name, location, rating, text }: TestimonialCar
       <CardContent className="p-6">
         <div className="flex items-center mb-4">
           {[...Array(rating)].map((_, i) => (
-            <Star key={i} className="w-5 h-5 fill-[#84d21f] text-[#84d21f]" />
+            <Star key={i} className="w-5 h-5 fill-brand-green text-brand-green" />
           ))}
         </div>
-        <Quote className="w-8 h-8 text-[#d2491f] mb-4" />
+        <Quote className="w-8 h-8 text-brand-orange mb-4" />
         <p className="text-gray-700 mb-6">{text}</p>
         <div className="mt-auto">
-          <p className="font-semibold text-[#334155]">{name}</p>
+          <p className="font-semibold text-brand-slate">{name}</p>
           <p className="text-sm text-gray-500">{location}</p>
         </div>
       </CardContent>

@@ -14,7 +14,7 @@ export const HeroForm = ({ moveType, setMoveType, onGetQuotes }: HeroFormProps) 
   return (
     <div className="overflow-hidden rounded-2xl bg-white/95 backdrop-blur-sm shadow-[0_0_15px_rgba(0,0,0,0.1)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,0,0,0.15)]">
       <div className="p-6 md:p-8">
-        <h2 className="text-2xl md:text-3xl font-bold text-slate-700 mb-6">
+        <h2 className="text-2xl md:text-3xl font-bold text-brand-slate mb-6">
           Start Your Move
         </h2>
         <MoveTypeStep
@@ -23,7 +23,7 @@ export const HeroForm = ({ moveType, setMoveType, onGetQuotes }: HeroFormProps) 
           onNext={onGetQuotes}
         />
         <Button
-          className="w-full mt-6 bg-[#d2491f] hover:bg-[#84d21f] text-white text-lg font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+          className="w-full mt-6 bg-brand-orange hover:bg-brand-green text-white text-lg font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
           onClick={onGetQuotes}
           disabled={!moveType}
         >

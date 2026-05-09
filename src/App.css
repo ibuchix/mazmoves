@@ -11,7 +11,7 @@
 }
 
 .auth-button {
-  background-color: #334155 !important;
+  background-color: var(--brand-slate) !important;
   color: white !important;
   transition: all 0.2s ease-in-out !important;
   font-weight: 500 !important;
@@ -20,7 +20,7 @@
 }
 
 .auth-button:hover {
-  background-color: #475569 !important;
+  background-color: var(--brand-slate-light) !important;
   transform: translateY(-1px);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
 }
@@ -35,11 +35,11 @@
 }
 
 .auth-input:focus {
-  border-color: #475569 !important;
+  border-color: var(--brand-slate-light) !important;
   box-shadow: 0 0 0 2px rgba(31, 61, 210, 0.1) !important;
   outline: none !important;
 }
 
 .auth-input:hover {
-  border-color: #475569 !important;
+  border-color: var(--brand-slate-light) !important;
 }

@@ -31,11 +31,11 @@ const steps = [
 export const HowItWorksSection = () => {
   return (
     <section className="py-24 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-br from-[#334155]/5 via-[#475569]/5 to-[#84d21f]/5" />
+      <div className="absolute inset-0 bg-gradient-to-br from-brand-slate/5 via-brand-slateLight/5 to-brand-green/5" />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-bold text-[#334155] mb-4">How It Works</h2>
+          <h2 className="text-4xl font-bold text-brand-slate mb-4">How It Works</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Your journey to a seamless move in four simple steps
           </p>

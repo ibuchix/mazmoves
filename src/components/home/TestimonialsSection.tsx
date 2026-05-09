@@ -27,8 +27,8 @@ export const TestimonialsSection = () => {
     <section className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold text-slate-700 mb-4">What Our Customers Say</h2>
-          <p className="text-slate-600 max-w-2xl mx-auto">
+          <h2 className="text-3xl font-bold text-brand-slate mb-4">What Our Customers Say</h2>
+          <p className="text-brand-slateLight max-w-2xl mx-auto">
             Read about the experiences of customers who have trusted us with their moves
           </p>
         </div>
@@ -39,14 +39,14 @@ export const TestimonialsSection = () => {
               <CardContent className="p-6">
                 <div className="flex items-center mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-[#84d21f] text-[#84d21f]" />
+                    <Star key={i} className="w-5 h-5 fill-brand-green text-brand-green" />
                   ))}
                 </div>
-                <Quote className="w-8 h-8 text-slate-600 mb-4" />
-                <p className="text-slate-700 mb-6">{testimonial.text}</p>
+                <Quote className="w-8 h-8 text-brand-slateLight mb-4" />
+                <p className="text-brand-slate mb-6">{testimonial.text}</p>
                 <div className="mt-auto">
-                  <p className="font-semibold text-slate-700">{testimonial.name}</p>
-                  <p className="text-sm text-slate-500">{testimonial.location}</p>
+                  <p className="font-semibold text-brand-slate">{testimonial.name}</p>
+                  <p className="text-sm text-brand-slateMuted">{testimonial.location}</p>
                 </div>
               </CardContent>
             </Card>

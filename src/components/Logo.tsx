@@ -39,7 +39,7 @@ export default function Logo({
       />
       {withText && (
         <span
-          className={`${sizes.text} font-bold tracking-tight text-[#334155]`}
+          className={`${sizes.text} font-bold tracking-tight text-brand-slate`}
           style={{ fontFamily: "Montserrat, sans-serif" }}
         >
           HouseMove
