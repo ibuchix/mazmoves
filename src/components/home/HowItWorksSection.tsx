@@ -40,7 +40,7 @@ export const HowItWorksSection = () => {
           </p>
 
           <div className="mt-6 inline-flex items-center gap-2 bg-brand-green/20 px-4 py-2 rounded-full">
-            <span className="text-brand-slate font-semibold">100% Free Service for Customers</span>
+            <span className="text-[#040480] font-semibold">100% Free Service for Customers</span>
           </div>
         </div>
 
