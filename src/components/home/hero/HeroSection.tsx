@@ -20,7 +20,7 @@ export const HeroSection = ({ moveType, setMoveType, onGetQuotes }: HeroSectionP
 
       {/* Main content */}
       <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-stretch">
           {/* Form Section */}
           <div className="order-2 md:order-1 animate-fade-in">
             <HeroForm 
@@ -31,7 +31,7 @@ export const HeroSection = ({ moveType, setMoveType, onGetQuotes }: HeroSectionP
           </div>
           
           {/* Content Section */}
-          <div className="order-1 md:order-2 animate-fade-in [animation-delay:200ms]">
+          <div className="order-1 md:order-2 animate-fade-in [animation-delay:200ms] flex flex-col justify-between h-full">
             <HeroContent />
           </div>
         </div>
