@@ -27,9 +27,9 @@ export function AddressStep({
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-[#040480]">{title}</h3>
+        <h3 className="text-lg font-semibold text-[#334155]">{title}</h3>
         {isGeocoding && (
-          <div className="flex items-center text-sm text-[#1f3dd2]">
+          <div className="flex items-center text-sm text-[#475569]">
             <LoadingSpinner className="w-4 h-4 mr-2" />
             Verifying address...
           </div>
@@ -37,13 +37,13 @@ export function AddressStep({
       </div>
       <div className="grid gap-4">
         <div className="space-y-2">
-          <Label htmlFor={`${type}-street`} className="text-sm font-medium text-[#040480]">
+          <Label htmlFor={`${type}-street`} className="text-sm font-medium text-[#334155]">
             Street Address
             <span className="text-red-500 ml-1">*</span>
           </Label>
           <Input
             id={`${type}-street`}
-            className={`h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 ${
+            className={`h-11 border-[#475569] focus:ring-[#84d21f] transition-all duration-300 ${
               addressErrors?.street ? "border-red-500" : ""
             }`}
             {...register(`${type}Address.street` as any, { 
@@ -65,13 +65,13 @@ export function AddressStep({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor={`${type}-city`} className="text-sm font-medium text-[#040480]">
+          <Label htmlFor={`${type}-city`} className="text-sm font-medium text-[#334155]">
             City
             <span className="text-red-500 ml-1">*</span>
           </Label>
           <Input
             id={`${type}-city`}
-            className={`h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 ${
+            className={`h-11 border-[#475569] focus:ring-[#84d21f] transition-all duration-300 ${
               addressErrors?.city ? "border-red-500" : ""
             }`}
             {...register(`${type}Address.city` as any, { 
@@ -93,13 +93,13 @@ export function AddressStep({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor={`${type}-state`} className="text-sm font-medium text-[#040480]">
+          <Label htmlFor={`${type}-state`} className="text-sm font-medium text-[#334155]">
             State/Province
             <span className="text-red-500 ml-1">*</span>
           </Label>
           <Input
             id={`${type}-state`}
-            className={`h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 ${
+            className={`h-11 border-[#475569] focus:ring-[#84d21f] transition-all duration-300 ${
               addressErrors?.state ? "border-red-500" : ""
             }`}
             {...register(`${type}Address.state` as any, { 
@@ -122,13 +122,13 @@ export function AddressStep({
 
         {isInternational && (
           <div className="space-y-2">
-            <Label htmlFor={`${type}-country`} className="text-sm font-medium text-[#040480]">
+            <Label htmlFor={`${type}-country`} className="text-sm font-medium text-[#334155]">
               Country
               <span className="text-red-500 ml-1">*</span>
             </Label>
             <Input
               id={`${type}-country`}
-              className={`h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 ${
+              className={`h-11 border-[#475569] focus:ring-[#84d21f] transition-all duration-300 ${
                 addressErrors?.country ? "border-red-500" : ""
               }`}
               {...register(`${type}Address.country` as any, { 
@@ -151,13 +151,13 @@ export function AddressStep({
         )}
 
         <div className="space-y-2">
-          <Label htmlFor={`${type}-zipCode`} className="text-sm font-medium text-[#040480]">
+          <Label htmlFor={`${type}-zipCode`} className="text-sm font-medium text-[#334155]">
             Postal Code
             <span className="text-red-500 ml-1">*</span>
           </Label>
           <Input
             id={`${type}-zipCode`}
-            className={`h-11 border-[#1f3dd2] focus:ring-[#84d21f] transition-all duration-300 ${
+            className={`h-11 border-[#475569] focus:ring-[#84d21f] transition-all duration-300 ${
               addressErrors?.zipCode ? "border-red-500" : ""
             }`}
             {...register(`${type}Address.zipCode` as any, { 

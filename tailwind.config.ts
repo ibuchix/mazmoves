@@ -19,6 +19,13 @@ export default {
 		},
 		extend: {
 			colors: {
+				// Centralised brand palette — keep in sync with src/theme/brand.ts
+				brand: {
+					slate: '#334155',
+					slateLight: '#475569',
+					green: '#84d21f',
+					orange: '#d2491f',
+				},
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
 				ring: 'hsl(var(--ring))',

@@ -20,16 +20,16 @@ export const StepCard = ({ step, title, description, icon: Icon, isLast = false 
       
       <Card className="relative z-10 group hover:shadow-lg transition-all duration-300 bg-white/80 backdrop-blur-sm border-none w-full">
         <CardContent className="flex flex-col items-center p-8 h-full">
-          <div className="w-10 h-10 mb-6 flex items-center justify-center bg-gradient-to-r from-[#040480] to-[#1f3dd2] text-white rounded-full font-semibold group-hover:scale-110 transition-transform duration-300">
+          <div className="w-10 h-10 mb-6 flex items-center justify-center bg-gradient-to-r from-[#334155] to-[#475569] text-white rounded-full font-semibold group-hover:scale-110 transition-transform duration-300">
             {step}
           </div>
           
-          <div className="mb-6 text-[#1f3dd2] group-hover:scale-110 transition-transform duration-300 group-hover:text-[#84d21f]">
+          <div className="mb-6 text-[#475569] group-hover:scale-110 transition-transform duration-300 group-hover:text-[#84d21f]">
             <Icon className="w-12 h-12" />
           </div>
           
           <div className="text-center flex-grow flex flex-col justify-between">
-            <h3 className="text-xl font-semibold text-[#040480] mb-3 group-hover:text-[#1f3dd2] transition-colors">
+            <h3 className="text-xl font-semibold text-[#334155] mb-3 group-hover:text-[#475569] transition-colors">
               {title}
             </h3>
             <p className="text-gray-600">

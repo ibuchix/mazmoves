@@ -17,7 +17,7 @@ export function LoadingOverlay({
     )}>
       <LoadingSpinner size="lg" />
       {message && (
-        <p className="mt-4 text-lg text-[#040480] font-medium">{message}</p>
+        <p className="mt-4 text-lg text-[#334155] font-medium">{message}</p>
       )}
     </div>
   );

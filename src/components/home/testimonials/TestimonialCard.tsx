@@ -20,7 +20,7 @@ export const TestimonialCard = ({ name, location, rating, text }: TestimonialCar
         <Quote className="w-8 h-8 text-[#d2491f] mb-4" />
         <p className="text-gray-700 mb-6">{text}</p>
         <div className="mt-auto">
-          <p className="font-semibold text-[#040480]">{name}</p>
+          <p className="font-semibold text-[#334155]">{name}</p>
           <p className="text-sm text-gray-500">{location}</p>
         </div>
       </CardContent>
