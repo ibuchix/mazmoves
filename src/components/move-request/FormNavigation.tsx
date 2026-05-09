@@ -1,13 +1,10 @@
 // Navigation row for the move request wizard.
-// - Step > 1: shows a Previous button on the left.
-// - Step 1:   shows a Home button on the left (link back to /) so users can
-//             exit the wizard without having to use the browser back button.
+// - Step 1:    Previous button is rendered but disabled (persistent navbar handles Home navigation).
+// - Step > 1:  Previous button is enabled.
 // - Last step: swaps Next for a Submit button.
 
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Home } from "lucide-react";
-import { Link } from "react-router-dom";
 
 interface FormNavigationProps {
   step: number;
@@ -33,30 +30,15 @@ export function FormNavigation({
 
   return (
     <div className="flex justify-between pt-4">
-      {isFirstStep ? (
-        <Button
-          asChild
-          type="button"
-          variant="outline"
-          className="bg-white hover:bg-gray-50"
-          disabled={isProcessing}
-        >
-          <Link to="/" aria-label="Return to home">
-            <Home className="mr-2 h-4 w-4" />
-            Home
-          </Link>
-        </Button>
-      ) : (
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onPrevious}
-          className="bg-white hover:bg-gray-50"
-          disabled={isProcessing}
-        >
-          Previous
-        </Button>
-      )}
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onPrevious}
+        className="bg-white hover:bg-gray-50"
+        disabled={isProcessing || isFirstStep}
+      >
+        Previous
+      </Button>
 
       {!isLastStep ? (
         <Button
