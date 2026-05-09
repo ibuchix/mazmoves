@@ -11,6 +11,8 @@ interface HeroSectionProps {
 }
 
 export const HeroSection = ({ moveType, setMoveType, onGetQuotes }: HeroSectionProps) => {
+  const isMobile = useIsMobile();
+
   return (
     <section className="relative flex items-center px-4 sm:px-6 lg:px-8 pt-8 pb-16 md:pt-12 md:pb-24">
       {/* Background with slate grey gradient, shorter rectangle with curved corners */}
@@ -22,17 +24,17 @@ export const HeroSection = ({ moveType, setMoveType, onGetQuotes }: HeroSectionP
       {/* Main content */}
       <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-stretch">
-          {/* Form Section */}
-          <div className="order-2 md:order-1 animate-fade-in">
-            <HeroForm 
+          {/* Form Section — first on mobile, left on desktop */}
+          <div className={`${isMobile ? "order-1" : "order-2 md:order-1"} animate-fade-in`}>
+            <HeroForm
               moveType={moveType}
               setMoveType={setMoveType}
               onGetQuotes={onGetQuotes}
             />
           </div>
-          
-          {/* Content Section */}
-          <div className="order-1 md:order-2 animate-fade-in [animation-delay:200ms] flex flex-col justify-between h-full">
+
+          {/* Content Section — below form on mobile, right on desktop */}
+          <div className={`${isMobile ? "order-2" : "order-1 md:order-2"} animate-fade-in [animation-delay:200ms] flex flex-col justify-between h-full`}>
             <HeroContent />
           </div>
         </div>
