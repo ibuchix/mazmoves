@@ -101,9 +101,6 @@ export type Database = {
           email_verification_sent_at: string | null
           email_verified: boolean | null
           email_verified_at: string | null
-          encrypted_contact_phone: string | null
-          encrypted_registration_number: string | null
-          encrypted_vat_number: string | null
           free_assignments_remaining: number | null
           id: string
           is_active: boolean | null
@@ -114,8 +111,6 @@ export type Database = {
           longitude: number | null
           manager_name: string | null
           name: string
-          password: string | null
-          password_hash: string | null
           public_access_token: string
           rating: number | null
           registration_date: string | null
@@ -144,9 +139,6 @@ export type Database = {
           email_verification_sent_at?: string | null
           email_verified?: boolean | null
           email_verified_at?: string | null
-          encrypted_contact_phone?: string | null
-          encrypted_registration_number?: string | null
-          encrypted_vat_number?: string | null
           free_assignments_remaining?: number | null
           id?: string
           is_active?: boolean | null
@@ -157,8 +149,6 @@ export type Database = {
           longitude?: number | null
           manager_name?: string | null
           name: string
-          password?: string | null
-          password_hash?: string | null
           public_access_token?: string
           rating?: number | null
           registration_date?: string | null
@@ -187,9 +177,6 @@ export type Database = {
           email_verification_sent_at?: string | null
           email_verified?: boolean | null
           email_verified_at?: string | null
-          encrypted_contact_phone?: string | null
-          encrypted_registration_number?: string | null
-          encrypted_vat_number?: string | null
           free_assignments_remaining?: number | null
           id?: string
           is_active?: boolean | null
@@ -200,8 +187,6 @@ export type Database = {
           longitude?: number | null
           manager_name?: string | null
           name?: string
-          password?: string | null
-          password_hash?: string | null
           public_access_token?: string
           rating?: number | null
           registration_date?: string | null
@@ -1010,6 +995,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           address: Json | null
@@ -1500,6 +1506,13 @@ export type Database = {
       }
       get_setting: { Args: { setting_key: string }; Returns: string }
       gettransactionid: { Args: never; Returns: unknown }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_admin: { Args: { user_id: string }; Returns: boolean }
       is_country_allowed: { Args: { check_code: string }; Returns: boolean }
       is_valid_admin_creator: { Args: { email: string }; Returns: boolean }
@@ -1595,9 +1608,6 @@ export type Database = {
               email_verification_sent_at: string | null
               email_verified: boolean | null
               email_verified_at: string | null
-              encrypted_contact_phone: string | null
-              encrypted_registration_number: string | null
-              encrypted_vat_number: string | null
               free_assignments_remaining: number | null
               id: string
               is_active: boolean | null
@@ -1608,8 +1618,6 @@ export type Database = {
               longitude: number | null
               manager_name: string | null
               name: string
-              password: string | null
-              password_hash: string | null
               public_access_token: string
               rating: number | null
               registration_date: string | null
@@ -2245,6 +2253,7 @@ export type Database = {
       }
     }
     Enums: {
+      app_role: "admin" | "company" | "customer"
       assignment_status: "active" | "completed" | "cancelled" | "accepted"
       company_registration_status: "pending" | "active" | "suspended"
       invoice_status: "draft" | "pending" | "paid" | "failed" | "void"
@@ -2394,6 +2403,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "company", "customer"],
       assignment_status: ["active", "completed", "cancelled", "accepted"],
       company_registration_status: ["pending", "active", "suspended"],
       invoice_status: ["draft", "pending", "paid", "failed", "void"],
