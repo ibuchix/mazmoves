@@ -1,13 +1,10 @@
 // Navigation row for the move request wizard.
-// - Step > 1: shows a Previous button on the left.
-// - Step 1:   shows a Home button on the left (link back to /) so users can
-//             exit the wizard without having to use the browser back button.
+// - Step 1:    Previous button is rendered but disabled (persistent navbar handles Home navigation).
+// - Step > 1:  Previous button is enabled.
 // - Last step: swaps Next for a Submit button.
 
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { Home } from "lucide-react";
-import { Link } from "react-router-dom";
 
 interface FormNavigationProps {
   step: number;
