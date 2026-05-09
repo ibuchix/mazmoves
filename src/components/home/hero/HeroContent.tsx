@@ -12,7 +12,7 @@ export const HeroContent = () => {
       </h1>
       
       <p className="text-xl md:text-2xl text-gray-100 font-light">
-        Free to use, no obligations. Compare prices and save.
+        Free to use, no obligations.
       </p>
 
       <div className="space-y-4">
