@@ -2,6 +2,7 @@
 import { MoveType } from "@/types/move-request";
 import { HeroForm } from "./HeroForm";
 import { HeroContent } from "./HeroContent";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface HeroSectionProps {
   moveType: MoveType | null;
