@@ -97,6 +97,6 @@
   }
 
   body {
-    @apply bg-gradient-to-bl from-[#84d21f]/5 to-[#d2491f]/5 text-foreground min-h-screen;
+    @apply bg-gradient-to-bl from-brand-green/5 to-brand-orange/5 text-foreground min-h-screen;
   }
 }
