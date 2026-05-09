@@ -30,30 +30,15 @@ export function FormNavigation({
 
   return (
     <div className="flex justify-between pt-4">
-      {isFirstStep ? (
-        <Button
-          asChild
-          type="button"
-          variant="outline"
-          className="bg-white hover:bg-gray-50"
-          disabled={isProcessing}
-        >
-          <Link to="/" aria-label="Return to home">
-            <Home className="mr-2 h-4 w-4" />
-            Home
-          </Link>
-        </Button>
-      ) : (
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onPrevious}
-          className="bg-white hover:bg-gray-50"
-          disabled={isProcessing}
-        >
-          Previous
-        </Button>
-      )}
+      <Button
+        type="button"
+        variant="outline"
+        onClick={onPrevious}
+        className="bg-white hover:bg-gray-50"
+        disabled={isProcessing || isFirstStep}
+      >
+        Previous
+      </Button>
 
       {!isLastStep ? (
         <Button
