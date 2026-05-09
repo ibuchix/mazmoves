@@ -8,7 +8,7 @@ export const HeroContent = () => {
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-tight">
           Get Instant Quotes from 
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-brand-green to-white ml-2">
-            Trusted Movers
+            Vetted Movers
           </span>
         </h1>
         
