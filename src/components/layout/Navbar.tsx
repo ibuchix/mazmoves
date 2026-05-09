@@ -29,9 +29,9 @@ export function Navbar() {
     }`;
 
   return (
-    <header className="sticky top-0 z-40 w-full bg-background border-b border-brand-slateSoft/30">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Logo size="sm" withText linkToHome />
+    <header className="sticky top-0 z-40 w-full bg-transparent">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <Logo size="lg" withText={false} linkToHome />
 
         {/* Desktop */}
         <nav className="hidden md:flex items-center gap-8">
@@ -42,7 +42,8 @@ export function Navbar() {
           ))}
           <Button
             asChild
-            className="bg-brand-orange hover:bg-brand-orange/90 text-white font-montserrat font-semibold shadow-sm"
+            size="sm"
+            className="bg-brand-orange hover:bg-brand-orange/90 text-white font-montserrat font-semibold text-xs shadow-sm"
           >
             <Link to="/request-move?step=1">Start Your Move</Link>
           </Button>
