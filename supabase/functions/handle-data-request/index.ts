@@ -24,7 +24,7 @@ serve(async (req) => {
     // Send email notification about the request
     const { error: emailError } = await supabaseClient.functions.invoke('send-email', {
       body: {
-        to: 'ask@mazmoves.com',
+        to: 'help@housemove.co',
         subject: `Data ${type} Request`,
         html: `
           <p>A user has requested their data to be ${type === 'deletion' ? 'deleted' : 'exported'}.</p>
