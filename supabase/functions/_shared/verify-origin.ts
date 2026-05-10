@@ -12,24 +12,29 @@ export function verifyOrigin(request: Request): boolean {
   const origin = request.headers.get('origin');
   const referer = request.headers.get('referer');
 
-  // If neither header is present, reject the request
   if (!origin && !referer) {
     console.error('No origin or referer header present');
     return false;
   }
 
-  // Check origin header
-  if (origin && ALLOWED_ORIGINS.includes(origin)) {
-    return true;
-  }
+  const isAllowed = (url: string): boolean => {
+    if (ALLOWED_ORIGINS.some(allowed => url.startsWith(allowed))) return true;
+    // Allow any Lovable preview / published subdomain for this project
+    try {
+      const { hostname } = new URL(url);
+      return (
+        hostname.endsWith('.lovable.app') ||
+        hostname.endsWith('.lovableproject.com')
+      );
+    } catch {
+      return false;
+    }
+  };
 
-  // Check referer header
-  if (referer) {
-    return ALLOWED_ORIGINS.some(allowed => referer.startsWith(allowed));
-  }
+  if (origin && isAllowed(origin)) return true;
+  if (referer && isAllowed(referer)) return true;
 
-  console.error('Invalid origin:', origin);
-  console.error('Invalid referer:', referer);
+  console.error('Invalid origin:', origin, 'referer:', referer);
   return false;
 }
 
