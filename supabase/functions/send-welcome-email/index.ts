@@ -90,25 +90,25 @@ serve(async (req) => {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'MAZ Moves <notifications@mazmoves.com>',
+        from: 'HouseMove <notifications@housemove.co>',
         to: [email],
-        subject: 'Welcome to MAZ Moves - Please Confirm Your Email',
+        subject: 'Welcome to HouseMove - Please Confirm Your Email',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h1 style="color: #040480;">Welcome to MAZ Moves, ${companyName}!</h1>
-            <p>Thank you for registering with MAZ Moves. We're excited to have you on board!</p>
+            <h1 style="color: #334155;">Welcome to HouseMove, ${companyName}!</h1>
+            <p>Thank you for registering with HouseMove. We're excited to have you on board!</p>
             <p>Please confirm your email address by clicking the button below:</p>
             <div style="text-align: center; margin: 30px 0;">
               <a href="${confirmUrl}" 
-                 style="background-color: #040480; color: white; padding: 12px 24px; 
-                        text-decoration: none; border-radius: 4px; font-weight: bold;">
+                 style="background-color: #334155; color: white; padding: 12px 24px; 
+                        text-decoration: none; border-radius: 8px; font-weight: bold;">
                 Confirm Email Address
               </a>
             </div>
             <p>This confirmation link will expire in 48 hours.</p>
             <p>If you can't click the button, copy and paste this URL into your browser:</p>
-            <p style="word-break: break-all; color: #1f3dd2;">${confirmUrl}</p>
-            <p style="margin-top: 20px;">Best regards,<br>MAZ Moves Team</p>
+            <p style="word-break: break-all; color: #334155;">${confirmUrl}</p>
+            <p style="margin-top: 20px;">Best regards,<br>The HouseMove Team</p>
           </div>
         `
       }),

@@ -38,15 +38,15 @@ async function sendEmailWithRetry(emailData: EmailData, attempt: number = 1): Pr
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        from: 'MAZ Moves <notifications@mazmoves.com>',
+        from: 'HouseMove <notifications@housemove.co>',
         to: [emailData.to],
         subject: 'Move Request Confirmation',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <h2 style="color: #040480;">Thank you for your move request, ${emailData.customerName}!</h2>
-            <p>We have received your move request and our verified moving companies in your area will be notified.</p>
+            <h2 style="color: #334155;">Thank you for your move request, ${emailData.customerName}!</h2>
+            <p>We have received your move request and our vetted moving companies in your area will be notified.</p>
             <p>You will be contacted directly by the moving companies to discuss your requirements in detail.</p>
-            <p style="margin-top: 20px;">Best regards,<br>MAZ Moves Team</p>
+            <p style="margin-top: 20px;">Best regards,<br>The HouseMove Team</p>
           </div>
         `
       })

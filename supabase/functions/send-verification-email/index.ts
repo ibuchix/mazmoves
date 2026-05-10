@@ -39,14 +39,14 @@ const handler = async (req: Request): Promise<Response> => {
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "MazMoves <onboarding@resend.dev>",
+        from: "HouseMove <notifications@housemove.co>",
         to: [email],
-        subject: "Your MazMoves Account Has Been Verified!",
+        subject: "Your HouseMove Account Has Been Verified!",
         html: `
           <h1>Congratulations ${companyName}!</h1>
-          <p>Your company account has been verified by our team. You can now access all features of the MazMoves platform.</p>
-          <p>Log in to your dashboard to start managing your moves: <a href="${SUPABASE_URL}">MazMoves Dashboard</a></p>
-          <p>Thank you for choosing MazMoves!</p>
+          <p>Your company account has been verified by our team. You can now access all features of the HouseMove platform.</p>
+          <p>Log in to your dashboard to start managing your moves: <a href="https://housemove.co">HouseMove Dashboard</a></p>
+          <p>Thank you for choosing HouseMove!</p>
         `,
       }),
     });
