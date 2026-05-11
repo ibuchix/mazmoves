@@ -20,6 +20,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { verifyOrigin, corsHeaders } from "../_shared/verify-origin.ts";
 import { findNearbyCompanies } from "./company-finder.ts";
 import { RADIUS_MILES } from "./distance.ts";
+import { sendCompanyJobEmail } from "./send-company-email.ts";
 import type { MoveRequest } from "./types.ts";
 
 serve(async (req) => {
@@ -121,6 +122,53 @@ serve(async (req) => {
       }
     }
 
+    // 3b. Send notification email to each matched company. Failures here are
+    // logged but do not affect the success of the assignment flow.
+    let emailsSent = 0;
+    let emailsFailed = 0;
+    let emailsSkipped = 0;
+    if (matches.length > 0) {
+      const results = await Promise.allSettled(
+        matches.map((m) => {
+          if (!m.company.contact_email) {
+            emailsSkipped += 1;
+            return Promise.resolve({ ok: false, error: "no contact_email" });
+          }
+          return sendCompanyJobEmail({
+            to: m.company.contact_email,
+            companyName: m.company.name,
+            pickupAddress: (moveRequest.pickup_address as any) ?? null,
+            deliveryAddress: (moveRequest.delivery_address as any) ?? null,
+            requestedDate: moveRequest.requested_date ?? null,
+            moveType: moveRequest.move_type ?? null,
+            estimatedSize: moveRequest.estimated_size ?? null,
+            distanceMiles: m.distance,
+          });
+        }),
+      );
+      for (let i = 0; i < results.length; i++) {
+        const r = results[i];
+        const companyId = matches[i].company.id;
+        if (r.status === "fulfilled" && r.value.ok) {
+          emailsSent += 1;
+          console.log(`notify-companies: emailed company ${companyId} (id=${r.value.id})`);
+        } else if (r.status === "fulfilled") {
+          if (r.value.error === "no contact_email") {
+            console.warn(`notify-companies: skipped company ${companyId} (no contact_email)`);
+          } else {
+            emailsFailed += 1;
+            console.error(`notify-companies: email failed for ${companyId}: ${r.value.error}`);
+          }
+        } else {
+          emailsFailed += 1;
+          console.error(`notify-companies: email rejected for ${companyId}:`, r.reason);
+        }
+      }
+      console.log(
+        `notify-companies: email summary sent=${emailsSent} failed=${emailsFailed} skipped=${emailsSkipped}`,
+      );
+    }
+
     // 4. Update the move request status.
     const newStatus = matches.length > 0 ? "assigned" : "no_companies_found";
     const { error: statusError } = await supabase
@@ -137,6 +185,9 @@ serve(async (req) => {
         success: true,
         companiesMatched: matches.length,
         breakdown,
+        emailsSent,
+        emailsFailed,
+        emailsSkipped,
         status: newStatus,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } },

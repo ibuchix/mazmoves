@@ -20,6 +20,12 @@ export interface MoveRequest {
   // PostGIS geometry columns (WKB hex strings when fetched via supabase-js).
   pickup_location: unknown | null;
   delivery_location: unknown | null;
+  // Extra context used to build the company notification email body.
+  pickup_address?: Record<string, unknown> | null;
+  delivery_address?: Record<string, unknown> | null;
+  requested_date?: string | null;
+  move_type?: string | null;
+  estimated_size?: string | null;
 }
 
 export interface Assignment {
