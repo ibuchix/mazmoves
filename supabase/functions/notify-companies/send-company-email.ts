@@ -87,7 +87,7 @@ export async function sendCompanyJobEmail(
       <p>Log in to your HouseMove dashboard to view the full details and accept this job before another company does.</p>
 
       <p style="text-align: center; margin: 28px 0;">
-        <a href="https://housemove.co"
+        <a href="https://jobs.housemove.co/dashboard"
            style="background: #334155; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; display: inline-block;">
           View job in dashboard
         </a>
