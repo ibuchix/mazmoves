@@ -120,6 +120,7 @@ export type Database = {
             | null
           service_areas: Json | null
           stripe_customer_id: string | null
+          stripe_payment_method_id: string | null
           subscription_status: string | null
           updated_at: string | null
           vat_number: string | null
@@ -158,6 +159,7 @@ export type Database = {
             | null
           service_areas?: Json | null
           stripe_customer_id?: string | null
+          stripe_payment_method_id?: string | null
           subscription_status?: string | null
           updated_at?: string | null
           vat_number?: string | null
@@ -196,6 +198,7 @@ export type Database = {
             | null
           service_areas?: Json | null
           stripe_customer_id?: string | null
+          stripe_payment_method_id?: string | null
           subscription_status?: string | null
           updated_at?: string | null
           vat_number?: string | null
@@ -206,14 +209,85 @@ export type Database = {
         }
         Relationships: []
       }
+      company_documents: {
+        Row: {
+          company_id: string
+          document_type: string
+          file_name: string
+          file_path: string
+          id: string
+          mime_type: string
+          review_notes: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          size_bytes: number
+          status: string
+          uploaded_at: string
+        }
+        Insert: {
+          company_id: string
+          document_type: string
+          file_name: string
+          file_path: string
+          id?: string
+          mime_type: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_bytes: number
+          status?: string
+          uploaded_at?: string
+        }
+        Update: {
+          company_id?: string
+          document_type?: string
+          file_name?: string
+          file_path?: string
+          id?: string
+          mime_type?: string
+          review_notes?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          size_bytes?: number
+          status?: string
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "admin_dashboard_mv"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "company_documents_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "scheduled_moves_view"
+            referencedColumns: ["company_id"]
+          },
+        ]
+      }
       company_invoices: {
         Row: {
           billing_cycle_id: string
           company_id: string
           created_at: string | null
           due_date: string
+          hosted_invoice_url: string | null
           id: string
+          invoice_pdf_url: string | null
           paid_at: string | null
+          period_end: string | null
+          period_start: string | null
           status: Database["public"]["Enums"]["invoice_status"]
           stripe_customer_id: string | null
           stripe_invoice_id: string | null
@@ -228,8 +302,12 @@ export type Database = {
           company_id: string
           created_at?: string | null
           due_date: string
+          hosted_invoice_url?: string | null
           id?: string
+          invoice_pdf_url?: string | null
           paid_at?: string | null
+          period_end?: string | null
+          period_start?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
           stripe_customer_id?: string | null
           stripe_invoice_id?: string | null
@@ -244,8 +322,12 @@ export type Database = {
           company_id?: string
           created_at?: string | null
           due_date?: string
+          hosted_invoice_url?: string | null
           id?: string
+          invoice_pdf_url?: string | null
           paid_at?: string | null
+          period_end?: string | null
+          period_start?: string | null
           status?: Database["public"]["Enums"]["invoice_status"]
           stripe_customer_id?: string | null
           stripe_invoice_id?: string | null
@@ -561,28 +643,31 @@ export type Database = {
         Row: {
           amount: number
           assignment_id: string
+          company_id: string | null
           created_at: string | null
           description: string
           id: string
-          invoice_id: string
+          invoice_id: string | null
           updated_at: string | null
         }
         Insert: {
           amount: number
           assignment_id: string
+          company_id?: string | null
           created_at?: string | null
           description: string
           id?: string
-          invoice_id: string
+          invoice_id?: string | null
           updated_at?: string | null
         }
         Update: {
           amount?: number
           assignment_id?: string
+          company_id?: string | null
           created_at?: string | null
           description?: string
           id?: string
-          invoice_id?: string
+          invoice_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -1328,6 +1413,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      current_company_id: { Args: never; Returns: string }
       decrypt_sensitive_data: {
         Args: { encrypted_data: string; key_id?: string }
         Returns: string
@@ -1627,6 +1713,7 @@ export type Database = {
                 | null
               service_areas: Json | null
               stripe_customer_id: string | null
+              stripe_payment_method_id: string | null
               subscription_status: string | null
               updated_at: string | null
               vat_number: string | null
