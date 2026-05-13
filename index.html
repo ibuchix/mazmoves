@@ -24,7 +24,60 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:image" content="/housemove-logo.png" />
     <meta name="robots" content="index, follow" />
-    <link rel="canonical" href="https://housemove.app" />
+    <link rel="canonical" href="https://housemove.co" />
+
+    <!-- JSON-LD structured data: Organization, WebSite, and Services -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://housemove.co/#organization",
+          "name": "HouseMove",
+          "url": "https://housemove.co",
+          "logo": "https://housemove.co/housemove-logo.png",
+          "email": "help@housemove.co",
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "email": "help@housemove.co",
+            "contactType": "customer support",
+            "areaServed": "GB",
+            "availableLanguage": "en"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://housemove.co/#website",
+          "url": "https://housemove.co",
+          "name": "HouseMove",
+          "description": "Professional moving services - get instant quotes from verified moving companies.",
+          "publisher": { "@id": "https://housemove.co/#organization" }
+        },
+        {
+          "@type": "Service",
+          "name": "Residential Moving",
+          "provider": { "@id": "https://housemove.co/#organization" },
+          "areaServed": "GB",
+          "description": "Professional home moving services tailored to your needs."
+        },
+        {
+          "@type": "Service",
+          "name": "Commercial Moving",
+          "provider": { "@id": "https://housemove.co/#organization" },
+          "areaServed": "GB",
+          "description": "Efficient business relocation with minimal disruption."
+        },
+        {
+          "@type": "Service",
+          "name": "Packing Services",
+          "provider": { "@id": "https://housemove.co/#organization" },
+          "areaServed": "GB",
+          "description": "Expert packing and unpacking for a worry-free move."
+        }
+      ]
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
