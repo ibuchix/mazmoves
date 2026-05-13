@@ -1,8 +1,8 @@
 # HouseMove
 
-> Professional moving services in the UK — request a move and get matched with verified moving companies for domestic, commercial, and international relocations.
+> Professional moving services in the UK — request a move, connect with vetted moving companies, and get quotes in minutes for domestic, commercial, and international relocations. Free for customers and free for movers.
 
-HouseMove connects customers with vetted moving companies. Customers submit a free move request with pickup and delivery addresses, and matched companies in the area respond with quotes. The service is free for movers.
+Customers submit a free move request with pickup and delivery addresses, and matched companies in the area respond with quotes.
 
 ## Pages
 
