@@ -76,32 +76,39 @@ const insertMoveRequest = async (
   pickupCoords: Coords | null,
   deliveryCoords: Coords | null,
 ): Promise<string> => {
-  const { data: inserted, error } = await supabase
-    .from("move_requests")
-    .insert([
-      {
-        move_type: data.moveType,
-        estimated_size: data.propertySize,
-        pickup_address: data.pickupAddress as never,
-        delivery_address: data.deliveryAddress as never,
-        requested_date: data.moveDate,
-        customer_name: data.fullName,
-        customer_email: data.email,
-        customer_phone: data.phone,
-        special_instructions: data.specialInstructions ?? null,
-        pickup_latitude: pickupCoords?.latitude ?? null,
-        pickup_longitude: pickupCoords?.longitude ?? null,
-        delivery_latitude: deliveryCoords?.latitude ?? null,
-        delivery_longitude: deliveryCoords?.longitude ?? null,
+  // Route through the submit-move-request edge function. The function
+  // performs origin/rate-limit/zod validation and inserts using the
+  // service role, so anon clients no longer need direct INSERT access
+  // on the move_requests table.
+  const { data: response, error } = await supabase.functions.invoke(
+    "submit-move-request",
+    {
+      body: {
+        moveRequest: {
+          moveType: data.moveType,
+          propertySize: data.propertySize,
+          pickupAddress: data.pickupAddress,
+          deliveryAddress: data.deliveryAddress,
+          moveDate: data.moveDate,
+          fullName: data.fullName,
+          email: data.email,
+          phone: data.phone,
+          specialInstructions: data.specialInstructions ?? null,
+          pickupCoords,
+          deliveryCoords,
+        },
       },
-    ])
-    .select("id")
-    .single();
+    },
+  );
 
-  if (error || !inserted) {
-    console.error("Failed to insert move request:", error);
-    throw new Error(error?.message || "Failed to save your move request");
+  if (error || !response?.success || !response?.id) {
+    const message =
+      response?.error || error?.message || "Failed to save your move request";
+    console.error("Failed to submit move request:", error || response);
+    throw new Error(message);
   }
+
+  const inserted = { id: response.id as string };
 
   return inserted.id as string;
 };
