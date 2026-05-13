@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "14.5"
   }
   public: {
     Tables: {
@@ -763,6 +763,13 @@ export type Database = {
             foreignKeyName: "move_assignments_request_id_fkey"
             columns: ["request_id"]
             isOneToOne: false
+            referencedRelation: "move_request_previews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "move_assignments_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
             referencedRelation: "move_requests"
             referencedColumns: ["id"]
           },
@@ -1217,6 +1224,51 @@ export type Database = {
           f_table_schema?: unknown
           srid?: number | null
           type?: string | null
+        }
+        Relationships: []
+      }
+      move_request_previews: {
+        Row: {
+          delivery_city: string | null
+          delivery_latitude: number | null
+          delivery_longitude: number | null
+          delivery_postcode: string | null
+          estimated_size: string | null
+          id: string | null
+          move_type: string | null
+          pickup_city: string | null
+          pickup_latitude: number | null
+          pickup_longitude: number | null
+          pickup_postcode: string | null
+          requested_date: string | null
+        }
+        Insert: {
+          delivery_city?: never
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
+          delivery_postcode?: never
+          estimated_size?: string | null
+          id?: string | null
+          move_type?: string | null
+          pickup_city?: never
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
+          pickup_postcode?: never
+          requested_date?: string | null
+        }
+        Update: {
+          delivery_city?: never
+          delivery_latitude?: number | null
+          delivery_longitude?: number | null
+          delivery_postcode?: never
+          estimated_size?: string | null
+          id?: string | null
+          move_type?: string | null
+          pickup_city?: never
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
+          pickup_postcode?: never
+          requested_date?: string | null
         }
         Relationships: []
       }
