@@ -1,0 +1,13 @@
+# HouseMove
+
+> Professional moving services in the UK — request a move and get matched with verified moving companies for domestic, commercial, and international relocations.
+
+HouseMove connects customers with vetted moving companies. Customers submit a free move request with pickup and delivery addresses, and matched companies in the area respond with quotes. The service is free for movers.
+
+## Pages
+
+- [Home](/): Overview of HouseMove and starting point to request a move.
+- [Request a Move](/request-move?step=1): Multi-step form to submit a new move request (move type, addresses, property size, contact details).
+- [Contact](/contact): Email (help@housemove.co) and support hours.
+- [Privacy Policy](/privacy-policy): How HouseMove collects and uses personal data.
+- [Terms and Conditions](/terms-and-conditions): Terms of use for the HouseMove service.
