@@ -6,6 +6,12 @@ import { Card } from "@/components/ui/card";
 export default function TermsAndConditions() {
   return (
     <div className="bg-background">
+      <SeoHead
+        title="Terms & Conditions — HouseMove"
+        description="The rules that govern your use of the HouseMove platform for booking professional UK moving services."
+        path="/terms-and-conditions"
+        type="article"
+      />
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <header className="mb-10 text-left">
           <h1 className="font-montserrat font-bold text-4xl md:text-5xl text-brand-slate mb-3">

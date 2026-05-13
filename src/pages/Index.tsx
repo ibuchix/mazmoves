@@ -25,6 +25,12 @@ export default function Index() {
 
   return (
     <div className="flex-1">
+      <SeoHead
+        title="HouseMove — Professional UK Moving Services"
+        description="Request a move and get matched with vetted UK moving companies. Free quotes in minutes for domestic, commercial, and international relocations."
+        path="/"
+        type="website"
+      />
       <AsyncContent 
         loading={isLoading} 
         error={error}
