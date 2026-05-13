@@ -25,7 +25,7 @@ export function Navbar() {
     `text-sm font-montserrat font-semibold transition-colors ${
       isActive
         ? "text-brand-slate"
-        : "text-brand-slateMuted hover:text-brand-slate"
+        : "text-brand-slateLight hover:text-brand-slate"
     }`;
 
   return (

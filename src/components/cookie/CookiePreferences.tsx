@@ -76,14 +76,14 @@ export default function CookiePreferences() {
           <div className="flex items-center justify-between">
             <Label htmlFor="necessary" className="flex flex-col">
               <span>Necessary</span>
-              <span className="text-xs text-gray-500">Required for the site to function</span>
+              <span className="text-xs text-brand-slateLight">Required for the site to function</span>
             </Label>
             <Switch id="necessary" checked disabled />
           </div>
           <div className="flex items-center justify-between">
             <Label htmlFor="analytics" className="flex flex-col">
               <span>Analytics</span>
-              <span className="text-xs text-gray-500">Help us improve our service</span>
+              <span className="text-xs text-brand-slateLight">Help us improve our service</span>
             </Label>
             <Switch
               id="analytics"
@@ -94,7 +94,7 @@ export default function CookiePreferences() {
           <div className="flex items-center justify-between">
             <Label htmlFor="marketing" className="flex flex-col">
               <span>Marketing</span>
-              <span className="text-xs text-gray-500">Personalized content and ads</span>
+              <span className="text-xs text-brand-slateLight">Personalized content and ads</span>
             </Label>
             <Switch
               id="marketing"

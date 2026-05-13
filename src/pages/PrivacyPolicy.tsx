@@ -18,10 +18,10 @@ export default function PrivacyPolicy() {
           <h1 className="font-montserrat font-bold text-4xl md:text-5xl text-brand-slate mb-3">
             Privacy Policy
           </h1>
-          <p className="font-roboto text-brand-slateMuted">
+          <p className="font-roboto text-brand-slateLight">
             How HouseMove collects, uses and protects your personal data.
           </p>
-          <p className="font-roboto text-sm text-brand-slateMuted mt-2">
+          <p className="font-roboto text-sm text-brand-slateLight mt-2">
             Last updated: May 2026
           </p>
         </header>

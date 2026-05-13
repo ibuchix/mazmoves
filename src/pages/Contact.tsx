@@ -55,7 +55,7 @@ export default function Contact() {
           <h1 className="font-montserrat font-bold text-4xl md:text-5xl text-brand-slate mb-4">
             Contact Us
           </h1>
-          <p className="font-roboto text-lg text-brand-slateMuted max-w-2xl mx-auto">
+          <p className="font-roboto text-lg text-brand-slateLight max-w-2xl mx-auto">
             We're here to help with your move. Reach out and our team will get
             back to you as soon as possible.
           </p>
@@ -77,7 +77,7 @@ export default function Contact() {
                 >
                   help@housemove.co
                 </a>
-                <p className="text-sm text-brand-slateMuted mt-2">
+                <p className="text-sm text-brand-slateLight mt-2">
                   Typical reply within one business day.
                 </p>
               </div>
@@ -111,7 +111,7 @@ export default function Contact() {
                 <h2 className="font-montserrat font-semibold text-xl text-brand-slate mb-2">
                   Office Address
                 </h2>
-                <p className="font-roboto text-base text-brand-slateMuted italic">
+                <p className="font-roboto text-base text-brand-slateLight italic">
                   Coming soon — our office address will be published here shortly.
                 </p>
               </div>
