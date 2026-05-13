@@ -2,6 +2,7 @@
 import { MoveRequestForm } from "@/components/move-request/MoveRequestForm";
 import { Navigate, useSearchParams, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { SeoHead } from "@/components/seo/SeoHead";
 
 export default function RequestMove() {
   const [searchParams] = useSearchParams();
@@ -54,5 +55,15 @@ export default function RequestMove() {
     return <Navigate to="/request-move?step=1" replace />;
   }
 
-  return <MoveRequestForm />;
+  return (
+    <>
+      <SeoHead
+        title="Request a Move — HouseMove"
+        description="Tell us about your move in a few quick steps and get matched with vetted UK moving companies for free quotes."
+        path="/request-move"
+        type="website"
+      />
+      <MoveRequestForm />
+    </>
+  );
 }
