@@ -34,8 +34,12 @@ export default function Logo({
       <img
         src={logo}
         alt="HouseMove logo"
+        width={96}
+        height={96}
         className={`${sizes.img} object-contain`}
         loading="eager"
+        decoding="async"
+        fetchPriority="high"
       />
       {withText && (
         <span
