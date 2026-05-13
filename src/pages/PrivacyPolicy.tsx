@@ -2,6 +2,7 @@
 // Updated contact email to help@housemove.co; phone removed; address omitted.
 
 import { Card } from "@/components/ui/card";
+import { SeoHead } from "@/components/seo/SeoHead";
 
 export default function PrivacyPolicy() {
   return (

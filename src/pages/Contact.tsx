@@ -3,6 +3,7 @@
 
 import { Mail, Clock, MapPin } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { SeoHead } from "@/components/seo/SeoHead";
 
 export default function Contact() {
   const localBusinessJsonLd = {
