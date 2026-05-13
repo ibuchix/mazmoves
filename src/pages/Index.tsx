@@ -7,6 +7,7 @@ import { HowItWorksSection } from "@/components/home/HowItWorksSection";
 import { TestimonialsSection } from "@/components/home/TestimonialsSection";
 import { ServicesSection } from "@/components/home/ServicesSection";
 import { AsyncContent } from "@/components/ui/async-content";
+import { SeoHead } from "@/components/seo/SeoHead";
 
 export default function Index() {
   const [moveType, setMoveType] = useState<MoveType | null>(null);
@@ -24,6 +25,12 @@ export default function Index() {
 
   return (
     <div className="flex-1">
+      <SeoHead
+        title="HouseMove — Professional UK Moving Services"
+        description="Request a move and get matched with vetted UK moving companies. Free quotes in minutes for domestic, commercial, and international relocations."
+        path="/"
+        type="website"
+      />
       <AsyncContent 
         loading={isLoading} 
         error={error}

@@ -2,10 +2,17 @@
 // Updated contact email to help@housemove.co; phone removed; address omitted.
 
 import { Card } from "@/components/ui/card";
+import { SeoHead } from "@/components/seo/SeoHead";
 
 export default function PrivacyPolicy() {
   return (
     <div className="bg-background">
+      <SeoHead
+        title="Privacy Policy — HouseMove"
+        description="How HouseMove collects, uses and protects your personal data when you request a move or contact our team."
+        path="/privacy-policy"
+        type="article"
+      />
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <header className="mb-10 text-left">
           <h1 className="font-montserrat font-bold text-4xl md:text-5xl text-brand-slate mb-3">

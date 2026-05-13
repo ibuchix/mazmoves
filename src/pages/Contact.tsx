@@ -3,6 +3,7 @@
 
 import { Mail, Clock, MapPin } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { SeoHead } from "@/components/seo/SeoHead";
 
 export default function Contact() {
   const localBusinessJsonLd = {
@@ -39,6 +40,12 @@ export default function Contact() {
 
   return (
     <div className="bg-background">
+      <SeoHead
+        title="Contact HouseMove — Email & Support Hours"
+        description="Get in touch with HouseMove. Email help@housemove.co, support Mon–Fri 08:00–18:00 and Sat 09:00–16:00."
+        path="/contact"
+        type="website"
+      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessJsonLd) }}
