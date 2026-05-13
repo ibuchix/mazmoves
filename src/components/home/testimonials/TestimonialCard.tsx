@@ -21,7 +21,7 @@ export const TestimonialCard = ({ name, location, rating, text }: TestimonialCar
         <p className="text-gray-700 mb-6">{text}</p>
         <div className="mt-auto">
           <p className="font-semibold text-brand-slate">{name}</p>
-          <p className="text-sm text-gray-500">{location}</p>
+          <p className="text-sm text-brand-slateLight">{location}</p>
         </div>
       </CardContent>
     </Card>
