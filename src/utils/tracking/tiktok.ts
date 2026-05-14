@@ -37,15 +37,17 @@ interface Ttq {
 
 type ServerEvent =
   | "ViewContent"
+  | "ClickButton"
   | "InitiateCheckout"
-  | "CompleteRegistration"
-  | "PlaceAnOrder";
+  | "SubmitForm"
+  | "CompleteRegistration";
 
 const SERVER_EVENTS: ReadonlySet<string> = new Set<ServerEvent>([
   "ViewContent",
+  "ClickButton",
   "InitiateCheckout",
+  "SubmitForm",
   "CompleteRegistration",
-  "PlaceAnOrder",
 ]);
 
 // In-memory cache of the most recently identified user. Captured via
