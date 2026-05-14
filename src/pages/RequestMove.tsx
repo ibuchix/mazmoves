@@ -3,6 +3,7 @@ import { MoveRequestForm } from "@/components/move-request/MoveRequestForm";
 import { Navigate, useSearchParams, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { SeoHead } from "@/components/seo/SeoHead";
+import { trackEvent } from "@/utils/tracking/tiktok";
 
 export default function RequestMove() {
   const [searchParams] = useSearchParams();
@@ -10,6 +11,35 @@ export default function RequestMove() {
   const [hasError, setHasError] = useState(false);
   const step = searchParams.get("step");
   const moveType = searchParams.get("moveType");
+
+  // Fire TikTok events tied to the move-request funnel. ViewContent is sent
+  // on every visit; InitiateCheckout is sent once the user has chosen a
+  // move type and progressed to step 2 (the actual form).
+  useEffect(() => {
+    trackEvent("ViewContent", {
+      contents: [
+        {
+          content_id: "move-request",
+          content_type: "product",
+          content_name: "Move Request",
+        },
+      ],
+    });
+  }, []);
+
+  useEffect(() => {
+    if (moveType && step && parseInt(step) >= 2) {
+      trackEvent("InitiateCheckout", {
+        contents: [
+          {
+            content_id: `move-${moveType}`,
+            content_type: "product",
+            content_name: `Move Request - ${moveType}`,
+          },
+        ],
+      });
+    }
+  }, [moveType, step]);
 
   useEffect(() => {
     // Increase timeout to 5000ms (5 seconds) to allow more time for form initialization

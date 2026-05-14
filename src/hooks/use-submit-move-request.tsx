@@ -20,6 +20,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { MoveRequestForm } from "@/types/move-request";
 import type { Address } from "@/types/address";
+import { identifyUser, trackEvent } from "@/utils/tracking/tiktok";
 
 export interface SubmitMoveRequestHook {
   isSubmitting: boolean;
@@ -189,6 +190,25 @@ export function useSubmitMoveRequest(): SubmitMoveRequestHook {
           "Your request was saved, but we couldn't send the confirmation email. We'll still be in touch.",
         );
       }
+
+      // 5. TikTok Pixel — identify customer (hashed) and fire conversion
+      // events. Non-blocking; failures are swallowed inside the helpers.
+      void identifyUser({
+        email: data.email,
+        phone: data.phone,
+        externalId: moveRequestId,
+      });
+      const conversionPayload = {
+        contents: [
+          {
+            content_id: `move-${data.moveType}`,
+            content_type: "product" as const,
+            content_name: `Move Request - ${data.moveType}`,
+          },
+        ],
+      };
+      trackEvent("PlaceAnOrder", conversionPayload);
+      trackEvent("CompleteRegistration", conversionPayload);
 
       setShowSuccess(true);
     } catch (error) {
