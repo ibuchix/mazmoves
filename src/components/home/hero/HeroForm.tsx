@@ -1,8 +1,11 @@
 // Hero form for selecting move type. Removed the "moving company? Join us" link
 // since registration has been removed from the platform.
+// Fires TikTok ClickButton event when the user clicks "Get Free Quotes" so the
+// lead-gen funnel (ViewContent → ClickButton → SubmitForm → CompleteRegistration) is complete.
 import { Button } from "@/components/ui/button";
 import { MoveTypeStep } from "@/components/move-request/MoveTypeStep";
 import { MoveType } from "@/types/move-request";
+import { trackEvent } from "@/utils/tracking/tiktok";
 
 interface HeroFormProps {
   moveType: MoveType | null;
