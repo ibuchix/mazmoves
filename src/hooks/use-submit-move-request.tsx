@@ -191,13 +191,19 @@ export function useSubmitMoveRequest(): SubmitMoveRequestHook {
         );
       }
 
-      // 5. TikTok Pixel — identify customer (hashed) and fire conversion
-      // events. Non-blocking; failures are swallowed inside the helpers.
-      void identifyUser({
-        email: data.email,
-        phone: data.phone,
-        externalId: moveRequestId,
-      });
+      // 5. TikTok Pixel + server Events API — identify customer (hashed)
+      // first so the conversion events can attach hashed PII, then fire
+      // the conversions. Awaiting identify is cheap (SHA-256 of 3 short
+      // strings) and ensures the server payload includes the user data.
+      try {
+        await identifyUser({
+          email: data.email,
+          phone: data.phone,
+          externalId: moveRequestId,
+        });
+      } catch (err) {
+        console.error("TikTok identifyUser failed (non-blocking):", err);
+      }
       const conversionPayload = {
         contents: [
           {
