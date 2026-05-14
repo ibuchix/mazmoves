@@ -152,7 +152,9 @@ serve(async (req) => {
     }
     if (data.search_string) properties.search_string = data.search_string;
 
-    const tiktokPayload = {
+    const testEventCode = Deno.env.get("TIKTOK_TEST_EVENT_CODE");
+
+    const tiktokPayload: Record<string, unknown> = {
       event_source: "web",
       event_source_id: pixelId,
       data: [
@@ -166,6 +168,7 @@ serve(async (req) => {
         },
       ],
     };
+    if (testEventCode) tiktokPayload.test_event_code = testEventCode;
 
     const ttRes = await fetch(TIKTOK_ENDPOINT, {
       method: "POST",
@@ -177,24 +180,25 @@ serve(async (req) => {
     });
 
     const ttBody = await ttRes.text();
+    let ttCode: number | undefined;
+    try {
+      ttCode = (JSON.parse(ttBody) as { code?: number }).code;
+    } catch { /* ignore */ }
+
     if (!ttRes.ok) {
       console.error(
-        `TikTok API error ${ttRes.status} for event ${data.event}:`,
+        `tiktok-track ${data.event} event_id=${data.event_id} HTTP ${ttRes.status}:`,
+        ttBody,
+      );
+    } else if (ttCode && ttCode !== 0) {
+      console.error(
+        `tiktok-track ${data.event} event_id=${data.event_id} TikTok code=${ttCode}:`,
         ttBody,
       );
     } else {
-      // TikTok returns 200 even on logical errors; log non-zero codes.
-      try {
-        const parsedBody = JSON.parse(ttBody) as { code?: number; message?: string };
-        if (parsedBody.code && parsedBody.code !== 0) {
-          console.error(
-            `TikTok API logical error for event ${data.event}:`,
-            parsedBody,
-          );
-        }
-      } catch {
-        // ignore parse errors
-      }
+      console.log(
+        `tiktok-track ${data.event} event_id=${data.event_id} ok${testEventCode ? " (test)" : ""}`,
+      );
     }
 
     return json({ success: true }, 200);
