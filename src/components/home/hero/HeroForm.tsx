@@ -14,6 +14,15 @@ interface HeroFormProps {
 }
 
 export const HeroForm = ({ moveType, setMoveType, onGetQuotes }: HeroFormProps) => {
+  const handleGetQuotes = () => {
+    trackEvent("ClickButton", {
+      contents: moveType
+        ? [{ content_id: `move-${moveType}`, content_type: "product", content_name: `Move Request - ${moveType}` }]
+        : [],
+    });
+    onGetQuotes();
+  };
+
   return (
     <div className="overflow-hidden rounded-2xl bg-white/95 backdrop-blur-sm shadow-[0_0_15px_rgba(0,0,0,0.1)] transition-all duration-300 hover:shadow-[0_0_30px_rgba(0,0,0,0.15)]">
       <div className="p-6 md:p-8">
