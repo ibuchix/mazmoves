@@ -26,9 +26,10 @@ const TIKTOK_ENDPOINT =
 
 const ALLOWED_EVENTS = [
   "ViewContent",
+  "ClickButton",
   "InitiateCheckout",
+  "SubmitForm",
   "CompleteRegistration",
-  "PlaceAnOrder",
 ] as const;
 
 const bodySchema = z.object({
