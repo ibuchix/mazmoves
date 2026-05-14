@@ -184,7 +184,9 @@ export const identifyUser = async (params: {
 export const trackEvent = (
   event:
     | "ViewContent"
+    | "ClickButton"
     | "InitiateCheckout"
+    | "SubmitForm"
     | "AddToCart"
     | "AddPaymentInfo"
     | "PlaceAnOrder"
