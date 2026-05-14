@@ -213,7 +213,7 @@ export function useSubmitMoveRequest(): SubmitMoveRequestHook {
           },
         ],
       };
-      trackEvent("PlaceAnOrder", conversionPayload);
+      trackEvent("SubmitForm", conversionPayload);
       trackEvent("CompleteRegistration", conversionPayload);
 
       setShowSuccess(true);
