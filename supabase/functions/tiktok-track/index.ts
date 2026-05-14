@@ -48,8 +48,10 @@ const bodySchema = z.object({
   search_string: z.string().max(256).optional(),
   user: z
     .object({
+      // Values may arrive pre-hashed (64-char SHA-256 hex) or raw, so
+      // limits must accommodate the hashed length plus headroom.
       email: z.string().max(320).optional(),
-      phone: z.string().max(32).optional(),
+      phone: z.string().max(128).optional(),
       external_id: z.string().max(256).optional(),
       ttclid: z.string().max(512).optional(),
       ttp: z.string().max(512).optional(),
