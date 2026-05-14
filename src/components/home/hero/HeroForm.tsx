@@ -32,11 +32,11 @@ export const HeroForm = ({ moveType, setMoveType, onGetQuotes }: HeroFormProps) 
         <MoveTypeStep
           value={moveType}
           onChange={(value) => setMoveType(value)}
-          onNext={onGetQuotes}
+          onNext={handleGetQuotes}
         />
         <Button
           className="w-full mt-6 bg-brand-orange hover:bg-brand-green text-white text-lg font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
-          onClick={onGetQuotes}
+          onClick={handleGetQuotes}
           disabled={!moveType}
         >
           Get Free Quotes
