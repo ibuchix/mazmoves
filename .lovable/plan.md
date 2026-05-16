@@ -1,52 +1,69 @@
-# Security findings 1–3: status & fix plan
+# Secure Stripe billing + admin verify-company endpoints
 
-## 1. `registration_errors` RLS — already fixed, just confirm
+## Context
 
-Verified live state:
-- `pg_class.relrowsecurity = true` on `public.registration_errors`.
-- Policies present: `Admins can view registration errors` (SELECT, admin-only via `is_admin(auth.uid())`).
-- No INSERT / UPDATE / DELETE policies → with RLS on, anon and authenticated roles get **zero** access.
-- All writes happen from edge functions using `SUPABASE_SERVICE_ROLE_KEY`, which bypasses RLS.
+None of the six flagged edge functions (`create-subscription`, `process-payment`, `generate-invoice`, `report-usage`, `create-stripe-customer`, `verify-company`) are called from this customer-side codebase. They are invoked from the admin app and from internal billing flows. So we can safely add JWT + role checks without breaking any UI in this repo.
 
-The scanner finding is stale (it was generated against the old "RLS disabled" state). **No code or DB change required.** Action: mark `reg_errors_no_rls` as fixed in the security tracker.
+The `verify-company` finding **is** relevant even though it lives in the customer-side codebase: the function is deployed in the shared Supabase project and is reachable by anyone on the internet. Today it only checks `Origin`, and `*.lovable.app` / `*.lovableproject.com` are whitelisted, so any Lovable project can flip `is_verified=true` on any company. We must lock it to admins.
 
-The related warn-level finding (`registration_errors_client_ip_exposure` — no explicit deny policy for writes) is also already covered, because RLS-on + no policy = deny by default for non-service-role callers. Optional belt-and-braces: add explicit no-op policies, but it adds noise without changing behaviour. Recommend: leave as-is, mark fixed.
+## What changes
 
-## 2. Backup edge functions — add a shared-secret guard
+### 1. `verify-company` — admin only
+- Require `Authorization: Bearer <jwt>` and validate with `supabase.auth.getUser`.
+- Look up caller in `public.users` and require `role = 'admin'` (or `has_role(uid,'admin')`).
+- Keep the existing geocode guard and Resend email logic untouched.
+- Keep `verifyOrigin` as a secondary defense (not the only one).
+- Admin app already sends the user's session JWT via `supabase.functions.invoke`, so no admin-app change is needed.
 
-Affected: `perform-database-backup`, `perform-incremental-backup`, `backup-storage`, `monitor-backups`.
+### 2. `create-stripe-customer` — company-owner or admin
+- Require JWT.
+- Load `companies` row by `companyId` using the service role key.
+- Allow only if `companies.auth_user_id === user.id` OR caller is admin.
+- Switch internal Supabase client from anon key to service role (needed once RLS is honoring auth).
 
-These are **only invoked by pg_cron** (confirmed via `cron.job`) — never from the React app or any user-facing flow. The current cron jobs already pass `Authorization: Bearer <service_role_key>`. The risk is that the endpoints are *also* reachable by anonymous HTTP callers because there's no in-function check.
+### 3. `create-subscription` — company-owner or admin
+- Require JWT.
+- Derive `company_id` from `companies.auth_user_id = user.id` rather than trusting the body (admin path may pass an explicit `company_id` and we validate admin role for that branch).
+- Switch to service role for the internal company lookup/update.
 
-Fix (minimal, zero behavioural change for cron):
+### 4. `process-payment` — company-owner or admin
+- Require JWT.
+- Load invoice + company; allow only invoice's company owner or admin.
+- Switch to service role internally.
 
-1. Add a new project secret `CRON_SECRET` (random string, generated once).
-2. At the top of each of the 4 functions, immediately after the CORS preflight, require either:
-   - `Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY>`, **or**
-   - `x-cron-secret: <CRON_SECRET>`
-   Reject with 401 otherwise. Use constant-time comparison.
-3. Update the pg_cron jobs that hit these endpoints to add the `x-cron-secret` header (keeps things working even if the inline service-role-key approach ever rotates).
+### 5. `generate-invoice` — admin only
+- Invoice generation is an admin/back-office action.
+- Require JWT + admin role.
+- Keep current logic.
 
-This keeps cron working unchanged today (it already sends the service role bearer) and blocks anonymous HTTP callers. No customer/company app code touches these functions, so the frontend is unaffected.
+### 6. `report-usage` — admin or service-role caller only
+- This is called server-side after an assignment completes. It must not accept anonymous calls.
+- Require JWT and admin role (current admin flows that trigger it), OR accept an internal call authenticated with the service role key (validate via `getUser` returning a service principal — simplest: require admin role; update the admin caller if it isn't already sending the session JWT).
+- Document that this endpoint is not callable from the public site.
 
-## 3. `process-matches` — same shared-secret guard
+## Shared helper
 
-The cron job for `process-matches-every-5-min` currently passes the **anon** key, not the service role. So we can't use "require service role bearer" alone. Apply the `CRON_SECRET` header pattern from #2:
+Add `supabase/functions/_shared/require-admin.ts` that:
+- Reads `Authorization` header, calls `supabase.auth.getUser(token)`.
+- Looks up `public.users.role` (or uses `has_role`) and returns `{ user, isAdmin }` or a 401/403 `Response`.
+- Used by `verify-company`, `generate-invoice`, `report-usage`.
 
-1. Update the cron job command to include `'x-cron-secret', '<CRON_SECRET>'` in its `jsonb_build_object` headers.
-2. In `supabase/functions/process-matches/index.ts`, after CORS preflight, require `x-cron-secret` to equal `Deno.env.get('CRON_SECRET')`. Reject with 401 otherwise.
+Add `supabase/functions/_shared/require-company-owner.ts` that:
+- Validates JWT, loads the target `companies` row by id with service role, returns 403 unless `auth_user_id === user.id` or caller is admin.
+- Used by `create-stripe-customer`, `create-subscription`, `process-payment`.
 
-No React or other edge function calls `process-matches`, so this is a safe lockdown.
+## Technical details
 
-## Why nothing in the customer/company app breaks
+- All functions keep `OPTIONS`/CORS handling and existing response shapes — no breaking changes for callers that already send a valid session JWT.
+- `supabase.functions.invoke` from both customer and admin apps automatically attaches the user's session JWT, so existing UI flows continue to work.
+- No DB migrations needed for this plan.
+- No changes to `stripe-webhook` here (separate finding, can be addressed next).
 
-- None of these 5 functions are invoked from `src/` or from any other edge function — confirmed by repo-wide search. They are 100% cron-driven.
-- The matching flow that companies actually depend on (`notify-companies` running synchronously on move submission) is untouched.
-- `registration_errors` is written by edge functions using the service role key, which bypasses RLS — already working today.
+## Out of scope (will flag separately)
 
-## Steps
-
-1. Add `CRON_SECRET` via the secrets tool (one new secret).
-2. Single migration: update the 5 cron job commands to include `x-cron-secret` header. (Stored in pg_cron with the project's own secret value — no other project sees it.)
-3. Edit the 5 edge function `index.ts` files to require the secret (or service-role bearer for the 4 backup fns) immediately after the OPTIONS handler.
-4. Mark these security findings as fixed: `reg_errors_no_rls`, `backup_endpoints_no_auth`, `process_matches_no_auth`. Update security memory with the new invariant: "All cron-only edge functions require `x-cron-secret` or service-role bearer."
+- Plaintext `password`/`password_hash` columns on `companies`
+- `handle_new_user` role-from-metadata escalation
+- `users` table `system_insert` public INSERT policy
+- `stripe-webhook` using anon key
+- `send-welcome-email` / `send-verification-email` / `send-confirmation-email` / `geocode-address` / `check-move-distance` hardening
+- Supabase linter warnings (function search_path, leaked password protection, OTP expiry, etc.)
