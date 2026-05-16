@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Companies can update during registration" ON public.companies;
