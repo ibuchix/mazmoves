@@ -47,7 +47,11 @@ The `verify-company` finding **is** relevant even though it lives in the custome
 Add `supabase/functions/_shared/require-admin.ts` that:
 - Reads `Authorization` header, calls `supabase.auth.getUser(token)`.
 - Looks up `public.users.role` (or uses `has_role`) and returns `{ user, isAdmin }` or a 401/403 `Response`.
-- Used by `verify-company`, `generate-invoice`, `report-usage`.
+- Used by `verify-company`.
+
+Add `supabase/functions/_shared/require-admin-or-service.ts` that:
+- Allows the request when the bearer token equals `SUPABASE_SERVICE_ROLE_KEY` (cron path), OR when the caller is an authenticated admin.
+- Used by `generate-invoice` and `report-usage`.
 
 Add `supabase/functions/_shared/require-company-owner.ts` that:
 - Validates JWT, loads the target `companies` row by id with service role, returns 403 unless `auth_user_id === user.id` or caller is admin.
