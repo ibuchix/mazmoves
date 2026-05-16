@@ -1,32 +1,28 @@
-# Verify TikTok tracking via Test Events Activity
+# Remove the unused `public.secrets` table
 
-## Goal
-Confirm the `tiktok-track` edge function is successfully sending events to TikTok by making them appear in the **Test Events Activity** tab in TikTok Events Manager.
+## Why
 
-## What you need to do (in TikTok Events Manager)
-1. Open TikTok Events Manager → your pixel → **Test Events** tab.
-2. Copy the **test event code** shown there (looks like `TEST12345`).
-3. Paste it when I prompt for the secret in the next step.
+The security scanner flagged `public.secrets` (a `bytea` column for raw secret storage) as risky: no SELECT policy exists, but any future `SECURITY DEFINER` function could leak it, and storing raw secrets in an application table is an anti-pattern.
 
-## What I will do
-1. Add a new runtime secret `TIKTOK_TEST_EVENT_CODE` to the project (using your code).
-2. The `tiktok-track` edge function already reads this secret — when present, it appends `test_event_code` to the TikTok payload so events route to the Test Events tab instead of the live stream.
-3. No code changes are needed — that wiring is already in place from the previous implementation.
+Investigation findings:
+- The table is **empty** (0 rows).
+- **No code** in `src/` or `supabase/functions/` reads from or writes to it — the only reference is in the auto-generated `src/integrations/supabase/types.ts`, which regenerates from the schema.
+- **No database function** references it.
+- All real secrets (Resend, Stripe, Mapbox, TikTok, Supabase service role, etc.) are already stored in Supabase Edge Function secrets (`Deno.env.get(...)`), which is the correct place.
 
-## How to verify
-1. Once the secret is added, go to `/request-move` and submit a test move request.
-2. Within ~30 seconds, you should see these events appear in TikTok's **Test Events Activity** tab, each with a matching `event_id` from both the **Browser** (pixel) and **Server** (Events API) sources — proving deduplication works:
-   - `ViewContent` (on page load)
-   - `ClickButton` (when you click "Get Free Quotes" on the homepage)
-   - `InitiateCheckout` (on step 2+)
-   - `SubmitForm` (on submit)
-   - `CompleteRegistration` (on submit)
-3. I will also check the `tiktok-track` edge function logs to confirm `code=0` (TikTok success) for each event.
+So the table is dead weight and a latent risk. The cleanest fix is to drop it.
 
-## After verification
-Once events are confirmed flowing correctly, **delete the `TIKTOK_TEST_EVENT_CODE` secret**. This switches events back to the live data stream so they count toward real campaign optimization (test events do not). I'll handle the deletion when you confirm.
+## Change
+
+Single migration:
+
+```sql
+DROP TABLE IF EXISTS public.secrets;
+DROP SEQUENCE IF EXISTS public.secrets_id_seq;
+```
+
+After the migration runs, the Supabase types file will auto-regenerate without the `secrets` entry. No application code needs to change.
 
 ## Out of scope
-- No frontend or form changes.
-- No edge function code changes.
-- No changes to event names or business logic.
+
+The security view shows many other unrelated findings (plaintext passwords in `companies`, privilege-escalation policies on `users`, unauthenticated edge functions, etc.). Those are separate issues and not addressed here — this plan is only about the `secrets` table finding.
