@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "update_own_verification_status" ON public.companies;
