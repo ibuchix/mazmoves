@@ -1,6 +1,9 @@
+// Changes: require service-role bearer (cron path) or admin JWT.
+// Switched internal client to service role so RLS does not block invoice creation.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import Stripe from 'https://esm.sh/stripe@12.18.0'
+import { requireAdminOrService } from "../_shared/require-admin-or-service.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,9 +16,12 @@ serve(async (req) => {
   }
 
   try {
+    const auth = await requireAdminOrService(req, corsHeaders)
+    if (auth instanceof Response) return auth
+
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
