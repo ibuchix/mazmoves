@@ -557,61 +557,6 @@ export type Database = {
           },
         ]
       }
-      email_logs: {
-        Row: {
-          company_id: string | null
-          created_at: string | null
-          email_type: string
-          error_message: string | null
-          id: string
-          recipient_email: string
-          status: string
-          updated_at: string | null
-        }
-        Insert: {
-          company_id?: string | null
-          created_at?: string | null
-          email_type: string
-          error_message?: string | null
-          id?: string
-          recipient_email: string
-          status: string
-          updated_at?: string | null
-        }
-        Update: {
-          company_id?: string | null
-          created_at?: string | null
-          email_type?: string
-          error_message?: string | null
-          id?: string
-          recipient_email?: string
-          status?: string
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "email_logs_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "admin_dashboard_mv"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "email_logs_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "email_logs_company_id_fkey"
-            columns: ["company_id"]
-            isOneToOne: false
-            referencedRelation: "scheduled_moves_view"
-            referencedColumns: ["company_id"]
-          },
-        ]
-      }
       email_templates: {
         Row: {
           created_at: string | null
@@ -966,30 +911,6 @@ export type Database = {
             referencedColumns: ["company_id"]
           },
         ]
-      }
-      registration_attempts: {
-        Row: {
-          attempt_time: string | null
-          email: string
-          id: string
-          ip_address: string
-          success: boolean | null
-        }
-        Insert: {
-          attempt_time?: string | null
-          email: string
-          id?: string
-          ip_address: string
-          success?: boolean | null
-        }
-        Update: {
-          attempt_time?: string | null
-          email?: string
-          id?: string
-          ip_address?: string
-          success?: boolean | null
-        }
-        Relationships: []
       }
       registration_errors: {
         Row: {
