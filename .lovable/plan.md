@@ -1,73 +1,52 @@
-# Fix: Prevent users from escalating their own `role` to `admin`
+# Security findings 1–3: status & fix plan
 
-## The finding
-The `users` table has two UPDATE policies that allow a user to update their own row (`auth.uid() = id`) with **no restriction on the `role` column**. A signed-in customer or company user can run:
+## 1. `registration_errors` RLS — already fixed, just confirm
 
-```ts
-supabase.from('users').update({ role: 'admin' }).eq('id', myUid)
-```
+Verified live state:
+- `pg_class.relrowsecurity = true` on `public.registration_errors`.
+- Policies present: `Admins can view registration errors` (SELECT, admin-only via `is_admin(auth.uid())`).
+- No INSERT / UPDATE / DELETE policies → with RLS on, anon and authenticated roles get **zero** access.
+- All writes happen from edge functions using `SUPABASE_SERVICE_ROLE_KEY`, which bypasses RLS.
 
-…and instantly become an admin (`is_admin()` returns true), gaining access to every company, invoice, and admin endpoint.
+The scanner finding is stale (it was generated against the old "RLS disabled" state). **No code or DB change required.** Action: mark `reg_errors_no_rls` as fixed in the security tracker.
 
-## What I verified
-- Current policies on `public.users`:
-  - `Users can update own data` — USING + WITH CHECK only check `auth.uid() = id`. **Allows role change.**
-  - `admin_all_access` (FOR ALL) — USING + WITH CHECK is `(is_admin(auth.uid()) OR id = auth.uid())`. **Same flaw — a non-admin self-update passes the OR.**
-  - `Admin can update all users` — correctly gated by `is_admin(auth.uid())`. Keep as-is.
-- Code audit: searched `src/` and `supabase/functions/` for any `.update()` against the `users` table that touches `role`. **None found.** The app never legitimately changes a user's role from the client. Role is set once at signup by the `handle_new_user` webhook (service role).
+The related warn-level finding (`registration_errors_client_ip_exposure` — no explicit deny policy for writes) is also already covered, because RLS-on + no policy = deny by default for non-service-role callers. Optional belt-and-braces: add explicit no-op policies, but it adds noise without changing behaviour. Recommend: leave as-is, mark fixed.
 
-## Proposed fix
-Two complementary changes in a single migration. Both are needed because the existing `admin_all_access` policy is too permissive and a trigger gives defense-in-depth against any future policy mistake.
+## 2. Backup edge functions — add a shared-secret guard
 
-### 1. Tighten RLS policies
-- Drop the redundant/dangerous `admin_all_access` policy (its admin half is already covered by `Admin can update all users` + `Admin can view all users`; its self half is covered by `Users can update own data` + `Users can view own data`).
-- Replace `Users can update own data` with a version whose `WITH CHECK` forbids role mutation by comparing to the row's current role via a `SECURITY DEFINER` helper (avoids RLS recursion).
+Affected: `perform-database-backup`, `perform-incremental-backup`, `backup-storage`, `monitor-backups`.
 
-### 2. Add a hard guard trigger
-A `BEFORE UPDATE OF role` trigger on `public.users` that raises an exception unless the session is the service role or the caller is an admin. This catches any update path — direct SQL, future policy changes, accidental admin client misuse — not just RLS-governed REST calls.
+These are **only invoked by pg_cron** (confirmed via `cron.job`) — never from the React app or any user-facing flow. The current cron jobs already pass `Authorization: Bearer <service_role_key>`. The risk is that the endpoints are *also* reachable by anonymous HTTP callers because there's no in-function check.
 
-```sql
--- helper (SECURITY DEFINER, search_path locked)
-CREATE OR REPLACE FUNCTION public.get_user_role(_uid uuid)
-RETURNS user_role LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public
-AS $$ SELECT role FROM public.users WHERE id = _uid $$;
+Fix (minimal, zero behavioural change for cron):
 
--- policy replacement
-DROP POLICY "admin_all_access" ON public.users;
-DROP POLICY "Users can update own data" ON public.users;
-CREATE POLICY "Users can update own data (no role change)"
-  ON public.users FOR UPDATE TO authenticated
-  USING (auth.uid() = id)
-  WITH CHECK (auth.uid() = id AND role = public.get_user_role(auth.uid()));
+1. Add a new project secret `CRON_SECRET` (random string, generated once).
+2. At the top of each of the 4 functions, immediately after the CORS preflight, require either:
+   - `Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY>`, **or**
+   - `x-cron-secret: <CRON_SECRET>`
+   Reject with 401 otherwise. Use constant-time comparison.
+3. Update the pg_cron jobs that hit these endpoints to add the `x-cron-secret` header (keeps things working even if the inline service-role-key approach ever rotates).
 
--- defense-in-depth trigger
-CREATE OR REPLACE FUNCTION public.prevent_role_self_escalation()
-RETURNS trigger LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
-BEGIN
-  IF NEW.role IS DISTINCT FROM OLD.role
-     AND current_setting('role', true) <> 'service_role'
-     AND NOT public.is_admin(auth.uid()) THEN
-    RAISE EXCEPTION 'Only admins can change a user role';
-  END IF;
-  RETURN NEW;
-END $$;
+This keeps cron working unchanged today (it already sends the service role bearer) and blocks anonymous HTTP callers. No customer/company app code touches these functions, so the frontend is unaffected.
 
-CREATE TRIGGER trg_prevent_role_self_escalation
-  BEFORE UPDATE OF role ON public.users
-  FOR EACH ROW EXECUTE FUNCTION public.prevent_role_self_escalation();
-```
+## 3. `process-matches` — same shared-secret guard
 
-## Why this won't break the app
-- **Customers**: Don't register and don't have rows in `public.users` they update via the client. Move-request submission writes to `move_requests`, not `users`. Unaffected.
-- **Companies**: The codebase has zero `.update()` calls against `public.users` from the company app. Profile data lives in `companies`. Unaffected.
-- **Admins**: `Admin can update all users` policy remains; admins can still change any user's role. The new trigger explicitly allows `is_admin(auth.uid())` and the service role.
-- **Edge functions / webhooks**: All run with the service role key, which bypasses RLS and is whitelisted in the trigger. `handle_new_user` (sets role at signup) continues to work.
-- **All other columns** (`full_name`, `phone`, `address`, etc.): users can still self-update them — the policy only blocks changes to `role`.
+The cron job for `process-matches-every-5-min` currently passes the **anon** key, not the service role. So we can't use "require service role bearer" alone. Apply the `CRON_SECRET` header pattern from #2:
 
-## Notes
-- The `handle_new_user_role_metadata` finding (role assigned from user-supplied `user_metadata`) is a separate, related issue. This plan does not fix it. After this plan ships, even if that webhook accepts `user_metadata.role`, the user cannot later flip themselves to admin — but the webhook should still be hardened in a follow-up.
+1. Update the cron job command to include `'x-cron-secret', '<CRON_SECRET>'` in its `jsonb_build_object` headers.
+2. In `supabase/functions/process-matches/index.ts`, after CORS preflight, require `x-cron-secret` to equal `Deno.env.get('CRON_SECRET')`. Reject with 401 otherwise.
+
+No React or other edge function calls `process-matches`, so this is a safe lockdown.
+
+## Why nothing in the customer/company app breaks
+
+- None of these 5 functions are invoked from `src/` or from any other edge function — confirmed by repo-wide search. They are 100% cron-driven.
+- The matching flow that companies actually depend on (`notify-companies` running synchronously on move submission) is untouched.
+- `registration_errors` is written by edge functions using the service role key, which bypasses RLS — already working today.
 
 ## Steps
-1. Run the migration above.
-2. Mark the `users_table_role_self_update_no_check` finding as fixed.
-3. Update security memory with the new invariant: "Role mutation requires admin or service role — enforced by trigger."
+
+1. Add `CRON_SECRET` via the secrets tool (one new secret).
+2. Single migration: update the 5 cron job commands to include `x-cron-secret` header. (Stored in pg_cron with the project's own secret value — no other project sees it.)
+3. Edit the 5 edge function `index.ts` files to require the secret (or service-role bearer for the 4 backup fns) immediately after the OPTIONS handler.
+4. Mark these security findings as fixed: `reg_errors_no_rls`, `backup_endpoints_no_auth`, `process_matches_no_auth`. Update security memory with the new invariant: "All cron-only edge functions require `x-cron-secret` or service-role bearer."
