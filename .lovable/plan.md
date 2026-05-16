@@ -1,32 +1,28 @@
-# Delete the unused `handle-data-request` edge function
+# Fix: Realtime exposure of `move_assignments`
 
-## Why
+## The finding
+`move_assignments` is published to Supabase Realtime (`supabase_realtime` publication). RLS on the underlying table does not apply to Realtime channel broadcasts, so any authenticated user can subscribe and receive change events for every company's assignments.
 
-The security scanner flagged `handle-data-request` as a critical issue: it uses the service role key but never validates who's calling it, meaning anyone on the internet could submit GDPR-style deletion or export requests for any user ID.
+## What I verified
+- `pg_publication_tables` confirms `public.move_assignments` is the only table in the `supabase_realtime` publication.
+- Codebase-wide search across `src/` and `supabase/` for `.channel(`, `postgres_changes`, and `realtime` returns **zero matches**. Nothing in the frontend or any edge function subscribes to Realtime for `move_assignments` (or any other table).
+- The matching system (`process-matches`, `submit-move-request`, company dashboards) reads/writes `move_assignments` via the standard PostgREST API — not Realtime. RLS policies on the table already correctly scope company access.
 
-After inspecting the codebase, this function is **dead code**:
+## Proposed fix
+Remove `move_assignments` from the `supabase_realtime` publication. No code changes needed.
 
-- Nothing calls it — not the customer app, not the companies app, not the admin app, not any other edge function.
-- It tries to write to a `data_requests` table that doesn't exist in the database, so any call would fail anyway.
-- The Privacy Policy page directs users to email `help@housemove.co` to exercise their data rights — it does not invoke this function.
+```sql
+ALTER PUBLICATION supabase_realtime DROP TABLE public.move_assignments;
+```
 
-The simplest, safest fix is to delete the function. That eliminates the vulnerability with zero impact on any app feature.
+## Why this is safe for the matching system
+- Matching, assignment creation, acceptance, and the 25-mile radius logic all run via service-role inserts (in `process-matches`) and authenticated SELECT/UPDATE through existing RLS policies. None of this depends on Realtime.
+- Company dashboards fetch assignments via normal queries — confirmed no `.channel()` or `postgres_changes` subscriptions exist anywhere.
+- Removing a table from the publication only stops change events from being broadcast; it does not affect table data, RLS, queries, or writes.
 
-## What changes
+## Alternative considered (not recommended)
+Adding RLS policies on `realtime.messages` to scope topic subscriptions by `auth.uid()` → company ownership. This is more complex, brittle (depends on topic naming conventions), and unnecessary because no client subscribes today. If a future feature needs Realtime for assignments, we re-add the table to the publication and add scoped `realtime.messages` policies then.
 
-- Delete the folder `supabase/functions/handle-data-request/`.
-- Remove the deployed function from Supabase so the public URL no longer responds.
-- Mark the security finding as fixed.
-
-## What does NOT change
-
-- No frontend code changes (nothing imports it).
-- No database changes.
-- GDPR data-request handling continues via the existing `help@housemove.co` email channel documented in the Privacy Policy.
-- All other edge functions, the admin login flow, and admin account creation remain untouched.
-
-## Technical notes
-
-- Use `code--exec rm -rf supabase/functions/handle-data-request` to remove source.
-- Use `supabase--delete_edge_functions` with `["handle-data-request"]` to undeploy.
-- Use `security--manage_security_finding` with `mark_as_fixed` for `agent_security` / `handle_data_no_auth`.
+## Steps
+1. Run a migration dropping `public.move_assignments` from `supabase_realtime`.
+2. Mark the security finding as fixed.
