@@ -21,15 +21,37 @@ export async function checkExistingCompany(supabase: any, email: string) {
 export async function registerCompany(supabase: any, companyData: CompanyRegistrationData) {
   // First geocode the address
   const geocodedAddress = await geocodeAddress(companyData.business_address);
-  
+
+  // SECURITY: Explicitly allowlist fields from the client payload.
+  // Never spread `...companyData` — billing_status, free_assignments_remaining,
+  // subscription_status, stripe_customer_id, is_verified, etc. must be
+  // server-controlled to prevent mass-assignment / billing bypass at signup.
   const companyRecord = {
-    ...companyData,
+    // Client-supplied profile fields (safe to accept):
+    name: companyData.name,
+    description: (companyData as any).description ?? null,
+    contact_email: companyData.contact_email,
+    contact_phone: companyData.contact_phone,
+    business_address: companyData.business_address,
+    service_areas: (companyData as any).service_areas ?? null,
+    registration_number: companyData.registration_number,
+    vat_number: (companyData as any).vat_number ?? null,
+    manager_name: (companyData as any).manager_name ?? null,
+    auth_user_id: (companyData as any).auth_user_id,
+
+    // Server-derived:
     location: geocodedAddress.location,
     latitude: geocodedAddress.latitude,
     longitude: geocodedAddress.longitude,
+
+    // Hardcoded — never trust the client for these:
     registration_status: 'pending',
     is_active: true,
-    is_verified: false
+    is_verified: false,
+    email_verified: false,
+    billing_status: 'free_tier',
+    free_assignments_remaining: 7,
+    subscription_status: 'trial',
   };
 
   const { data: company, error: registerError } = await supabase
