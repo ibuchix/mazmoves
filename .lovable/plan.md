@@ -31,22 +31,27 @@ The `verify-company` finding **is** relevant even though it lives in the custome
 - Load invoice + company; allow only invoice's company owner or admin.
 - Switch to service role internally.
 
-### 5. `generate-invoice` — admin only
-- Invoice generation is an admin/back-office action.
-- Require JWT + admin role.
-- Keep current logic.
+### 5. `generate-invoice` — cron (service role) or admin
+- **How it works today:** monthly pg_cron job `process-monthly-billing` runs `process_billing_cycle()` on the 1st of each month. That SECURITY DEFINER SQL function opens a new `billing_cycles` row and POSTs to `/generate-invoice` with `Authorization: Bearer <SERVICE_ROLE_KEY>` and `{ billingCycleId }`. The edge function then aggregates every completed `move_assignment` in the cycle and creates the Stripe invoice plus DB rows. Companies and admins do not trigger it manually.
+- **After the change:** accept the request if EITHER the bearer token is the project's service role key (cron path) OR the caller is an authenticated admin (manual re-run from admin app). Reject everyone else.
+- Service role detection: decode the JWT and require `role === 'service_role'`, or compare to `Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')` directly. No DB call needed for the cron path.
+- Existing cron + admin flows continue to work unchanged — the monthly invoice still runs automatically on day 1.
 
-### 6. `report-usage` — admin or service-role caller only
-- This is called server-side after an assignment completes. It must not accept anonymous calls.
-- Require JWT and admin role (current admin flows that trigger it), OR accept an internal call authenticated with the service role key (validate via `getUser` returning a service principal — simplest: require admin role; update the admin caller if it isn't already sending the session JWT).
-- Document that this endpoint is not callable from the public site.
+### 6. `report-usage` — cron/service role or admin
+- Called server-side when an assignment completes; not from the public site.
+- Same dual-auth as `generate-invoice`: allow service role bearer (internal callers) or admin JWT.
+- Anonymous calls rejected.
 
 ## Shared helper
 
 Add `supabase/functions/_shared/require-admin.ts` that:
 - Reads `Authorization` header, calls `supabase.auth.getUser(token)`.
 - Looks up `public.users.role` (or uses `has_role`) and returns `{ user, isAdmin }` or a 401/403 `Response`.
-- Used by `verify-company`, `generate-invoice`, `report-usage`.
+- Used by `verify-company`.
+
+Add `supabase/functions/_shared/require-admin-or-service.ts` that:
+- Allows the request when the bearer token equals `SUPABASE_SERVICE_ROLE_KEY` (cron path), OR when the caller is an authenticated admin.
+- Used by `generate-invoice` and `report-usage`.
 
 Add `supabase/functions/_shared/require-company-owner.ts` that:
 - Validates JWT, loads the target `companies` row by id with service role, returns 403 unless `auth_user_id === user.id` or caller is admin.
