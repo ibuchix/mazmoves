@@ -1546,6 +1546,10 @@ export type Database = {
         }[]
       }
       get_setting: { Args: { setting_key: string }; Returns: string }
+      get_user_role: {
+        Args: { _uid: string }
+        Returns: Database["public"]["Enums"]["user_role"]
+      }
       gettransactionid: { Args: never; Returns: unknown }
       has_role: {
         Args: {
