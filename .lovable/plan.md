@@ -1,51 +1,32 @@
-# Remove the public-role "Companies can update during registration" policy
+# Delete the unused `handle-data-request` edge function
 
-## The issue
+## Why
 
-The `companies` table currently has this policy:
+The security scanner flagged `handle-data-request` as a critical issue: it uses the service role key but never validates who's calling it, meaning anyone on the internet could submit GDPR-style deletion or export requests for any user ID.
 
-```
-Companies can update during registration
-  role:        public  (includes unauthenticated)
-  command:     UPDATE
-  USING:       contact_email = jwt.email  OR  auth_user_id = auth.uid()
-  WITH CHECK:  same
-```
+After inspecting the codebase, this function is **dead code**:
 
-Because it's bound to the `public` role, an attacker can craft a JWT that puts any email in the `email` claim and update **that company's row** — including `stripe_customer_id`, `billing_status`, `is_verified`, and `auth_user_id`. The JWT does not need to come from Supabase Auth; only RLS evaluates the claim.
+- Nothing calls it — not the customer app, not the companies app, not the admin app, not any other edge function.
+- It tries to write to a `data_requests` table that doesn't exist in the database, so any call would fail anyway.
+- The Privacy Policy page directs users to email `help@housemove.co` to exercise their data rights — it does not invoke this function.
 
-## Why it can be removed safely
+The simplest, safest fix is to delete the function. That eliminates the vulnerability with zero impact on any app feature.
 
-Registration on the company app is handled by the `register-company-v2` edge function using the **service role key**, which bypasses RLS entirely. No client-side update is needed during signup.
+## What changes
 
-Once a company is registered and signs in, the existing policy
+- Delete the folder `supabase/functions/handle-data-request/`.
+- Remove the deployed function from Supabase so the public URL no longer responds.
+- Mark the security finding as fixed.
 
-```
-Companies can only view and edit their own data
-  role:   authenticated
-  USING:  auth_user_id = auth.uid() OR is_admin(auth.uid())
-```
+## What does NOT change
 
-already gives them full read/update access to their own row from the company dashboard (documents, profile, etc.). Admins keep their existing policies.
+- No frontend code changes (nothing imports it).
+- No database changes.
+- GDPR data-request handling continues via the existing `help@housemove.co` email channel documented in the Privacy Policy.
+- All other edge functions, the admin login flow, and admin account creation remain untouched.
 
-So the public-role policy is pure attack surface — nothing legitimate depends on it.
+## Technical notes
 
-## Change (single migration)
-
-```sql
-DROP POLICY IF EXISTS "Companies can update during registration" ON public.companies;
-```
-
-That's it. No code changes in either app are needed.
-
-## What stays the same
-
-- Company registration via `register-company-v2` (service role — bypasses RLS).
-- Authenticated companies updating their own row from the company dashboard.
-- Admin updates to any company.
-- Customer-side move requests (untouched).
-- Admin login and admin creation flows (untouched).
-
-## Out of scope
-
-Other findings on `companies` (`update_own_verification_status` also being on `public`, the still-present `password`/`password_hash` columns, etc.) are separate and tracked individually — not addressed here.
+- Use `code--exec rm -rf supabase/functions/handle-data-request` to remove source.
+- Use `supabase--delete_edge_functions` with `["handle-data-request"]` to undeploy.
+- Use `security--manage_security_finding` with `mark_as_fixed` for `agent_security` / `handle_data_no_auth`.
