@@ -80,6 +80,16 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Cron-only function: require x-cron-secret header matching CRON_SECRET.
+  const cronSecret = Deno.env.get("CRON_SECRET") ?? "";
+  const cronHeader = req.headers.get("x-cron-secret") ?? "";
+  if (!cronSecret || cronHeader !== cronSecret) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+    );
+  }
+
   try {
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
