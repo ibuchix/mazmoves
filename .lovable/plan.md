@@ -1,68 +1,28 @@
-# Confirm prior fixes and harden `check-move-distance`
+# Delete unused `check-move-distance` edge function
 
-## Verification of previously fixed findings
+## Why this is safe
 
-After reading the current code, three of the four findings the scanner is still showing are **already fixed in the codebase**. The scanner results are stale and should be marked resolved.
+- `check-move-distance` only **deletes** `move_assignments` rows where the company is > 25 miles from pickup. It never returns mileage to a caller, so it cannot be what powers any "distance to job" display in the companies app.
+- Distance shown to companies is a read operation. The two places distance is actually computed in this project are:
+  - `find_companies_within_radius` PostGIS RPC (used by `process-matches` and `notify-companies/company-finder.ts`) — returns `distance` per company.
+  - `notify-companies/distance.ts` Haversine helper.
+  Either of those is what a companies-app dashboard would read from; deleting the edge function does not touch them.
+- Confirmed earlier: no code references, no DB trigger, no Database Webhook, zero invocation logs. The function has never run.
+- The 25-mile cap is already enforced **upfront** in matching — companies outside 25 miles are never assigned in the first place, so the "delete after the fact" cleanup is redundant even in theory.
 
-### 1. `create-stripe-customer` — FIXED
-`supabase/functions/create-stripe-customer/index.ts` calls `requireCompanyOwnerOrAdmin(req, companyId, …)` before any Stripe work. The shared helper:
-- Requires `Authorization: Bearer <jwt>`.
-- Verifies the JWT with `supabase.auth.getUser`.
-- Loads the target `companies` row with the service role key.
-- Returns 403 unless `companies.auth_user_id === user.id` OR caller is admin.
+## Changes
 
-### 2. `verify-company` — FIXED
-`supabase/functions/verify-company/index.ts` runs `verifyOrigin` AND `requireAdmin` before flipping `is_verified=true`. `requireAdmin` enforces a valid JWT and `public.users.role = 'admin'`.
+1. Delete the directory `supabase/functions/check-move-distance/` (removes `index.ts`).
+2. Call `supabase--delete_edge_functions` with `["check-move-distance"]` to remove the deployed function from Supabase.
+3. Leave `supabase/functions/_shared/require-webhook-secret.ts` in place — it's a small, generic helper that's useful for future DB-webhook-triggered functions. No other file imports it yet, but keeping it costs nothing and avoids re-creating it later.
 
-### 3. `create-subscription` / `process-payment` / `generate-invoice` / `report-usage` — FIXED
-- `create-subscription` and `process-payment` → `requireCompanyOwnerOrAdmin`.
-- `generate-invoice` and `report-usage` → `requireAdminOrService`, which accepts either the project service-role bearer (so the monthly `process_billing_cycle()` cron and the `report-usage` server-to-server callers keep working) or an authenticated admin JWT.
+## Not changed
 
-No changes needed for these three findings beyond marking them fixed.
+- No DB migrations.
+- No frontend changes.
+- No changes to `process-matches`, `notify-companies`, `find_companies_within_radius`, billing, or invoicing.
+- No new secrets required. `MOVE_ASSIGNMENT_WEBHOOK_SECRET` was never added, so nothing to clean up there either.
 
-## Finding 4 — `check-move-distance` is still vulnerable
+## Follow-up after merge
 
-### How it works today
-- The function is not invoked anywhere in this codebase. It is wired up as a **Supabase Database Webhook on `move_assignments` (AFTER INSERT)** — the request body shape `{ record: { request_id, company_id, id } }` is exactly the standard Supabase webhook payload.
-- It only calls `verifyOrigin(req)`, then trusts every field in `record` and deletes `move_assignments` where `id = record.id`.
-- Because `*.lovable.app` and `*.lovableproject.com` are in the origin allowlist, any caller can spoof the `Origin` header, point `record.id` at any assignment row, and pair it with a `request_id`/`company_id` that are naturally > 25 miles apart. The function will then delete the targeted assignment.
-
-### What we will change
-Goal: keep the existing database-webhook behavior intact (assignments outside 25 miles get deleted automatically) while preventing arbitrary deletion.
-
-1. **Require a webhook secret.** Add a new Supabase secret `MOVE_ASSIGNMENT_WEBHOOK_SECRET`. The edge function will require it on every call. Two acceptance modes:
-   - Header `x-webhook-secret: <secret>` (preferred for the DB webhook — set in the Supabase webhook config).
-   - OR `Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY>` (so an authenticated admin/service caller can still trigger it manually).
-
-   Any request that has neither is rejected with 401. `verifyOrigin` is removed as the sole guard.
-
-2. **Validate `record.id` actually links `record.request_id` to `record.company_id`.** Before any delete, load the assignment row and confirm:
-   - `move_assignments.id = record.id`
-   - `move_assignments.request_id = record.request_id`
-   - `move_assignments.company_id = record.company_id`
-   - `move_assignments.status` is one of the statuses the matcher actually creates (e.g. `active`/`pending`) — so we never delete a completed/invoiced assignment even if the distance check is somehow re-run.
-
-   If the row doesn't exist or any field mismatches, return 200 with `{ skipped: true }` and do nothing.
-
-3. **No behavioral change for the legitimate webhook path.** The Supabase DB webhook fires once per new `move_assignments` insert, the function recomputes distance from pickup vs company coordinates (unchanged Haversine logic), and deletes only if > 25 miles. Matching accuracy, the notify/assign pipeline, billing, and any downstream UI are unaffected because:
-   - The set of rows that get deleted is the same set today's logic would delete for legitimate inserts.
-   - We only added preconditions that reject *forged* calls; legitimate webhook calls always satisfy them.
-
-### Operational follow-up the user does after merge
-- In the Supabase dashboard → Database → Webhooks, open the existing `move_assignments` webhook that targets `check-move-distance` and add an HTTP header `x-webhook-secret` = the value of the new secret.
-- Add the `MOVE_ASSIGNMENT_WEBHOOK_SECRET` secret in Supabase → Edge Functions → Secrets (we will use `add_secret` to request the value during implementation).
-
-## Files touched
-
-- `supabase/functions/check-move-distance/index.ts` — replace `verifyOrigin` guard with the secret-or-service-role guard, add the integrity check on `record`.
-- (Optional) `supabase/functions/_shared/require-webhook-secret.ts` — small helper so we don't repeat the secret comparison logic if other webhooks need it later.
-
-No DB migrations. No frontend changes. No changes to matching, billing, invoicing, or any other edge function.
-
-## Out of scope (separate findings still to address later)
-
-- `notify-companies`, `send-verification-email`, `send-confirmation-email`, `send-welcome-email`, `geocode-address` open-endpoint findings.
-- `stripe-webhook` anon key.
-- `handle_new_user` role-from-metadata.
-- `companies` and `users` RLS INSERT policies, plaintext `password`/`password_hash` columns.
-- Supabase linter warnings (function search_path, leaked password protection, OTP expiry, etc.).
+- In Supabase Security scan, mark the `check-move-distance` finding as resolved (the function no longer exists).
