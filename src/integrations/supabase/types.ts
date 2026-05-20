@@ -747,6 +747,7 @@ export type Database = {
           pickup_location: unknown
           pickup_longitude: number | null
           requested_date: string
+          source: string
           special_instructions: string | null
           status: Database["public"]["Enums"]["request_status"] | null
           updated_at: string | null
@@ -770,6 +771,7 @@ export type Database = {
           pickup_location?: unknown
           pickup_longitude?: number | null
           requested_date: string
+          source?: string
           special_instructions?: string | null
           status?: Database["public"]["Enums"]["request_status"] | null
           updated_at?: string | null
@@ -793,6 +795,7 @@ export type Database = {
           pickup_location?: unknown
           pickup_longitude?: number | null
           requested_date?: string
+          source?: string
           special_instructions?: string | null
           status?: Database["public"]["Enums"]["request_status"] | null
           updated_at?: string | null
