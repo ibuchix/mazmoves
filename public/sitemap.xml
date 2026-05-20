@@ -24,5 +24,9 @@
     <loc>https://housemove.co/terms-and-conditions</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
+  <url>
+    <loc>https://housemove.co/agents</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.4</priority>
   </url>
 </urlset>

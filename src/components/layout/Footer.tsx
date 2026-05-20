@@ -1,6 +1,7 @@
 // Footer.tsx - Thin persistent footer across all pages.
 // Slate grey background with copyright on the left and legal links on the right.
 // Intentionally compact — no logo, single row on desktop.
+// Added "For AI agents" link pointing to /agents (MCP docs page).
 
 import { Link } from "react-router-dom";
 
@@ -10,7 +11,9 @@ export function Footer() {
     { to: "/privacy-policy", label: "Privacy Policy" },
     { to: "/terms-and-conditions", label: "Terms & Conditions" },
     { to: "/contact", label: "Contact" },
+    { to: "/agents", label: "For AI agents" },
   ];
+
 
   return (
     <footer className="w-full bg-brand-slate text-white">

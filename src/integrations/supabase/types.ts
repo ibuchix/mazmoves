@@ -741,6 +741,7 @@ export type Database = {
           estimated_value: number | null
           id: string
           inventory_list: Json | null
+          ip_origin: string | null
           move_type: string | null
           pickup_address: Json
           pickup_latitude: number | null
@@ -765,6 +766,7 @@ export type Database = {
           estimated_value?: number | null
           id?: string
           inventory_list?: Json | null
+          ip_origin?: string | null
           move_type?: string | null
           pickup_address: Json
           pickup_latitude?: number | null
@@ -789,6 +791,7 @@ export type Database = {
           estimated_value?: number | null
           id?: string
           inventory_list?: Json | null
+          ip_origin?: string | null
           move_type?: string | null
           pickup_address?: Json
           pickup_latitude?: number | null

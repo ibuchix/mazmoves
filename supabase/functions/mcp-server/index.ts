@@ -18,7 +18,9 @@
 import { Hono } from "npm:hono@4.6.14";
 import { McpServer, StreamableHttpTransport } from "npm:mcp-lite@^0.10.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
-import { moveRequestSchema, sanitizeInstructions } from "../submit-move-request/validation.ts";
+import { moveRequestSchema, sanitizeInstructions } from "../_shared/move-request-validation.ts";
+
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -131,29 +133,29 @@ const REQUIRED_FIELDS_SCHEMA = {
 } as const;
 
 // --- MCP server setup ---------------------------------------------------
+// inputSchema is passed as plain JSON Schema; mcp-lite forwards it to clients
+// untouched. Runtime validation is done inside the handler via zod safeParse.
 const mcpServer = new McpServer({
   name: "housemove-mcp",
   version: "1.0.0",
 });
 
-mcpServer.tool({
-  name: "get_required_fields",
+mcpServer.tool("get_required_fields", {
   description:
     "Returns the JSON schema of fields required to submit a UK house-move request via submit_move_request. Call this first so you know what to collect from the user.",
   inputSchema: { type: "object", properties: {} },
-  handler: async () => {
-    return {
-      content: [{ type: "text", text: JSON.stringify(REQUIRED_FIELDS_SCHEMA, null, 2) }],
-    };
-  },
+  handler: () => ({
+    content: [{ type: "text", text: JSON.stringify(REQUIRED_FIELDS_SCHEMA, null, 2) }],
+  }),
 });
 
-mcpServer.tool({
-  name: "submit_move_request",
+mcpServer.tool("submit_move_request", {
   description:
     "Submits a UK house-move request on behalf of a human user. HouseMove will match the request to nearby moving companies who will then contact the user directly. Returns the request id and matching status.",
   inputSchema: REQUIRED_FIELDS_SCHEMA,
   handler: async (input: unknown, ctx: { request?: Request } | undefined) => {
+
+
     const req = ctx?.request as Request | undefined;
     const ip = req ? getClientIp(req) : "unknown";
 
@@ -263,6 +265,7 @@ mcpServer.tool({
 // --- HTTP transport via Hono --------------------------------------------
 const app = new Hono();
 const transport = new StreamableHttpTransport();
+const httpHandler = transport.bind(mcpServer);
 
 app.options("/*", (c) => new Response(null, { headers: corsHeaders }));
 
@@ -275,11 +278,12 @@ app.all("/*", async (c) => {
       { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
-  const res = await transport.handleRequest(c.req.raw, mcpServer);
+  const res = await httpHandler(c.req.raw);
   // Merge CORS headers into MCP response
   const merged = new Headers(res.headers);
   for (const [k, v] of Object.entries(corsHeaders)) merged.set(k, v);
   return new Response(res.body, { status: res.status, headers: merged });
 });
+
 
 Deno.serve(app.fetch);
