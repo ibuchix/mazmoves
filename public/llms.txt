@@ -11,3 +11,4 @@ Customers submit a free move request with pickup and delivery addresses, and mat
 - [Contact](/contact): Email (help@housemove.co) and support hours.
 - [Privacy Policy](/privacy-policy): How HouseMove collects and uses personal data.
 - [Terms and Conditions](/terms-and-conditions): Terms of use for the HouseMove service.
+- [For AI Agents](/agents): MCP endpoint and tool documentation for AI agents booking moves on behalf of users.
