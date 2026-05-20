@@ -93,7 +93,7 @@ The function must accept `Accept: application/json, text/event-stream` on POST â
 | Movers get low-quality leads | Same Zod validation as web form; phone + email are required and format-checked. |
 | Breaking the web submission path | Zero shared code paths modified. New function is fully isolated. |
 | MCP spec drift | `mcp-lite ^0.10.0` is actively maintained and recommended in Lovable knowledge. |
-| Geocoding cost spike | `check_service_area` geocodes once and is cheap; `submit_move_request` geocodes twice (same as web). Rate limit caps blast radius. |
+| Geocoding cost spike | `submit_move_request` geocodes twice (same as web). 2-submissions/IP/day cap hard-limits blast radius. |
 
 ## Out of scope (future)
 
