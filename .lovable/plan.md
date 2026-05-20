@@ -1,102 +1,75 @@
-# MCP Server for AI-Agent Move Bookings
+# Harden the public `/agents` page
 
 ## Goal
 
-Allow third-party AI agents (ChatGPT, Claude, custom assistants, etc.) to book a move on the customer side using the Model Context Protocol — without changing how the human-facing form works today.
+Keep `/agents` useful for legitimate AI agents (discoverable, enough to connect and call tools) while removing the operational and business detail that helps attackers or competitors.
 
-## Why this fits the current architecture
+## What the page reveals today (and shouldn't)
 
-The customer app is a Vite SPA with no server runtime; all backend logic already lives in Supabase Edge Functions (`submit-move-request`, `geocode-address`, `notify-companies`). MCP servers can be hosted as a single Edge Function using `mcp-lite` + Hono over Streamable HTTP. So we add **one new edge function** plus **one small public page** — and reuse every existing validation, geocoding, and matching path.
+1. **Raw Supabase functions hostname** (`*.functions.supabase.co/mcp-server`) — leaks our infra provider and exact function name, making it trivial to fingerprint and target other functions on the same project.
+2. **Exact rate limits** ("2 submissions and 30 tool calls per IP per 24 hours") — tells an abuser precisely how to stay under the threshold and how many IPs they need.
+3. **Internal matching rule** ("25-mile radius of pickup or delivery") — a core business rule we'd rather not publish; it's competitive info and helps spammers craft addresses that always match.
+4. **Pipeline internals** ("geocode the addresses, insert the request, notify nearby moving companies") — describes our backend flow.
+5. **Audit/abuse-detection hint** ("Submissions are tagged so HouseMove staff can audit agent traffic") — tells abusers exactly what signal we use.
+6. **Tool input schema disclosure path** — we tell agents to call `get_required_fields` first, which is fine, but the page itself doesn't need to enumerate tools by exact internal name.
 
-The human submission flow (`useSubmitMoveRequest` → `submit-move-request`) is untouched.
+## Proposed changes
 
-## What we build
+### 1. Hide the raw Supabase URL behind our own domain
 
-### 1. New edge function: `mcp-server`
+Add a same-origin proxy route on `housemove.co` that forwards to the Supabase function:
 
-A standalone MCP endpoint at `https://<project>.functions.supabase.co/mcp-server`. Exposes two tools:
-
-| Tool | Purpose |
-|---|---|
-| `get_required_fields` | Returns the JSON schema an agent must fill to submit a request (mirrors `moveRequestSchema`). Self-documenting so agents collect the right info from the user. |
-| `submit_move_request` | Validates input, geocodes pickup+delivery server-side, inserts the row, and triggers `notify-companies`. Returns the request id + status (`assigned` / `no_companies_found`). |
-
-No pre-flight service-area check — agents submit and the existing matching pipeline (`notify-companies` → `process-matches`) decides coverage, exactly like the web form. Keeps matching logic in one place.
-
-Internally, the function reuses the exact same Zod schema (`validation.ts`), geocoding edge function, and matching pipeline — no duplicated business logic, no second source of truth.
-
-### 2. Auth + abuse model (the non-obvious part)
-
-Today, `submit-move-request` blocks non-browser callers via `verifyOrigin`. Agents have no browser origin, so MCP can't reuse that gate. Cleanest approach:
-
-- **Open MCP endpoint, no API key required** (matches the spirit of the human form being open).
-- **Tight per-IP rate limit** in the MCP function: **2 successful submissions per IP per 24 hours**, plus a separate **30 tool calls per IP per 24 hours** cap so `get_required_fields` discovery doesn't burn the submission budget. A real person never submits more than 1–2 move requests a day, so anything above that is almost certainly abuse.
-- **Mark agent-originated rows** with a new nullable `source` column on `move_requests` (`'web' | 'mcp'`, default `'web'`). This gives admins visibility and a future kill-switch without affecting matching.
-- **No new secrets** in v1. If abuse appears, we can later add an `MCP_API_KEY` header check — a 5-line change.
-
-### 3. Discovery page: `/agents`
-
-A single public page at `/agents` (linked from the footer in small text) that:
-
-- Explains the MCP endpoint URL, transport (Streamable HTTP), and the two tools.
-- Shows a copy-paste connection snippet for Claude Desktop / ChatGPT.
-- Links to a `/.well-known/ai-plugin.json`–style descriptor served from `public/` so AI directories can index it.
-
-No interactive UI, no auth on this page — pure documentation. Zero impact on existing routes.
-
-### 4. SEO + robots
-
-- Add `/agents` to `sitemap.xml` and `llms.txt`.
-- Allow the MCP path in `robots.txt`.
-
-## What we deliberately do NOT do
-
-- No changes to `submit-move-request`, `notify-companies`, `process-matches`, `geocode-address`, or any frontend submission code.
-- No new database tables. Only an additive nullable `source` column (safe migration, no backfill needed).
-- No payment, no account creation for agents in v1. Agents pass `customerEmail` + `customerPhone` exactly like the web form requires.
-- No streaming/conversational tools — MCP tools are request/response only, matching how movers actually need bookings to arrive.
-
-## Technical details
-
-### Files added
-- `supabase/functions/mcp-server/index.ts` — Hono + mcp-lite, three tools.
-- `supabase/functions/mcp-server/tools.ts` — tool handlers that internally `fetch` `geocode-address` and insert via service role using the shared Zod schema.
-- `supabase/functions/mcp-server/config.toml` — `verify_jwt = false` (public, like `submit-move-request`).
-- `src/pages/Agents.tsx` — documentation page.
-- `public/.well-known/ai-plugin.json` — minimal descriptor pointing to the MCP endpoint.
-- Route added to `src/config/routes.tsx`.
-
-### Files changed
-- `src/components/layout/Footer.tsx` — small "For AI agents" link.
-- `public/sitemap.xml`, `public/llms.txt`, `public/robots.txt`.
-
-### Migration
-```sql
-ALTER TABLE move_requests
-  ADD COLUMN source text DEFAULT 'web';
+```text
+POST https://housemove.co/mcp  ->  https://<ref>.functions.supabase.co/mcp-server
 ```
-(Nullable-safe, no RLS changes — existing policies still apply.)
 
-### Required headers (per MCP spec)
-The function must accept `Accept: application/json, text/event-stream` on POST — handled by `mcp-lite`'s `StreamableHttpTransport` automatically.
+Two options for the proxy (pick one in the technical section):
+- A new edge function `mcp` whose only job is to forward to `mcp-server` (cleanest, but adds one hop).
+- A Netlify/host rewrite in `public/_redirects` (zero hops, no code).
 
-### Reused, not duplicated
-- Validation: imports `moveRequestSchema` from `submit-move-request/validation.ts`.
-- Geocoding: `fetch`es the existing `geocode-address` function with the service role key.
-- Matching: after insert, `fetch`es `notify-companies` exactly like the web path does.
+The public docs only ever advertise `https://housemove.co/mcp`. The Supabase URL stops appearing in the page, in `ai-plugin.json`, and in `llms.txt`.
 
-## Risk review
+### 2. Rewrite the page copy to be minimal and neutral
 
-| Risk | Mitigation |
-|---|---|
-| Agents spam fake bookings | Per-IP rate limit + `source='mcp'` flag so admin can filter/disable. |
-| Movers get low-quality leads | Same Zod validation as web form; phone + email are required and format-checked. |
-| Breaking the web submission path | Zero shared code paths modified. New function is fully isolated. |
-| MCP spec drift | `mcp-lite ^0.10.0` is actively maintained and recommended in Lovable knowledge. |
-| Geocoding cost spike | `submit_move_request` geocodes twice (same as web). 2-submissions/IP/day cap hard-limits blast radius. |
+Keep: what HouseMove is, that there's an MCP endpoint, the endpoint URL, the Claude Desktop snippet, a short responsible-use note, and a contact email for agent operators.
 
-## Out of scope (future)
+Remove:
+- Specific rate-limit numbers — replace with "Rate-limited; contact us for higher limits."
+- The 25-mile radius rule — replace with "We match requests to nearby UK moving companies."
+- The "geocode + insert + notify" pipeline description — replace with "Matched companies will contact the user directly."
+- The "submissions are tagged for audit" line — drop entirely (we still tag internally; we just don't advertise it).
+- The explicit tool list with internal names — replace with one sentence: "Call `tools/list` on the endpoint to discover available tools and their schemas." That's the standard MCP discovery path, so legitimate agents lose nothing.
 
-- Agent authentication via API keys + per-key quotas.
-- Quote estimation tool (needs pricing logic we don't have yet).
-- Webhook back to the agent when a mover accepts (needs assignment-status notifications, which the admin-side feature you mentioned will design).
+### 3. Tighten `ai-plugin.json` and `llms.txt`
+
+- `ai-plugin.json`: change `url` to `https://housemove.co/mcp`. Shorten `description_for_model` so it doesn't describe internal matching logic.
+- `llms.txt`: keep the `/agents` link, but trim the one-line description to "MCP endpoint for AI agents."
+
+### 4. Optional follow-up (not in this plan unless you want it)
+
+- Move `/agents` behind a "request access" flow (email us, we issue a token) instead of a fully public endpoint. This is a bigger change to the MCP server itself and changes the abuse model, so I'd do it as a separate plan if you want it.
+
+## Technical section
+
+**Proxy choice — recommendation: host rewrite via `public/_redirects`.**
+
+```text
+/mcp  https://tcyulkuyfptlisfyefnn.functions.supabase.co/mcp-server  200
+/mcp/*  https://tcyulkuyfptlisfyefnn.functions.supabase.co/mcp-server/:splat  200
+```
+
+Pros: no new edge function, no extra cold-start latency, no code to maintain. The Supabase hostname still appears in DNS/TLS if someone inspects deeply, but it's no longer in our docs or discovery files, which is the goal.
+
+Cons: the rewrite is host-specific (Netlify/Lovable hosting). If we ever move hosts we re-add the rule.
+
+If you'd rather have a real edge-function proxy (more control, can add headers, can later add auth), I'll wire `supabase/functions/mcp/index.ts` that forwards `req.method`, headers, and body to `mcp-server` and streams the response back. Slightly more code, one extra hop.
+
+**CORS / MCP transport note:** the Streamable HTTP transport needs `Accept: application/json, text/event-stream` to pass through unchanged. A host rewrite preserves headers; an edge-function proxy must forward them explicitly and stream the response body (don't `await res.json()`).
+
+**Files touched (rewrite path):**
+- `src/pages/Agents.tsx` — rewrite copy, drop tool-by-name list and rate-limit/radius details, change endpoint URL constant to `https://housemove.co/mcp`.
+- `public/ai-plugin.json` (well-known) — update `url`, trim `description_for_model`.
+- `public/llms.txt` — trim `/agents` line.
+- `public/_redirects` — add the two `/mcp` rewrite rules.
+
+**No backend changes.** The `mcp-server` function, rate limits, `source='mcp'` tagging, and `ip_origin` tracking all stay exactly as they are — we're only changing what we publish about them.
