@@ -18,7 +18,7 @@
 import { Hono } from "npm:hono@4.6.14";
 import { McpServer, StreamableHttpTransport } from "npm:mcp-lite@^0.10.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
-import { moveRequestSchema, sanitizeInstructions } from "../submit-move-request/validation.ts";
+import { moveRequestSchema, sanitizeInstructions } from "../_shared/move-request-validation.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
