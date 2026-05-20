@@ -17,8 +17,46 @@
 
 import { Hono } from "npm:hono@4.6.14";
 import { McpServer, StreamableHttpTransport } from "npm:mcp-lite@^0.10.0";
+import { z } from "https://esm.sh/zod@3.23.8";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
 import { moveRequestSchema, sanitizeInstructions } from "../_shared/move-request-validation.ts";
+
+// Minimal Zod -> JSON Schema adapter for mcp-lite. We only support the
+// shapes used by our tools (object/string/number/enum/optional/array).
+// Falls back to { type: "object" } for unknown shapes.
+function zodToJsonSchema(schema: unknown): Record<string, unknown> {
+  const def = (schema as { _def?: { typeName?: string } })?._def;
+  const t = def?.typeName;
+  const s = schema as Record<string, unknown> & { _def: Record<string, unknown> };
+  switch (t) {
+    case "ZodObject": {
+      const shape = (s._def.shape as () => Record<string, unknown>)();
+      const properties: Record<string, unknown> = {};
+      const required: string[] = [];
+      for (const [k, v] of Object.entries(shape)) {
+        properties[k] = zodToJsonSchema(v);
+        const vd = (v as { _def?: { typeName?: string } })._def;
+        if (vd?.typeName !== "ZodOptional" && vd?.typeName !== "ZodDefault" && vd?.typeName !== "ZodNullable") {
+          required.push(k);
+        }
+      }
+      return required.length ? { type: "object", properties, required } : { type: "object", properties };
+    }
+    case "ZodString": return { type: "string" };
+    case "ZodNumber": return { type: "number" };
+    case "ZodBoolean": return { type: "boolean" };
+    case "ZodEnum": return { type: "string", enum: s._def.values };
+    case "ZodArray": return { type: "array", items: zodToJsonSchema(s._def.type) };
+    case "ZodOptional":
+    case "ZodNullable":
+    case "ZodDefault":
+    case "ZodEffects":
+      return zodToJsonSchema(s._def.innerType ?? s._def.schema);
+    default:
+      return {};
+  }
+}
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
