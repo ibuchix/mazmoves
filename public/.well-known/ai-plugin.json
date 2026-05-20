@@ -3,7 +3,7 @@
   "name_for_human": "HouseMove",
   "name_for_model": "housemove",
   "description_for_human": "Book UK house moves through HouseMove.",
-  "description_for_model": "Submits UK house-move requests on behalf of users. HouseMove matches each request to nearby moving companies who then contact the user directly. Use the MCP endpoint for tool access.",
+  "description_for_model": "Submits UK house-move requests on behalf of users. Use the MCP endpoint and call tools/list to discover available tools.",
   "auth": { "type": "none" },
   "api": {
     "type": "mcp",
@@ -11,6 +11,6 @@
     "transport": "streamable-http"
   },
   "logo_url": "https://housemove.co/housemove-logo.png",
-  "contact_email": "support@housemove.co",
+  "contact_email": "help@housemove.co",
   "legal_info_url": "https://housemove.co/terms-and-conditions"
 }
