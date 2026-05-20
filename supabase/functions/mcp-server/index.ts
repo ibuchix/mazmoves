@@ -190,9 +190,6 @@ mcpServer.tool("submit_move_request", {
   inputSchema: moveRequestSchema,
   handler: async (input: unknown, ctx: { request?: Request } | undefined) => {
 
-    "Submits a UK house-move request on behalf of a human user. HouseMove will match the request to nearby moving companies who will then contact the user directly. Returns the request id and matching status.",
-  inputSchema: REQUIRED_FIELDS_SCHEMA,
-  handler: async (input: unknown, ctx: { request?: Request } | undefined) => {
     const req = ctx?.request as Request | undefined;
     const ip = req ? getClientIp(req) : "unknown";
 
