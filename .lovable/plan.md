@@ -14,13 +14,14 @@ The human submission flow (`useSubmitMoveRequest` → `submit-move-request`) is 
 
 ### 1. New edge function: `mcp-server`
 
-A standalone MCP endpoint at `https://<project>.functions.supabase.co/mcp-server`. Exposes three tools:
+A standalone MCP endpoint at `https://<project>.functions.supabase.co/mcp-server`. Exposes two tools:
 
 | Tool | Purpose |
 |---|---|
-| `check_service_area` | Given a postcode/address, returns whether we have movers within 25 miles. Lets agents pre-qualify before collecting full details. |
-| `get_required_fields` | Returns the JSON schema an agent must fill to submit a request (mirrors `moveRequestSchema`). Self-documenting. |
+| `get_required_fields` | Returns the JSON schema an agent must fill to submit a request (mirrors `moveRequestSchema`). Self-documenting so agents collect the right info from the user. |
 | `submit_move_request` | Validates input, geocodes pickup+delivery server-side, inserts the row, and triggers `notify-companies`. Returns the request id + status (`assigned` / `no_companies_found`). |
+
+No pre-flight service-area check — agents submit and the existing matching pipeline (`notify-companies` → `process-matches`) decides coverage, exactly like the web form. Keeps matching logic in one place.
 
 Internally, the function reuses the exact same Zod schema (`validation.ts`), geocoding edge function, and matching pipeline — no duplicated business logic, no second source of truth.
 
@@ -29,7 +30,7 @@ Internally, the function reuses the exact same Zod schema (`validation.ts`), geo
 Today, `submit-move-request` blocks non-browser callers via `verifyOrigin`. Agents have no browser origin, so MCP can't reuse that gate. Cleanest approach:
 
 - **Open MCP endpoint, no API key required** (matches the spirit of the human form being open).
-- **Stricter per-IP rate limit** in the MCP function: 3 successful submissions per IP per hour, 20 tool calls per IP per hour.
+- **Tight per-IP rate limit** in the MCP function: **2 successful submissions per IP per 24 hours**, plus a separate **30 tool calls per IP per 24 hours** cap so `get_required_fields` discovery doesn't burn the submission budget. A real person never submits more than 1–2 move requests a day, so anything above that is almost certainly abuse.
 - **Mark agent-originated rows** with a new nullable `source` column on `move_requests` (`'web' | 'mcp'`, default `'web'`). This gives admins visibility and a future kill-switch without affecting matching.
 - **No new secrets** in v1. If abuse appears, we can later add an `MCP_API_KEY` header check — a 5-line change.
 
