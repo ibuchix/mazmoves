@@ -1,28 +1,101 @@
-# Delete unused `check-move-distance` edge function
+# MCP Server for AI-Agent Move Bookings
 
-## Why this is safe
+## Goal
 
-- `check-move-distance` only **deletes** `move_assignments` rows where the company is > 25 miles from pickup. It never returns mileage to a caller, so it cannot be what powers any "distance to job" display in the companies app.
-- Distance shown to companies is a read operation. The two places distance is actually computed in this project are:
-  - `find_companies_within_radius` PostGIS RPC (used by `process-matches` and `notify-companies/company-finder.ts`) — returns `distance` per company.
-  - `notify-companies/distance.ts` Haversine helper.
-  Either of those is what a companies-app dashboard would read from; deleting the edge function does not touch them.
-- Confirmed earlier: no code references, no DB trigger, no Database Webhook, zero invocation logs. The function has never run.
-- The 25-mile cap is already enforced **upfront** in matching — companies outside 25 miles are never assigned in the first place, so the "delete after the fact" cleanup is redundant even in theory.
+Allow third-party AI agents (ChatGPT, Claude, custom assistants, etc.) to book a move on the customer side using the Model Context Protocol — without changing how the human-facing form works today.
 
-## Changes
+## Why this fits the current architecture
 
-1. Delete the directory `supabase/functions/check-move-distance/` (removes `index.ts`).
-2. Call `supabase--delete_edge_functions` with `["check-move-distance"]` to remove the deployed function from Supabase.
-3. Leave `supabase/functions/_shared/require-webhook-secret.ts` in place — it's a small, generic helper that's useful for future DB-webhook-triggered functions. No other file imports it yet, but keeping it costs nothing and avoids re-creating it later.
+The customer app is a Vite SPA with no server runtime; all backend logic already lives in Supabase Edge Functions (`submit-move-request`, `geocode-address`, `notify-companies`). MCP servers can be hosted as a single Edge Function using `mcp-lite` + Hono over Streamable HTTP. So we add **one new edge function** plus **one small public page** — and reuse every existing validation, geocoding, and matching path.
 
-## Not changed
+The human submission flow (`useSubmitMoveRequest` → `submit-move-request`) is untouched.
 
-- No DB migrations.
-- No frontend changes.
-- No changes to `process-matches`, `notify-companies`, `find_companies_within_radius`, billing, or invoicing.
-- No new secrets required. `MOVE_ASSIGNMENT_WEBHOOK_SECRET` was never added, so nothing to clean up there either.
+## What we build
 
-## Follow-up after merge
+### 1. New edge function: `mcp-server`
 
-- In Supabase Security scan, mark the `check-move-distance` finding as resolved (the function no longer exists).
+A standalone MCP endpoint at `https://<project>.functions.supabase.co/mcp-server`. Exposes three tools:
+
+| Tool | Purpose |
+|---|---|
+| `check_service_area` | Given a postcode/address, returns whether we have movers within 25 miles. Lets agents pre-qualify before collecting full details. |
+| `get_required_fields` | Returns the JSON schema an agent must fill to submit a request (mirrors `moveRequestSchema`). Self-documenting. |
+| `submit_move_request` | Validates input, geocodes pickup+delivery server-side, inserts the row, and triggers `notify-companies`. Returns the request id + status (`assigned` / `no_companies_found`). |
+
+Internally, the function reuses the exact same Zod schema (`validation.ts`), geocoding edge function, and matching pipeline — no duplicated business logic, no second source of truth.
+
+### 2. Auth + abuse model (the non-obvious part)
+
+Today, `submit-move-request` blocks non-browser callers via `verifyOrigin`. Agents have no browser origin, so MCP can't reuse that gate. Cleanest approach:
+
+- **Open MCP endpoint, no API key required** (matches the spirit of the human form being open).
+- **Stricter per-IP rate limit** in the MCP function: 3 successful submissions per IP per hour, 20 tool calls per IP per hour.
+- **Mark agent-originated rows** with a new nullable `source` column on `move_requests` (`'web' | 'mcp'`, default `'web'`). This gives admins visibility and a future kill-switch without affecting matching.
+- **No new secrets** in v1. If abuse appears, we can later add an `MCP_API_KEY` header check — a 5-line change.
+
+### 3. Discovery page: `/agents`
+
+A single public page at `/agents` (linked from the footer in small text) that:
+
+- Explains the MCP endpoint URL, transport (Streamable HTTP), and the three tools.
+- Shows a copy-paste connection snippet for Claude Desktop / ChatGPT.
+- Links to a `/.well-known/ai-plugin.json`–style descriptor served from `public/` so AI directories can index it.
+
+No interactive UI, no auth on this page — pure documentation. Zero impact on existing routes.
+
+### 4. SEO + robots
+
+- Add `/agents` to `sitemap.xml` and `llms.txt`.
+- Allow the MCP path in `robots.txt`.
+
+## What we deliberately do NOT do
+
+- No changes to `submit-move-request`, `notify-companies`, `process-matches`, `geocode-address`, or any frontend submission code.
+- No new database tables. Only an additive nullable `source` column (safe migration, no backfill needed).
+- No payment, no account creation for agents in v1. Agents pass `customerEmail` + `customerPhone` exactly like the web form requires.
+- No streaming/conversational tools — MCP tools are request/response only, matching how movers actually need bookings to arrive.
+
+## Technical details
+
+### Files added
+- `supabase/functions/mcp-server/index.ts` — Hono + mcp-lite, three tools.
+- `supabase/functions/mcp-server/tools.ts` — tool handlers that internally `fetch` `geocode-address` and insert via service role using the shared Zod schema.
+- `supabase/functions/mcp-server/config.toml` — `verify_jwt = false` (public, like `submit-move-request`).
+- `src/pages/Agents.tsx` — documentation page.
+- `public/.well-known/ai-plugin.json` — minimal descriptor pointing to the MCP endpoint.
+- Route added to `src/config/routes.tsx`.
+
+### Files changed
+- `src/components/layout/Footer.tsx` — small "For AI agents" link.
+- `public/sitemap.xml`, `public/llms.txt`, `public/robots.txt`.
+
+### Migration
+```sql
+ALTER TABLE move_requests
+  ADD COLUMN source text DEFAULT 'web';
+```
+(Nullable-safe, no RLS changes — existing policies still apply.)
+
+### Required headers (per MCP spec)
+The function must accept `Accept: application/json, text/event-stream` on POST — handled by `mcp-lite`'s `StreamableHttpTransport` automatically.
+
+### Reused, not duplicated
+- Validation: imports `moveRequestSchema` from `submit-move-request/validation.ts`.
+- Geocoding: `fetch`es the existing `geocode-address` function with the service role key.
+- Matching: after insert, `fetch`es `notify-companies` exactly like the web path does.
+
+## Risk review
+
+| Risk | Mitigation |
+|---|---|
+| Agents spam fake bookings | Per-IP rate limit + `source='mcp'` flag so admin can filter/disable. |
+| Movers get low-quality leads | Same Zod validation as web form; phone + email are required and format-checked. |
+| Breaking the web submission path | Zero shared code paths modified. New function is fully isolated. |
+| MCP spec drift | `mcp-lite ^0.10.0` is actively maintained and recommended in Lovable knowledge. |
+| Geocoding cost spike | `check_service_area` geocodes once and is cheap; `submit_move_request` geocodes twice (same as web). Rate limit caps blast radius. |
+
+## Out of scope (future)
+
+- Agent authentication via API keys + per-key quotas.
+- Quote estimation tool (needs pricing logic we don't have yet).
+- Webhook back to the agent when a mover accepts (needs assignment-status notifications, which the admin-side feature you mentioned will design).
