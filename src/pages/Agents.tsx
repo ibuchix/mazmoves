@@ -1,6 +1,8 @@
 // Agents.tsx
-// Public documentation page describing the HouseMove MCP endpoint for AI agents.
-// Pure docs — no interactive UI, no auth. Linked from the footer.
+// Public documentation page for the HouseMove MCP endpoint.
+// Hardened to avoid exposing internal architecture, rate-limit numbers,
+// matching radius, pipeline details, or audit hints. Agents discover
+// available tools and schemas via the standard MCP tools/list call.
 
 import { Helmet } from "react-helmet-async";
 
@@ -32,8 +34,7 @@ export default function Agents() {
         </h1>
         <p className="text-lg mb-8">
           HouseMove exposes a Model Context Protocol (MCP) endpoint so AI agents can
-          book UK house moves on behalf of their users. The matching, geocoding, and
-          notification pipeline is identical to the human form.
+          book UK house moves on behalf of their users.
         </p>
 
         <section className="mb-10">
@@ -42,25 +43,18 @@ export default function Agents() {
             <code>{MCP_URL}</code>
           </pre>
           <p className="mt-3 text-sm text-slate-600">
-            Transport: <strong>Streamable HTTP</strong>. No API key required in v1.
-            Limits: 2 submissions and 30 tool calls per IP per 24 hours.
+            Transport: <strong>Streamable HTTP</strong>. Rate-limited; contact us if you
+            need higher limits for a legitimate integration.
           </p>
         </section>
 
         <section className="mb-10">
           <h2 className="font-montserrat font-bold text-2xl text-brand-navy mb-3">Tools</h2>
-          <ul className="space-y-4">
-            <li>
-              <strong className="text-brand-royal">get_required_fields</strong> — returns
-              the JSON schema your agent must fill before submitting. Call it once at
-              the start of a session so you know what to collect from the user.
-            </li>
-            <li>
-              <strong className="text-brand-royal">submit_move_request</strong> — submits
-              a move request. We geocode the addresses, insert the request, and notify
-              nearby moving companies. Returns a request id.
-            </li>
-          </ul>
+          <p>
+            Call <code>tools/list</code> on the endpoint to discover the available
+            tools and their input schemas. This is the standard MCP discovery path
+            and is all your agent needs to get started.
+          </p>
         </section>
 
         <section className="mb-10">
@@ -80,9 +74,8 @@ export default function Agents() {
             What happens after submission
           </h2>
           <p>
-            Once a request is submitted, HouseMove finds moving companies within a 25-mile
-            radius of either the pickup or delivery address and notifies them. Companies
-            then contact the user directly using the phone and email provided.
+            HouseMove matches each request to suitable UK moving companies, who then
+            contact the user directly using the details provided.
           </p>
         </section>
 
@@ -92,8 +85,12 @@ export default function Agents() {
           </h2>
           <p>
             Only submit move requests with the user's explicit consent and accurate
-            contact details. Submissions are tagged so HouseMove staff can audit agent
-            traffic and revoke access if abuse is detected.
+            contact details. Abuse or low-quality traffic may result in access being
+            revoked. For partnership or higher-volume access, email{" "}
+            <a className="text-brand-royal underline" href="mailto:help@housemove.co">
+              help@housemove.co
+            </a>
+            .
           </p>
         </section>
       </main>
