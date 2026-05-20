@@ -172,23 +172,24 @@ const REQUIRED_FIELDS_SCHEMA = {
 const mcpServer = new McpServer({
   name: "housemove-mcp",
   version: "1.0.0",
+  schemaAdapter: (schema: unknown) => zodToJsonSchema(schema),
 });
 
-mcpServer.tool({
-  name: "get_required_fields",
+mcpServer.tool("get_required_fields", {
   description:
     "Returns the JSON schema of fields required to submit a UK house-move request via submit_move_request. Call this first so you know what to collect from the user.",
-  inputSchema: { type: "object", properties: {} },
-  handler: async () => {
-    return {
-      content: [{ type: "text", text: JSON.stringify(REQUIRED_FIELDS_SCHEMA, null, 2) }],
-    };
-  },
+  inputSchema: z.object({}),
+  handler: () => ({
+    content: [{ type: "text", text: JSON.stringify(REQUIRED_FIELDS_SCHEMA, null, 2) }],
+  }),
 });
 
-mcpServer.tool({
-  name: "submit_move_request",
+mcpServer.tool("submit_move_request", {
   description:
+    "Submits a UK house-move request on behalf of a human user. HouseMove will match the request to nearby moving companies who will then contact the user directly. Returns the request id and matching status.",
+  inputSchema: moveRequestSchema,
+  handler: async (input: unknown, ctx: { request?: Request } | undefined) => {
+
     "Submits a UK house-move request on behalf of a human user. HouseMove will match the request to nearby moving companies who will then contact the user directly. Returns the request id and matching status.",
   inputSchema: REQUIRED_FIELDS_SCHEMA,
   handler: async (input: unknown, ctx: { request?: Request } | undefined) => {
