@@ -38,7 +38,7 @@ Today, `submit-move-request` blocks non-browser callers via `verifyOrigin`. Agen
 
 A single public page at `/agents` (linked from the footer in small text) that:
 
-- Explains the MCP endpoint URL, transport (Streamable HTTP), and the three tools.
+- Explains the MCP endpoint URL, transport (Streamable HTTP), and the two tools.
 - Shows a copy-paste connection snippet for Claude Desktop / ChatGPT.
 - Links to a `/.well-known/ai-plugin.json`–style descriptor served from `public/` so AI directories can index it.
 
