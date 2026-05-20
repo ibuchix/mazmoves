@@ -299,6 +299,7 @@ mcpServer.tool("submit_move_request", {
 // --- HTTP transport via Hono --------------------------------------------
 const app = new Hono();
 const transport = new StreamableHttpTransport();
+const httpHandler = transport.bind(mcpServer);
 
 app.options("/*", (c) => new Response(null, { headers: corsHeaders }));
 
@@ -311,11 +312,12 @@ app.all("/*", async (c) => {
       { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } },
     );
   }
-  const res = await transport.handleRequest(c.req.raw, mcpServer);
+  const res = await httpHandler(c.req.raw);
   // Merge CORS headers into MCP response
   const merged = new Headers(res.headers);
   for (const [k, v] of Object.entries(corsHeaders)) merged.set(k, v);
   return new Response(res.body, { status: res.status, headers: merged });
 });
+
 
 Deno.serve(app.fetch);
