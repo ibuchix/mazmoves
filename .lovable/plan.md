@@ -1,75 +1,138 @@
-# Harden the public `/agents` page
+# Proxy the MCP endpoint and harden the agent attack surface
 
 ## Goal
 
-Keep `/agents` useful for legitimate AI agents (discoverable, enough to connect and call tools) while removing the operational and business detail that helps attackers or competitors.
+Stop publishing the raw Supabase functions hostname, and tighten the MCP surface so it can't be turned into a spam/abuse vector against the move-requests pipeline — while still letting legitimate AI agents submit moves.
 
-## What the page reveals today (and shouldn't)
+## Part 1 — Dedicated proxy edge function
 
-1. **Raw Supabase functions hostname** (`*.functions.supabase.co/mcp-server`) — leaks our infra provider and exact function name, making it trivial to fingerprint and target other functions on the same project.
-2. **Exact rate limits** ("2 submissions and 30 tool calls per IP per 24 hours") — tells an abuser precisely how to stay under the threshold and how many IPs they need.
-3. **Internal matching rule** ("25-mile radius of pickup or delivery") — a core business rule we'd rather not publish; it's competitive info and helps spammers craft addresses that always match.
-4. **Pipeline internals** ("geocode the addresses, insert the request, notify nearby moving companies") — describes our backend flow.
-5. **Audit/abuse-detection hint** ("Submissions are tagged so HouseMove staff can audit agent traffic") — tells abusers exactly what signal we use.
-6. **Tool input schema disclosure path** — we tell agents to call `get_required_fields` first, which is fine, but the page itself doesn't need to enumerate tools by exact internal name.
+Add a new edge function with a **generic, non-descriptive name**: `agent-bridge`. Its only job is to forward requests to the internal `mcp-server` function and stream the response back.
 
-## Proposed changes
+- Public URL advertised everywhere: `https://tcyulkuyfptlisfyefnn.functions.supabase.co/agent-bridge` (and later, if a custom-domain rewrite is added, `https://housemove.co/agent-bridge`).
+- `mcp-server` becomes the internal name. It stops being referenced in `Agents.tsx`, `ai-plugin.json`, or `llms.txt`.
+- The proxy forwards method, body, and the MCP-required headers (`Content-Type`, `Accept: application/json, text/event-stream`, `Mcp-Session-Id` if present). It streams the response body so SSE works.
+- `verify_jwt = false` (same as `mcp-server`; auth model is IP-based rate limiting).
+- CORS preserved.
 
-### 1. Hide the raw Supabase URL behind our own domain
+Files:
+- `supabase/functions/agent-bridge/index.ts` — proxy.
+- `supabase/functions/agent-bridge/config.toml` — `verify_jwt = false`.
+- `src/pages/Agents.tsx` — endpoint constant → `agent-bridge` URL.
+- `public/.well-known/ai-plugin.json` — `url` → `agent-bridge` URL.
 
-Add a same-origin proxy route on `housemove.co` that forwards to the Supabase function:
+## Part 2 — Attack-surface review and mitigations
 
-```text
-POST https://housemove.co/mcp  ->  https://<ref>.functions.supabase.co/mcp-server
-```
+The MCP path opens these risks today. Each gets a concrete fix.
 
-Two options for the proxy (pick one in the technical section):
-- A new edge function `mcp` whose only job is to forward to `mcp-server` (cleanest, but adds one hop).
-- A Netlify/host rewrite in `public/_redirects` (zero hops, no code).
+### Risk 1 — IP-based rate limit is bypassable
 
-The public docs only ever advertise `https://housemove.co/mcp`. The Supabase URL stops appearing in the page, in `ai-plugin.json`, and in `llms.txt`.
+`mcp-server` rate-limits `2 submissions / IP / 24h`. An attacker with a residential proxy pool or a botnet trivially gets thousands of IPs. The cap also doesn't apply to the proxy hop (proxy forwards client IP via `X-Forwarded-For`, which is itself spoofable from outside Supabase's edge).
 
-### 2. Rewrite the page copy to be minimal and neutral
+**Fix:** Layer additional caps inside `mcp-server` that don't depend solely on IP:
+- Per-email cap: max 2 MCP submissions per `customer_email` per 24h (mirrors the human-side per-email cap in `submit-move-request`).
+- Per-phone cap: max 2 per `customer_phone` per 24h.
+- Global MCP cap: max N submissions across all MCP traffic per hour (circuit breaker — protects the pipeline if one attacker gets through). N defaults to 20/hour; admin-tunable later.
+- Trust the IP only from a known header chain. Inside `agent-bridge` we set `X-Agent-Bridge-Client-IP` from Supabase's own `x-forwarded-for` and have `mcp-server` prefer that header. Outside callers can't set it because they hit `agent-bridge`, not `mcp-server` directly — but `mcp-server` is still publicly reachable, so see Risk 2.
 
-Keep: what HouseMove is, that there's an MCP endpoint, the endpoint URL, the Claude Desktop snippet, a short responsible-use note, and a contact email for agent operators.
+### Risk 2 — `mcp-server` is still publicly reachable
 
-Remove:
-- Specific rate-limit numbers — replace with "Rate-limited; contact us for higher limits."
-- The 25-mile radius rule — replace with "We match requests to nearby UK moving companies."
-- The "geocode + insert + notify" pipeline description — replace with "Matched companies will contact the user directly."
-- The "submissions are tagged for audit" line — drop entirely (we still tag internally; we just don't advertise it).
-- The explicit tool list with internal names — replace with one sentence: "Call `tools/list` on the endpoint to discover available tools and their schemas." That's the standard MCP discovery path, so legitimate agents lose nothing.
+Even after we advertise `agent-bridge`, the underlying `mcp-server` URL is discoverable (DNS enumeration of `*.functions.supabase.co/<project>/...`, prior screenshots, archive.org, etc.). An attacker who finds it can bypass the proxy and any header-based trust.
 
-### 3. Tighten `ai-plugin.json` and `llms.txt`
+**Fix:** Require a shared secret between proxy and server.
+- New secret `AGENT_BRIDGE_SECRET` (random 32 bytes), available to both functions.
+- `agent-bridge` adds header `X-Agent-Bridge-Auth: <secret>` on every forwarded request.
+- `mcp-server` rejects any request missing or mismatching that header with `403`.
+- Result: direct calls to `mcp-server` fail. The only working path is through `agent-bridge`, where our rate limits and (future) bot defenses apply.
 
-- `ai-plugin.json`: change `url` to `https://housemove.co/mcp`. Shorten `description_for_model` so it doesn't describe internal matching logic.
-- `llms.txt`: keep the `/agents` link, but trim the one-line description to "MCP endpoint for AI agents."
+### Risk 3 — Pipeline pollution
 
-### 4. Optional follow-up (not in this plan unless you want it)
+Even a single successful MCP submission triggers `geocode-address` (paid Mapbox calls) and `notify-companies` (emails real movers). 10 bad rows = 10 geocode calls and potentially dozens of unwanted emails to companies, eroding trust in the matching feed.
 
-- Move `/agents` behind a "request access" flow (email us, we issue a token) instead of a fully public endpoint. This is a bigger change to the MCP server itself and changes the abuse model, so I'd do it as a separate plan if you want it.
+**Fix:**
+- Add a `confidence` field on insert (`source='mcp'` rows get `confidence='unverified'`).
+- `notify-companies` already runs on insert — modify it to **defer** unverified MCP submissions: don't email companies immediately; queue for manual or automated review. (Implementation: a small `mcp_submission_review` table, or a `pending_review` boolean on `move_requests`. The matcher only runs once an admin marks the row verified, or a future verification step — email confirmation, callback, etc. — succeeds.)
+- Phase-1 minimum: skip `notify-companies` dispatch for MCP rows. Admin marks them ready from the existing admin dashboard. This stops cold-start abuse without building a verification flow yet.
+
+### Risk 4 — Information leakage in the proxy itself
+
+A naive proxy that returns upstream error bodies verbatim leaks the upstream URL, stack traces, or Supabase error shapes.
+
+**Fix:** `agent-bridge` returns generic `{ error: "upstream_unavailable" }` on non-2xx upstream responses (still preserves status code), and never echoes the upstream `URL` or headers. Logs the full detail server-side.
+
+### Risk 5 — Discovery surface
+
+`ai-plugin.json` lives at `/.well-known/ai-plugin.json` and is crawlable. Right now it's harmless after the prior trim, but it does confirm the endpoint exists. Acceptable trade-off (the whole point is that legitimate agents can find us), but worth noting.
+
+**No change.** Mentioned for completeness.
+
+## Out of scope (future plans)
+
+- Cloudflare Turnstile / proof-of-work on `agent-bridge` to slow bot pools.
+- Per-agent API keys (move from anonymous-with-caps to identified-with-quota).
+- Custom-domain rewrite (`housemove.co/agent-bridge` → Supabase) once Lovable hosting supports it.
+- Building the actual verification/review flow for Risk 3 beyond "skip notify for MCP rows."
 
 ## Technical section
 
-**Proxy choice — recommendation: host rewrite via `public/_redirects`.**
+### `agent-bridge` proxy (sketch)
 
-```text
-/mcp  https://tcyulkuyfptlisfyefnn.functions.supabase.co/mcp-server  200
-/mcp/*  https://tcyulkuyfptlisfyefnn.functions.supabase.co/mcp-server/:splat  200
+```ts
+// supabase/functions/agent-bridge/index.ts
+const TARGET = `${Deno.env.get("SUPABASE_URL")}/functions/v1/mcp-server`;
+const SECRET = Deno.env.get("AGENT_BRIDGE_SECRET")!;
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+
+  const fwdHeaders = new Headers();
+  // Forward only what MCP needs
+  for (const h of ["content-type", "accept", "mcp-session-id"]) {
+    const v = req.headers.get(h);
+    if (v) fwdHeaders.set(h, v);
+  }
+  fwdHeaders.set("X-Agent-Bridge-Auth", SECRET);
+  fwdHeaders.set("X-Agent-Bridge-Client-IP", req.headers.get("x-forwarded-for") ?? "unknown");
+  fwdHeaders.set("Authorization", `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`); // mcp-server has verify_jwt=false but anon needs this
+
+  const upstream = await fetch(TARGET, { method: req.method, headers: fwdHeaders, body: req.body });
+
+  if (!upstream.ok && upstream.status >= 500) {
+    return new Response(JSON.stringify({ error: "upstream_unavailable" }),
+      { status: upstream.status, headers: { ...corsHeaders, "Content-Type": "application/json" }});
+  }
+
+  const out = new Headers(upstream.headers);
+  for (const [k, v] of Object.entries(corsHeaders)) out.set(k, v);
+  return new Response(upstream.body, { status: upstream.status, headers: out });
+});
 ```
 
-Pros: no new edge function, no extra cold-start latency, no code to maintain. The Supabase hostname still appears in DNS/TLS if someone inspects deeply, but it's no longer in our docs or discovery files, which is the goal.
+### `mcp-server` changes
 
-Cons: the rewrite is host-specific (Netlify/Lovable hosting). If we ever move hosts we re-add the rule.
+- Read shared secret on every request; `403` if missing/wrong.
+- Prefer `X-Agent-Bridge-Client-IP` over `x-forwarded-for` for IP-based caps.
+- Add per-email + per-phone + global hourly caps in `submit_move_request` handler.
+- Drop the fire-and-forget `notify-companies` call; insert with a `pending_review` flag instead.
 
-If you'd rather have a real edge-function proxy (more control, can add headers, can later add auth), I'll wire `supabase/functions/mcp/index.ts` that forwards `req.method`, headers, and body to `mcp-server` and streams the response back. Slightly more code, one extra hop.
+### Database migration
 
-**CORS / MCP transport note:** the Streamable HTTP transport needs `Accept: application/json, text/event-stream` to pass through unchanged. A host rewrite preserves headers; an edge-function proxy must forward them explicitly and stream the response body (don't `await res.json()`).
+```sql
+alter table move_requests add column if not exists pending_review boolean not null default false;
+-- For MCP rows we set pending_review = true on insert.
+-- Existing matcher/notify code paths must check this flag and skip notifying companies until it's cleared.
+```
 
-**Files touched (rewrite path):**
-- `src/pages/Agents.tsx` — rewrite copy, drop tool-by-name list and rate-limit/radius details, change endpoint URL constant to `https://housemove.co/mcp`.
-- `public/ai-plugin.json` (well-known) — update `url`, trim `description_for_model`.
-- `public/llms.txt` — trim `/agents` line.
-- `public/_redirects` — add the two `/mcp` rewrite rules.
+Admin UI changes to clear the flag are a follow-up — not in this plan.
 
-**No backend changes.** The `mcp-server` function, rate limits, `source='mcp'` tagging, and `ip_origin` tracking all stay exactly as they are — we're only changing what we publish about them.
+### Files touched
+
+- `supabase/functions/agent-bridge/index.ts` (new)
+- `supabase/functions/agent-bridge/config.toml` (new)
+- `supabase/functions/mcp-server/index.ts` (auth check, IP header, extra caps, set pending_review, drop notify)
+- `supabase/functions/notify-companies/index.ts` (skip if pending_review)
+- `supabase/migrations/<new>.sql` (add `pending_review`)
+- `src/pages/Agents.tsx` (URL change)
+- `public/.well-known/ai-plugin.json` (URL change)
+- Secret `AGENT_BRIDGE_SECRET` added via the secrets tool before deploy.
+
+No frontend behavior changes for human users.
