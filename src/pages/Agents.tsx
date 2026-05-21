@@ -6,7 +6,7 @@
 
 import { Helmet } from "react-helmet-async";
 
-const MCP_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.functions.supabase.co/mcp-server`;
+const MCP_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.functions.supabase.co/agent-bridge`;
 
 export default function Agents() {
   const claudeSnippet = `{

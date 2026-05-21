@@ -68,6 +68,18 @@ serve(async (req) => {
       );
     }
 
+    // Defensive guard: never notify companies for rows still pending review.
+    // Human/web submissions always have pending_review=false, so this is a
+    // no-op for them. MCP-sourced rows are only released once an admin
+    // clears the flag.
+    if (moveRequest.pending_review === true) {
+      console.log(`notify-companies: skipping ${moveRequestId} — pending_review=true`);
+      return new Response(
+        JSON.stringify({ success: true, skipped: true, reason: "pending_review" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     // 2. Find nearby companies — UNION of pickup AND delivery searches.
     const pickupResult = await findNearbyCompanies(supabase, moveRequest, false);
     const deliveryResult = await findNearbyCompanies(supabase, moveRequest, true);
