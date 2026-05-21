@@ -1,0 +1,2 @@
+ALTER TABLE public.move_requests ADD COLUMN IF NOT EXISTS pending_review boolean NOT NULL DEFAULT false;
+CREATE INDEX IF NOT EXISTS idx_move_requests_pending_review ON public.move_requests(pending_review) WHERE pending_review = true;

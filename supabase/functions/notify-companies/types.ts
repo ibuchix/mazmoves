@@ -26,6 +26,7 @@ export interface MoveRequest {
   requested_date?: string | null;
   move_type?: string | null;
   estimated_size?: string | null;
+  pending_review?: boolean | null;
 }
 
 export interface Assignment {

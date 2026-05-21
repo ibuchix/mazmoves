@@ -7,7 +7,7 @@
   "auth": { "type": "none" },
   "api": {
     "type": "mcp",
-    "url": "https://tcyulkuyfptlisfyefnn.functions.supabase.co/mcp-server",
+    "url": "https://tcyulkuyfptlisfyefnn.functions.supabase.co/agent-bridge",
     "transport": "streamable-http"
   },
   "logo_url": "https://housemove.co/housemove-logo.png",
