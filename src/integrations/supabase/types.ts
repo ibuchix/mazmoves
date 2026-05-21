@@ -779,6 +779,7 @@ export type Database = {
           inventory_list: Json | null
           ip_origin: string | null
           move_type: string | null
+          pending_review: boolean
           pickup_address: Json
           pickup_latitude: number | null
           pickup_location: unknown
@@ -804,6 +805,7 @@ export type Database = {
           inventory_list?: Json | null
           ip_origin?: string | null
           move_type?: string | null
+          pending_review?: boolean
           pickup_address: Json
           pickup_latitude?: number | null
           pickup_location?: unknown
@@ -829,6 +831,7 @@ export type Database = {
           inventory_list?: Json | null
           ip_origin?: string | null
           move_type?: string | null
+          pending_review?: boolean
           pickup_address?: Json
           pickup_latitude?: number | null
           pickup_location?: unknown
