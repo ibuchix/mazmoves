@@ -29,10 +29,18 @@ The MCP path opens these risks today. Each gets a concrete fix.
 `mcp-server` rate-limits `2 submissions / IP / 24h`. An attacker with a residential proxy pool or a botnet trivially gets thousands of IPs. The cap also doesn't apply to the proxy hop (proxy forwards client IP via `X-Forwarded-For`, which is itself spoofable from outside Supabase's edge).
 
 **Fix:** Layer additional caps inside `mcp-server` that don't depend solely on IP:
-- Per-email cap: max 2 MCP submissions per `customer_email` per 24h (mirrors the human-side per-email cap in `submit-move-request`).
-- Per-phone cap: max 2 per `customer_phone` per 24h.
+- Per-email cap: max 2 MCP submissions per `customer_email` per 24h.
+- Per-phone cap: max 2 MCP submissions per `customer_phone` per 24h.
 - Global MCP cap: max N submissions across all MCP traffic per hour (circuit breaker — protects the pipeline if one attacker gets through). N defaults to 20/hour; admin-tunable later.
 - Trust the IP only from a known header chain. Inside `agent-bridge` we set `X-Agent-Bridge-Client-IP` from Supabase's own `x-forwarded-for` and have `mcp-server` prefer that header. Outside callers can't set it because they hit `agent-bridge`, not `mcp-server` directly — but `mcp-server` is still publicly reachable, so see Risk 2.
+
+**Isolation from the human submission path (critical):**
+- All new caps live **only inside `mcp-server`**. The `submit-move-request` function (used by the homepage form) is not touched. Its existing 5-per-email-per-hour cap stays exactly as-is.
+- Every cap query in `mcp-server` filters with `.eq('source', 'mcp')`, the same way the current per-IP cap already does. This means:
+  - A human who submits twice from the website today does **not** consume any agent quota.
+  - An agent submission does **not** consume any human quota.
+  - The two pipelines share the `move_requests` table but never count each other's rows.
+- Acceptance check before shipping: submit two MCP requests with email X, then submit a human request from the website with the same email X — the human submission must still succeed.
 
 ### Risk 2 — `mcp-server` is still publicly reachable
 
