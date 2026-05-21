@@ -122,6 +122,7 @@ export type Database = {
           stripe_customer_id: string | null
           stripe_payment_method_id: string | null
           subscription_status: string | null
+          terms_accepted_at: string | null
           updated_at: string | null
           vat_number: string | null
           verification_date: string | null
@@ -161,6 +162,7 @@ export type Database = {
           stripe_customer_id?: string | null
           stripe_payment_method_id?: string | null
           subscription_status?: string | null
+          terms_accepted_at?: string | null
           updated_at?: string | null
           vat_number?: string | null
           verification_date?: string | null
@@ -200,6 +202,7 @@ export type Database = {
           stripe_customer_id?: string | null
           stripe_payment_method_id?: string | null
           subscription_status?: string | null
+          terms_accepted_at?: string | null
           updated_at?: string | null
           vat_number?: string | null
           verification_date?: string | null
@@ -638,6 +641,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      marketing_email_subscribers: {
+        Row: {
+          company_id: string
+          created_at: string
+          email: string
+          id: string
+          source: string
+          subscribed_at: string
+          unsubscribed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          email: string
+          id?: string
+          source?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          email?: string
+          id?: string
+          source?: string
+          subscribed_at?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       move_assignments: {
         Row: {
@@ -1680,6 +1716,7 @@ export type Database = {
               stripe_customer_id: string | null
               stripe_payment_method_id: string | null
               subscription_status: string | null
+              terms_accepted_at: string | null
               updated_at: string | null
               vat_number: string | null
               verification_date: string | null
