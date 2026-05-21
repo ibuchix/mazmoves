@@ -1455,13 +1455,21 @@ export type Database = {
         Returns: string
       }
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
-      find_companies_within_radius: {
-        Args: { point: unknown; radius_miles: number }
-        Returns: {
-          distance: number
-          id: string
-        }[]
-      }
+      find_companies_within_radius:
+        | {
+            Args: { point: unknown; radius_miles: number }
+            Returns: {
+              distance: number
+              id: string
+            }[]
+          }
+        | {
+            Args: { move_type?: string; point: unknown; radius_miles: number }
+            Returns: {
+              distance: number
+              id: string
+            }[]
+          }
       find_nearby_companies: {
         Args: {
           delivery_lat: number
