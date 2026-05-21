@@ -56,10 +56,21 @@ Even after we advertise `agent-bridge`, the underlying `mcp-server` URL is disco
 
 Even a single successful MCP submission triggers `geocode-address` (paid Mapbox calls) and `notify-companies` (emails real movers). 10 bad rows = 10 geocode calls and potentially dozens of unwanted emails to companies, eroding trust in the matching feed.
 
-**Fix:**
-- Add a `confidence` field on insert (`source='mcp'` rows get `confidence='unverified'`).
-- `notify-companies` already runs on insert — modify it to **defer** unverified MCP submissions: don't email companies immediately; queue for manual or automated review. (Implementation: a small `mcp_submission_review` table, or a `pending_review` boolean on `move_requests`. The matcher only runs once an admin marks the row verified, or a future verification step — email confirmation, callback, etc. — succeeds.)
-- Phase-1 minimum: skip `notify-companies` dispatch for MCP rows. Admin marks them ready from the existing admin dashboard. This stops cold-start abuse without building a verification flow yet.
+**Fix (Phase-1 minimum):**
+- Add a `pending_review` boolean column on `move_requests`. Default `false` (every existing row and every future human row stays `false`).
+- `mcp-server` is the **only** writer that ever sets `pending_review = true`, and only for its own inserts (`source='mcp'`).
+- `mcp-server` stops fire-and-forgetting `notify-companies` for its inserts. Admin marks the row ready from the admin dashboard, which clears `pending_review` and then invokes `notify-companies` normally.
+- `notify-companies` gets one defensive guard: if invoked with a row where `pending_review = true`, it returns early without geocoding or emailing. Belt-and-braces — the human path never sets that flag, so the guard is a no-op for human submissions.
+
+**Isolation from the human submission path (critical — must not regress):**
+- The homepage form → `submit-move-request` → `notify-companies` chain is **not modified**. `submit-move-request` continues to insert rows with `source='web'` and `pending_review` defaulted to `false`, and continues to call `notify-companies` exactly as today.
+- `notify-companies` keeps its current behaviour for every row where `pending_review = false`. Human rows are always `false`, so for them: same matching, same `move_assignments` writes, same company emails, same timing, same RLS, same logs. Zero behavioural change.
+- The new column is added with `DEFAULT false NOT NULL` so existing `select *` queries keep working unchanged.
+- Acceptance checks before shipping:
+  1. Submit a human request from the homepage → row inserted with `source='web'`, `pending_review=false` → `notify-companies` runs end-to-end and matched companies receive emails (same as today).
+  2. Submit an MCP request → row inserted with `source='mcp'`, `pending_review=true` → `notify-companies` is **not** called, no companies emailed.
+  3. Admin clears `pending_review` on the MCP row → `notify-companies` runs and behaves identically to the human path from that point on.
+  4. Regression check on `move_assignments`, `company_invoices`, free-assignments counters: nothing changes for human rows because their code path is untouched.
 
 ### Risk 4 — Information leakage in the proxy itself
 
