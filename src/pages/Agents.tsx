@@ -55,7 +55,7 @@ export default function Agents() {
       </Helmet>
 
       <div
-        className="bg-[#0a0a1a] text-slate-300"
+        className="bg-[#0a0a1a] text-slate-300 text-left"
         style={{ fontFamily: "'DM Sans', sans-serif" }}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
