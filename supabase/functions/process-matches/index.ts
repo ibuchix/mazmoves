@@ -34,6 +34,7 @@ interface PendingRequest {
   id: string;
   pickup_location: unknown | null;
   delivery_location: unknown | null;
+  move_type: string | null;
 }
 
 const matchOne = async (
@@ -48,6 +49,7 @@ const matchOne = async (
     const { data, error } = await supabase.rpc("find_companies_within_radius", {
       point,
       radius_miles: RADIUS_MILES,
+      move_type: request.move_type ?? null,
     });
     if (error) {
       console.error(`process-matches: RPC error for ${label} on ${request.id}:`, error);
@@ -98,7 +100,7 @@ serve(async (req) => {
 
     const { data: requests, error: requestError } = await supabase
       .from("move_requests")
-      .select("id, pickup_location, delivery_location")
+      .select("id, pickup_location, delivery_location, move_type")
       .eq("status", "pending")
       .limit(BATCH_SIZE);
 

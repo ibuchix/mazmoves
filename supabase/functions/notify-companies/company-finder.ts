@@ -24,6 +24,7 @@ export const findNearbyCompanies = async (
     {
       point,
       radius_miles: RADIUS_MILES,
+      move_type: request.move_type ?? null,
     },
   );
 
