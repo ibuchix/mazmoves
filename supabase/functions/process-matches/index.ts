@@ -100,7 +100,7 @@ serve(async (req) => {
 
     const { data: requests, error: requestError } = await supabase
       .from("move_requests")
-      .select("id, pickup_location, delivery_location")
+      .select("id, pickup_location, delivery_location, move_type")
       .eq("status", "pending")
       .limit(BATCH_SIZE);
 
