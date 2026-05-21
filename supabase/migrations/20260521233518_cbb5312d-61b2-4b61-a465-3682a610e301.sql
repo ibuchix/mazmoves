@@ -1,10 +1,3 @@
--- Reference copy of the PostGIS RPC used by notify-companies and process-matches.
--- Matches verified+active companies within `radius_miles` of `point`.
--- When `move_type` is provided, only excludes companies whose service_areas.types
--- is a populated array that does NOT contain the move_type. Companies with no
--- declared type preference (missing key, null, non-array, or empty array) still
--- match every request.
-
 CREATE OR REPLACE FUNCTION find_companies_within_radius(
   point geometry,
   radius_miles float,
@@ -23,12 +16,12 @@ BEGIN
     ST_Distance(
       companies.location::geography,
       point::geography
-    ) * 0.000621371 AS distance -- meters to miles
+    ) * 0.000621371 AS distance
   FROM companies
   WHERE ST_DWithin(
     companies.location::geography,
     point::geography,
-    radius_miles * 1609.34  -- miles to meters
+    radius_miles * 1609.34
   )
   AND companies.is_verified = true
   AND companies.is_active = true
