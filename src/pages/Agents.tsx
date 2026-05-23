@@ -10,6 +10,7 @@
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Check, Copy } from "lucide-react";
+import { SeoHead } from "@/components/seo/SeoHead";
 
 const MCP_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.functions.supabase.co/agent-bridge`;
 
