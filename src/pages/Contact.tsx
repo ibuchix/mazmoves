@@ -16,6 +16,12 @@ export default function Contact() {
     url: "https://housemove.co",
     image: "https://housemove.co/housemove-logo.png",
     email: "help@housemove.co",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "United Kingdom",
+      addressLocality: "UK",
+      addressCountry: "GB",
+    },
     priceRange: "££",
     areaServed: "GB",
     openingHoursSpecification: [
