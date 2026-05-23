@@ -123,6 +123,7 @@ export type Database = {
           stripe_payment_method_id: string | null
           subscription_status: string | null
           terms_accepted_at: string | null
+          trial_started_at: string
           updated_at: string | null
           vat_number: string | null
           verification_date: string | null
@@ -163,6 +164,7 @@ export type Database = {
           stripe_payment_method_id?: string | null
           subscription_status?: string | null
           terms_accepted_at?: string | null
+          trial_started_at?: string
           updated_at?: string | null
           vat_number?: string | null
           verification_date?: string | null
@@ -203,6 +205,7 @@ export type Database = {
           stripe_payment_method_id?: string | null
           subscription_status?: string | null
           terms_accepted_at?: string | null
+          trial_started_at?: string
           updated_at?: string | null
           vat_number?: string | null
           verification_date?: string | null
@@ -1728,6 +1731,7 @@ export type Database = {
               stripe_payment_method_id: string | null
               subscription_status: string | null
               terms_accepted_at: string | null
+              trial_started_at: string
               updated_at: string | null
               vat_number: string | null
               verification_date: string | null

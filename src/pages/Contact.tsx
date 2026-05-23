@@ -1,5 +1,7 @@
 // Contact.tsx - Official contact page. Phone removed and address left blank
 // (in progress). Email updated to help@housemove.co.
+// Added PostalAddress to LocalBusiness JSON-LD for structured-data completeness.
+
 
 import { Mail, Clock, MapPin } from "lucide-react";
 import { Card } from "@/components/ui/card";
@@ -14,6 +16,12 @@ export default function Contact() {
     url: "https://housemove.co",
     image: "https://housemove.co/housemove-logo.png",
     email: "help@housemove.co",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "United Kingdom",
+      addressLocality: "UK",
+      addressCountry: "GB",
+    },
     priceRange: "££",
     areaServed: "GB",
     openingHoursSpecification: [
