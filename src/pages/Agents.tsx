@@ -41,13 +41,13 @@ export default function Agents() {
 
   return (
     <>
+      <SeoHead
+        title="HouseMove for AI Agents | MCP Endpoint"
+        description="Connect AI agents to HouseMove via the Model Context Protocol to book UK house moves on behalf of users."
+        path="/agents"
+        type="article"
+      />
       <Helmet>
-        <title>HouseMove for AI Agents | MCP Endpoint</title>
-        <meta
-          name="description"
-          content="Connect AI agents to HouseMove via the Model Context Protocol to book UK house moves on behalf of users."
-        />
-        <link rel="canonical" href="https://housemove.co/agents" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
