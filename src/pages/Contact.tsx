@@ -1,5 +1,7 @@
 // Contact.tsx - Official contact page. Phone removed and address left blank
 // (in progress). Email updated to help@housemove.co.
+// Added PostalAddress to LocalBusiness JSON-LD for structured-data completeness.
+
 
 import { Mail, Clock, MapPin } from "lucide-react";
 import { Card } from "@/components/ui/card";
