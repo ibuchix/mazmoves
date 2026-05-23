@@ -5,6 +5,7 @@
 // the light Navbar and slate Footer. Hardened to avoid exposing internal architecture,
 // rate-limit numbers, matching radius, pipeline details, or audit hints — agents
 // discover available tools and schemas via the standard MCP tools/list call.
+// 2026-05-23: Switched from raw Helmet to SeoHead component for Open Graph coverage.
 
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
