@@ -1,5 +1,6 @@
-// Contact.tsx - Official contact page. Phone removed and address left blank
-// (in progress). Email updated to help@housemove.co.
+// Contact.tsx - Official contact page. Phone removed.
+// Email updated to help@housemove.co.
+// Registered address: 66 Paul Street, London EC2A 4NA.
 // Added PostalAddress to LocalBusiness JSON-LD for structured-data completeness.
 
 
@@ -18,8 +19,9 @@ export default function Contact() {
     email: "help@housemove.co",
     address: {
       "@type": "PostalAddress",
-      streetAddress: "United Kingdom",
-      addressLocality: "UK",
+      streetAddress: "66 Paul Street",
+      addressLocality: "London",
+      postalCode: "EC2A 4NA",
       addressCountry: "GB",
     },
     priceRange: "££",
@@ -119,9 +121,12 @@ export default function Contact() {
                 <h2 className="font-montserrat font-semibold text-xl text-brand-slate mb-2">
                   Office Address
                 </h2>
-                <p className="font-roboto text-base text-brand-slateLight italic">
-                  Coming soon — our office address will be published here shortly.
-                </p>
+                <address className="font-roboto text-base text-brand-slate not-italic">
+                  66 Paul Street<br />
+                  London<br />
+                  EC2A 4NA<br />
+                  United Kingdom
+                </address>
               </div>
             </div>
           </Card>
