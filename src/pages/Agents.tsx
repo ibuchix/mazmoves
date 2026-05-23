@@ -5,10 +5,12 @@
 // the light Navbar and slate Footer. Hardened to avoid exposing internal architecture,
 // rate-limit numbers, matching radius, pipeline details, or audit hints — agents
 // discover available tools and schemas via the standard MCP tools/list call.
+// 2026-05-23: Switched from raw Helmet to SeoHead component for Open Graph coverage.
 
 import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import { Check, Copy } from "lucide-react";
+import { SeoHead } from "@/components/seo/SeoHead";
 
 const MCP_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.functions.supabase.co/agent-bridge`;
 
@@ -39,13 +41,13 @@ export default function Agents() {
 
   return (
     <>
+      <SeoHead
+        title="HouseMove for AI Agents | MCP Endpoint"
+        description="Connect AI agents to HouseMove via the Model Context Protocol to book UK house moves on behalf of users."
+        path="/agents"
+        type="article"
+      />
       <Helmet>
-        <title>HouseMove for AI Agents | MCP Endpoint</title>
-        <meta
-          name="description"
-          content="Connect AI agents to HouseMove via the Model Context Protocol to book UK house moves on behalf of users."
-        />
-        <link rel="canonical" href="https://housemove.co/agents" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
