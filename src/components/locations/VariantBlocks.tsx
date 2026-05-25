@@ -4,12 +4,12 @@ import { Waves, Train, GraduationCap, Landmark, Trees, Building2 } from "lucide-
 import type { VariantBlock } from "@/data/locations";
 
 const META: Record<VariantBlock, { title: string; icon: typeof Waves; accent: string }> = {
-  coastal: { title: "Coastal access & seafront parking", icon: Waves, accent: "text-brand-royal" },
-  commuter: { title: "London commuter moves", icon: Train, accent: "text-brand-navy" },
+  coastal: { title: "Coastal access & seafront parking", icon: Waves, accent: "text-brand-slate" },
+  commuter: { title: "London commuter moves", icon: Train, accent: "text-brand-slateLight" },
   student: { title: "Student & academic moves", icon: GraduationCap, accent: "text-brand-orange" },
   historic: { title: "Historic-centre access", icon: Landmark, accent: "text-brand-slate" },
   rural: { title: "Rural & long-driveway access", icon: Trees, accent: "text-brand-green" },
-  city: { title: "Cross-city & apartment-block moves", icon: Building2, accent: "text-brand-royal" },
+  city: { title: "Cross-city & apartment-block moves", icon: Building2, accent: "text-brand-slate" },
 };
 
 interface VariantSectionsProps {

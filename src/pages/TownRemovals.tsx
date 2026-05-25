@@ -82,11 +82,11 @@ export default function TownRemovals() {
       >
         <ol className="flex items-center gap-1 flex-wrap">
           <li>
-            <Link to="/" className="hover:text-brand-royal">Home</Link>
+            <Link to="/" className="hover:text-brand-slate">Home</Link>
           </li>
           <ChevronRight className="w-3 h-3" />
           <li>
-            <Link to="/removals" className="hover:text-brand-royal">Removals</Link>
+            <Link to="/removals" className="hover:text-brand-slate">Removals</Link>
           </li>
           <ChevronRight className="w-3 h-3" />
           <li className="text-brand-slate font-medium">{loc.name}</li>

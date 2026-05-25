@@ -20,7 +20,7 @@ export function NearbyTowns({ nearbySlugs }: NearbyTownsProps) {
             <Link
               key={loc.slug}
               to={`/removals/${loc.slug}`}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-royal text-brand-royal hover:bg-brand-royal hover:text-white transition-colors font-roboto"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-slate text-brand-slate hover:bg-brand-slate hover:text-white transition-colors font-roboto"
             >
               {loc.name}
               <ArrowRight className="w-4 h-4" />
@@ -29,7 +29,7 @@ export function NearbyTowns({ nearbySlugs }: NearbyTownsProps) {
         </div>
         <Link
           to="/removals"
-          className="text-brand-royal hover:text-brand-green underline font-roboto"
+          className="text-brand-slate hover:text-brand-green underline font-roboto"
         >
           See all locations we cover →
         </Link>
