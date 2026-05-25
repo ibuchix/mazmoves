@@ -49,7 +49,7 @@ export function TownHero({ townName, county, trustWord = "vetted" }: TownHeroPro
               House Removals in {townName}
             </h1>
             <p className="text-lg text-white/90 font-roboto mb-6 max-w-xl">
-              Compare free quotes from vetted {townName} movers in one place — no obligation, no chasing calls.
+              Compare free quotes from {trustWord} {townName} movers in one place, with no obligation and no chasing calls.
             </p>
             <ul className="space-y-2">
               {bullets.map((b) => (
