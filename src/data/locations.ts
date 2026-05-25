@@ -76,7 +76,7 @@ export const locations: Location[] = [
       { to: "Luton", oneBedBand: "£330-£470" },
       { to: "Leighton Buzzard", oneBedBand: "£260-£380" },
     ],
-    trustPoints: baseTrust("Milton Keynes"),
+    trustPoints: baseTrust("Milton Keynes", "verified"),
     faqs: [
       {
         q: "How do movers handle the Milton Keynes grid road system with larger vans?",
@@ -129,7 +129,7 @@ export const locations: Location[] = [
       { to: "Huntingdon", oneBedBand: "£250-£380" },
       { to: "Wisbech", oneBedBand: "£280-£420" },
     ],
-    trustPoints: baseTrust("Peterborough"),
+    trustPoints: baseTrust("Peterborough", "verified"),
     faqs: [
       {
         q: "Any specific access notes for the Cathedral Quarter or Cowgate area?",
@@ -180,7 +180,7 @@ export const locations: Location[] = [
       { to: "Ely", oneBedBand: "£220-£340" },
       { to: "Newmarket", oneBedBand: "£240-£360" },
     ],
-    trustPoints: baseTrust("Cambridge"),
+    trustPoints: baseTrust("Cambridge", "verified"),
     faqs: [
       {
         q: "Do movers know college access rules for student moves?",
@@ -489,7 +489,7 @@ export const locations: Location[] = [
       { to: "Ipswich", oneBedBand: "£420-£620" },
       { to: "King's Lynn", oneBedBand: "£380-£560" },
     ],
-    trustPoints: baseTrust("Norwich"),
+    trustPoints: baseTrust("Norwich", "verified"),
     faqs: [
       {
         q: "Do movers handle UEA student moves at the end of the academic year?",
@@ -594,7 +594,7 @@ export const locations: Location[] = [
       { to: "London", oneBedBand: "£900-£1,350" },
       { to: "Wisbech", oneBedBand: "£260-£400" },
     ],
-    trustPoints: baseTrust("King's Lynn"),
+    trustPoints: baseTrust("King's Lynn", "verified"),
     faqs: [
       {
         q: "Can a large van access the historic Tuesday Market Place?",
@@ -845,7 +845,7 @@ export const locations: Location[] = [
       { to: "Bury St Edmunds", oneBedBand: "£320-£480" },
       { to: "Norwich", oneBedBand: "£480-£700" },
     ],
-    trustPoints: baseTrust("Ipswich"),
+    trustPoints: baseTrust("Ipswich", "verified"),
     faqs: [
       {
         q: "Do you handle waterfront apartment moves with lift restrictions?",
@@ -948,7 +948,7 @@ export const locations: Location[] = [
       { to: "London", oneBedBand: "£780-£1,150" },
       { to: "Norwich", oneBedBand: "£480-£700" },
     ],
-    trustPoints: baseTrust("Bury St Edmunds"),
+    trustPoints: baseTrust("Bury St Edmunds", "verified"),
     faqs: [
       {
         q: "Can a large van access streets near the Abbey?",
@@ -1046,7 +1046,7 @@ export const locations: Location[] = [
       { to: "London", oneBedBand: "£720-£1,060" },
       { to: "Bury St Edmunds", oneBedBand: "£420-£620" },
     ],
-    trustPoints: baseTrust("Felixstowe"),
+    trustPoints: baseTrust("Felixstowe", "verified"),
     faqs: [
       {
         q: "Can movers handle seafront properties with restricted parking?",
@@ -1197,7 +1197,7 @@ export const locations: Location[] = [
       { to: "Brentwood", oneBedBand: "£380-£560" },
       { to: "Colchester", oneBedBand: "£480-£700" },
     ],
-    trustPoints: baseTrust("Southend-on-Sea"),
+    trustPoints: baseTrust("Southend-on-Sea", "verified"),
     faqs: [
       {
         q: "Can movers handle seafront access restrictions on Marine Parade?",
@@ -1252,7 +1252,7 @@ export const locations: Location[] = [
       { to: "Braintree", oneBedBand: "£260-£400" },
       { to: "Cambridge", oneBedBand: "£480-£700" },
     ],
-    trustPoints: baseTrust("Colchester"),
+    trustPoints: baseTrust("Colchester", "verified"),
     faqs: [
       {
         q: "Do movers handle University of Essex student moves at term-end?",
@@ -1309,7 +1309,7 @@ export const locations: Location[] = [
       { to: "Basildon", oneBedBand: "£280-£420" },
       { to: "Cambridge", oneBedBand: "£480-£700" },
     ],
-    trustPoints: baseTrust("Chelmsford"),
+    trustPoints: baseTrust("Chelmsford", "verified"),
     faqs: [
       {
         q: "Are Liverpool Street commuter moves expensive on weekends?",
@@ -1359,7 +1359,7 @@ export const locations: Location[] = [
       { to: "Chelmsford", oneBedBand: "£280-£420" },
       { to: "Brentwood", oneBedBand: "£240-£360" },
     ],
-    trustPoints: baseTrust("Basildon"),
+    trustPoints: baseTrust("Basildon", "verified"),
     faqs: [
       {
         q: "Do you cover Pitsea, Laindon and Vange?",
@@ -1407,7 +1407,7 @@ export const locations: Location[] = [
       { to: "Chelmsford", oneBedBand: "£280-£420" },
       { to: "Cambridge", oneBedBand: "£420-£620" },
     ],
-    trustPoints: baseTrust("Harlow"),
+    trustPoints: baseTrust("Harlow", "verified"),
     faqs: [
       {
         q: "Do you cover Newhall and Gilden Park?",
@@ -1505,7 +1505,7 @@ export const locations: Location[] = [
       { to: "Basildon", oneBedBand: "£240-£360" },
       { to: "Romford", oneBedBand: "£240-£360" },
     ],
-    trustPoints: baseTrust("Brentwood"),
+    trustPoints: baseTrust("Brentwood", "verified"),
     faqs: [
       {
         q: "Do you cover Shenfield, Hutton and Warley?",
@@ -1556,7 +1556,7 @@ export const locations: Location[] = [
       { to: "St Albans", oneBedBand: "£260-£400" },
       { to: "Dunstable", oneBedBand: "£220-£340" },
     ],
-    trustPoints: baseTrust("Luton"),
+    trustPoints: baseTrust("Luton", "verified"),
     faqs: [
       {
         q: "Do you cover student moves around the University of Bedfordshire campus?",
@@ -1611,7 +1611,7 @@ export const locations: Location[] = [
       { to: "Luton", oneBedBand: "£280-£420" },
       { to: "Northampton", oneBedBand: "£340-£500" },
     ],
-    trustPoints: baseTrust("Bedford"),
+    trustPoints: baseTrust("Bedford", "verified"),
     faqs: [
       {
         q: "Do you cover student moves at the University of Bedfordshire Bedford campus?",
@@ -1764,7 +1764,7 @@ export const locations: Location[] = [
       { to: "Dunstable", oneBedBand: "£220-£340" },
       { to: "Bedford", oneBedBand: "£280-£420" },
     ],
-    trustPoints: baseTrust("Leighton Buzzard"),
+    trustPoints: baseTrust("Leighton Buzzard", "verified"),
     faqs: [
       {
         q: "Do you cover Linslade and Heath and Reach?",
