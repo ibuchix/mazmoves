@@ -32,7 +32,7 @@ export function CommonRoutes({ townName, routes }: CommonRoutesProps) {
                   <td className="px-4 py-3 font-medium text-brand-slate">{r.to}</td>
                   <td className="px-4 py-3 text-gray-800">{r.oneBedBand}</td>
                   <td className="px-4 py-3 text-gray-600 text-sm hidden md:table-cell">
-                    {r.notes || "—"}
+                    {r.notes || "-"}
                   </td>
                 </tr>
               ))}

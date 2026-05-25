@@ -23,10 +23,11 @@ export default function TownRemovals() {
 
   if (!loc) return <Navigate to="/removals" replace />;
 
+  const trustWordCap = loc.trustWord.charAt(0).toUpperCase() + loc.trustWord.slice(1);
   const title =
     loc.titleVariant === "manAndVan"
-      ? `Man and Van in ${loc.name} — Free Quotes from Verified Movers | HouseMove`
-      : `House Removals in ${loc.name} — Free Quotes from Verified Movers | HouseMove`;
+      ? `Man and Van in ${loc.name} | Free Quotes from ${trustWordCap} Movers | HouseMove`
+      : `House Removals in ${loc.name} | Free Quotes from ${trustWordCap} Movers | HouseMove`;
 
   const path = `/removals/${loc.slug}`;
   const url = `${SITE}${path}`;
@@ -43,7 +44,7 @@ export default function TownRemovals() {
     {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
-      name: `HouseMove — Removals in ${loc.name}`,
+      name: `HouseMove, Removals in ${loc.name}`,
       url,
       areaServed: { "@type": "City", name: loc.name, addressRegion: loc.county },
       priceRange: "££",
@@ -93,7 +94,7 @@ export default function TownRemovals() {
         </ol>
       </nav>
 
-      <TownHero townName={loc.name} county={loc.county} />
+      <TownHero townName={loc.name} county={loc.county} trustWord={loc.trustWord} />
 
       {/* Intro */}
       <section className="py-12 px-4 sm:px-6 lg:px-8">

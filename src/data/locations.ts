@@ -29,6 +29,7 @@ export interface Location {
   region: string;
   population?: string;
   titleVariant: "removals" | "manAndVan";
+  trustWord: "verified" | "vetted";
   metaDescription: string;
   intro: string; // 60-90 words
   workedExample: string; // pricing worked example, town-specific
@@ -42,26 +43,28 @@ export interface Location {
   variantCopy?: Partial<Record<VariantBlock, string>>;
 }
 
-const baseTrust = (town: string) => [
-  `Vetted removal companies covering ${town} and surrounding postcodes.`,
-  "Multiple quotes side by side — pick on price, reviews, or availability.",
+const baseTrust = (town: string, word: "verified" | "vetted" = "vetted") => [
+  `${word.charAt(0).toUpperCase() + word.slice(1)} removal companies covering ${town} and surrounding postcodes.`,
+  "Multiple quotes side by side, pick on price, reviews, or availability.",
   "Free to use for customers. You pay the mover you choose, not us.",
   "No obligation: ignore quotes you don't like, no chasing calls.",
+  "All movers in our network carry public liability and goods-in-transit insurance, so your property is protected throughout the move.",
 ];
 
 export const locations: Location[] = [
   // ===================== BUCKINGHAMSHIRE =====================
   {
     slug: "milton-keynes",
+    trustWord: "verified",
     name: "Milton Keynes",
     county: "Buckinghamshire",
     region: "Home Counties",
     population: "~290,000",
     titleVariant: "removals",
     metaDescription:
-      "Free, no-obligation removal quotes from vetted Milton Keynes movers. Compare prices for house moves, flat moves and man and van across MK postcodes.",
+      "Free, no-obligation removal quotes from verified Milton Keynes movers. Compare prices for house moves, flat moves and man and van across MK postcodes.",
     intro:
-      "Milton Keynes is one of the fastest-growing cities in the UK and one of the busiest local moving markets. Between new-build estates in Brooklands and Western Expansion, conversions in Central Milton Keynes, and steady commuter turnover to London Euston, removal companies here see everything from studio flats to four-bed family moves. HouseMove connects you with vetted movers across all MK postcodes so you can compare quotes without picking up the phone.",
+      "Milton Keynes is one of the fastest-growing cities in the UK and one of the busiest local moving markets. Between new-build estates in Brooklands and Western Expansion, conversions in Central Milton Keynes, and steady commuter turnover to London Euston, removal companies here see everything from studio flats to four-bed family moves. HouseMove connects you with verified movers across all MK postcodes so you can compare quotes without picking up the phone.",
     workedExample:
       "A 2-bed flat move within Milton Keynes typically lands around £380-£560 with a small crew and a Luton van. A 3-bed house from MK to north London usually runs £750-£1,150 depending on access at both ends and whether packing is included. Add a piano or large gym equipment and expect £150-£300 on top.",
     pricingNote:
@@ -73,11 +76,11 @@ export const locations: Location[] = [
       { to: "Luton", oneBedBand: "£330-£470" },
       { to: "Leighton Buzzard", oneBedBand: "£260-£380" },
     ],
-    trustPoints: baseTrust("Milton Keynes"),
+    trustPoints: baseTrust("Milton Keynes", "verified"),
     faqs: [
       {
         q: "How do movers handle the Milton Keynes grid road system with larger vans?",
-        a: "Most local crews know the grid roads and roundabouts well — the bigger consideration is access on the residential 'V' and 'H' street estates, where some closes are tight for 7.5-tonne vehicles. If you're on a narrow close, mention it when requesting quotes so movers can plan vehicle size.",
+        a: "Most local crews know the grid roads and roundabouts well, the bigger consideration is access on the residential 'V' and 'H' street estates, where some closes are tight for 7.5-tonne vehicles. If you're on a narrow close, mention it to the moving company while you're discussing the quote so movers can plan vehicle size.",
       },
       {
         q: "Do you cover Central Milton Keynes apartment blocks with lift restrictions?",
@@ -98,20 +101,21 @@ export const locations: Location[] = [
       city:
         "Milton Keynes mixes high-rise apartment moves in Central MK with sprawling family moves in Shenley, Westcroft and Tattenhoe. Movers here are used to both ends of the spectrum on the same day.",
       commuter:
-        "MK to London is one of the most common routes in our network — typically a 60-70 minute drive up the M1, with movers often able to do same-day completions if both properties are ready by mid-morning.",
+        "MK to London is one of the most common routes in our network, typically a 60-70 minute drive up the M1, with movers often able to do same-day completions if both properties are ready by mid-morning.",
     },
   },
 
   // ===================== CAMBRIDGESHIRE =====================
   {
     slug: "peterborough",
+    trustWord: "verified",
     name: "Peterborough",
     county: "Cambridgeshire",
     region: "East of England",
     population: "~215,000",
     titleVariant: "removals",
     metaDescription:
-      "Compare free quotes from vetted Peterborough removal companies. House, flat and man and van services across PE postcodes — no obligation, no chasing calls.",
+      "Compare free quotes from verified Peterborough removal companies. House, flat and man and van services across PE postcodes, no obligation, no chasing calls.",
     intro:
       "Peterborough is a fast-growing cathedral city with a busy housing market across Hampton, Werrington, Orton and the city centre. The local removal scene handles a steady mix of family moves, buy-to-let turnovers, and longer-distance jobs north to Lincolnshire and south to Cambridge or London. HouseMove gives you multiple PE-area quotes in one place so you can compare without making cold calls.",
     workedExample:
@@ -125,11 +129,11 @@ export const locations: Location[] = [
       { to: "Huntingdon", oneBedBand: "£250-£380" },
       { to: "Wisbech", oneBedBand: "£280-£420" },
     ],
-    trustPoints: baseTrust("Peterborough"),
+    trustPoints: baseTrust("Peterborough", "verified"),
     faqs: [
       {
         q: "Any specific access notes for the Cathedral Quarter or Cowgate area?",
-        a: "Yes — parts of the Cathedral precinct and Cowgate are pedestrianised with restricted vehicle access. Movers typically need to apply for a short access window or use the nearest loading bay. Mention your street when quoting.",
+        a: "Yes, parts of the Cathedral precinct and Cowgate are pedestrianised with restricted vehicle access. Movers typically need to apply for a short access window or use the nearest loading bay. Mention your street when quoting.",
       },
       {
         q: "Do movers handle Hampton and Hampton East new-build estates?",
@@ -148,22 +152,23 @@ export const locations: Location[] = [
     nearby: ["huntingdon", "wisbech", "cambridge", "ely"],
     variantCopy: {
       city:
-        "Peterborough's high-rise developments around the station and Fletton Quays sit alongside family streets in Werrington and Orton — movers here switch between lift-managed flat moves and full-house jobs all week.",
+        "Peterborough's high-rise developments around the station and Fletton Quays sit alongside family streets in Werrington and Orton, movers here switch between lift-managed flat moves and full-house jobs all week.",
       historic:
         "The Cathedral Quarter's narrow lanes and conservation rules mean some streets need a smaller van or a kerbside-only load. Plan a 30-minute parking window where possible.",
     },
   },
   {
     slug: "cambridge",
+    trustWord: "verified",
     name: "Cambridge",
     county: "Cambridgeshire",
     region: "East of England",
     population: "~145,000",
     titleVariant: "removals",
     metaDescription:
-      "Vetted Cambridge removal companies, free quotes in 24 hours. House, flat, student and college moves across CB postcodes. No obligation, no chasing calls.",
+      "Verified Cambridge removal companies, free quotes in 24 hours. House, flat, student and college moves across CB postcodes. No obligation, no chasing calls.",
     intro:
-      "Cambridge is one of the most distinctive moving markets in the UK — high-value family homes in Newnham and Trumpington sit alongside intense student and academic turnover around the colleges every Michaelmas, Lent and Easter term. Add a strong commuter pull to London King's Cross and a constant stream of relocations into the Biomedical Campus, and movers here stay busy year-round.",
+      "Cambridge is one of the most distinctive moving markets in the UK, high-value family homes in Newnham and Trumpington sit alongside intense student and academic turnover around the colleges every Michaelmas, Lent and Easter term. Add a strong commuter pull to London King's Cross and a constant stream of relocations into the Biomedical Campus, and movers here stay busy year-round.",
     workedExample:
       "A 1-bed flat within Cambridge typically runs £280-£420. A 4-bed family move to north London is usually £1,400-£2,100 with packing. Student moves (single room) often sit between £140 and £260.",
     pricingNote:
@@ -175,11 +180,11 @@ export const locations: Location[] = [
       { to: "Ely", oneBedBand: "£220-£340" },
       { to: "Newmarket", oneBedBand: "£240-£360" },
     ],
-    trustPoints: baseTrust("Cambridge"),
+    trustPoints: baseTrust("Cambridge", "verified"),
     faqs: [
       {
         q: "Do movers know college access rules for student moves?",
-        a: "Yes — many Cambridge crews work term-end weeks every year. They'll usually liaise with the porters' lodge for a delivery slot and use trolleys where vehicle access is restricted (Trinity, King's, St John's etc.).",
+        a: "Yes, many Cambridge crews work term-end weeks every year. They'll usually liaise with the porters' lodge for a delivery slot and use trolleys where vehicle access is restricted (Trinity, King's, St John's etc.).",
       },
       {
         q: "Can a mover handle a move from a Newnham or Chesterton property with no driveway?",
@@ -187,14 +192,14 @@ export const locations: Location[] = [
       },
       {
         q: "How early should I book for a late-June or late-September student move?",
-        a: "Book at least 4-6 weeks ahead — term-end weeks are the single busiest period of the year for Cambridge movers.",
+        a: "Book at least 4-6 weeks ahead, term-end weeks are the single busiest period of the year for Cambridge movers.",
       },
       {
         q: "Do you cover moves to and from the Biomedical Campus area?",
         a: "Yes. Movers regularly handle relocations into Trumpington, Great Kneighton and Eddington for incoming academic and clinical staff.",
       },
       {
-        q: "What about cycle access — is there special handling for bikes?",
+        q: "What about cycle access, is there special handling for bikes?",
         a: "Cambridge crews are used to transporting multiple bikes per household. Mention quantity when quoting so vans are loaded with bike protection in mind.",
       },
     ],
@@ -204,26 +209,27 @@ export const locations: Location[] = [
       student:
         "Student moves are a huge slice of Cambridge removals. Many movers offer per-room rates, short notice availability in term-end weeks, and porter-friendly trolley access for college rooms.",
       city:
-        "Movers handle everything from a single room at Jesus Lane to a 5-bed Newnham family home — different crews, different van sizes, all bookable in one quote request.",
+        "Movers handle everything from a single room at Jesus Lane to a 5-bed Newnham family home, different crews, different van sizes, all bookable in one quote request.",
       historic:
-        "Conservation areas around the historic core have strict access and loading windows. Smaller vans plus extra trolley runs are common — factor an extra 30-60 minutes vs a standard suburban move.",
+        "Conservation areas around the historic core have strict access and loading windows. Smaller vans plus extra trolley runs are common, factor an extra 30-60 minutes vs a standard suburban move.",
     },
   },
   {
     slug: "st-neots",
+    trustWord: "vetted",
     name: "St Neots",
     county: "Cambridgeshire",
     region: "East of England",
     population: "~33,000",
     titleVariant: "removals",
     metaDescription:
-      "Free quotes from vetted St Neots removal companies. House, flat and man and van moves across PE19 — no obligation, compare prices in one place.",
+      "Free quotes from vetted St Neots removal companies. House, flat and man and van moves across PE19, no obligation, compare prices in one place.",
     intro:
       "St Neots is the largest town in Cambridgeshire by population and one of the busiest commuter spots on the East Coast Main Line. Loves Farm, Wintringham and Eynesbury all see steady removal activity, with frequent moves out to London King's Cross and across to Cambridge or Bedford. HouseMove brings together quotes from local PE19 movers in one place.",
     workedExample:
       "A 2-bed flat move within St Neots typically runs £340-£500. The same flat moving to north London is around £580-£840. A 3-bed family home to Cambridge usually lands at £580-£850.",
     pricingNote:
-      "Mileage matters here — St Neots sits between Cambridge, Bedford and London, so route choice can swing a quote by £50-£100.",
+      "Mileage matters here, St Neots sits between Cambridge, Bedford and London, so route choice can swing a quote by £50-£100.",
     commonRoutes: [
       { to: "London (N)", oneBedBand: "£480-£700" },
       { to: "Cambridge", oneBedBand: "£300-£440" },
@@ -235,7 +241,7 @@ export const locations: Location[] = [
     faqs: [
       {
         q: "Do movers cover the newer Loves Farm and Wintringham estates?",
-        a: "Yes — these are standard runs. Roads are wide and parking is generally easy, but mention if you're on a private access road so the mover can confirm vehicle size.",
+        a: "Yes, these are standard runs. Roads are wide and parking is generally easy, but let the moving company know if you're on a private access road so the mover can confirm vehicle size.",
       },
       {
         q: "Can I get a same-week quote for a midweek London commute move?",
@@ -247,7 +253,7 @@ export const locations: Location[] = [
       },
       {
         q: "Do you handle moves across the river to Eaton Socon?",
-        a: "Yes — Eaton Socon, Eaton Ford and Eynesbury are all served by the same local crews.",
+        a: "Yes, Eaton Socon, Eaton Ford and Eynesbury are all served by the same local crews.",
       },
     ],
     sections: ["commuter"],
@@ -259,6 +265,7 @@ export const locations: Location[] = [
   },
   {
     slug: "wisbech",
+    trustWord: "vetted",
     name: "Wisbech",
     county: "Cambridgeshire",
     region: "Fens",
@@ -271,7 +278,7 @@ export const locations: Location[] = [
     workedExample:
       "A 3-bed farmhouse move within the Wisbech area typically runs £520-£780. A long-distance job to Greater London is more likely £1,100-£1,650 due to mileage. Single-room or man-and-van moves around town can start as low as £160.",
     pricingNote:
-      "Rural pickups often add 30-60 minutes of loading time — most quotes price by total hours, not just distance.",
+      "Rural pickups often add 30-60 minutes of loading time, most quotes price by total hours, not just distance.",
     commonRoutes: [
       { to: "King's Lynn", oneBedBand: "£260-£400" },
       { to: "Peterborough", oneBedBand: "£280-£420" },
@@ -282,32 +289,33 @@ export const locations: Location[] = [
     faqs: [
       {
         q: "Do movers handle long farmhouse driveways and outbuildings?",
-        a: "Yes. Several Wisbech crews specifically advertise farm and smallholding experience — they'll bring extra crew or a second vehicle if outbuildings are involved.",
+        a: "Yes. Several Wisbech crews specifically advertise farm and smallholding experience, they'll bring extra crew or a second vehicle if outbuildings are involved.",
       },
       {
         q: "Can a large van get into the historic Brink streets?",
         a: "Not easily. The Brinks have narrow access and parking restrictions; smaller vans or a shuttle plan from a nearby loading bay are common.",
       },
       {
-        q: "Do you cover the surrounding villages — Friday Bridge, Outwell, Tydd?",
+        q: "Do you cover the surrounding villages, Friday Bridge, Outwell, Tydd?",
         a: "Yes, all standard pickups for local Wisbech movers.",
       },
       {
         q: "How is pricing affected by tractor / agricultural equipment?",
-        a: "Large agricultural items usually need a specialist mover or a separate transport quote — flag any in your request.",
+        a: "Large agricultural items usually need a specialist mover or a separate transport quote, just mention them to the moving company while you're discussing the quote.",
       },
     ],
     sections: ["rural", "historic"],
     nearby: ["kings-lynn", "peterborough", "ely", "huntingdon"],
     variantCopy: {
       rural:
-        "Fenland properties often mean long single-track approaches and gravel driveways. Movers here factor extra crew and slower loading time into quotes — ask for total hours, not just mileage.",
+        "Fenland properties often mean long single-track approaches and gravel driveways. Movers here factor extra crew and slower loading time into quotes, ask for total hours, not just mileage.",
       historic:
         "The Brinks and North Brink conservation area limit van size and parking. Expect a shuttle plan if your property is in the historic core.",
     },
   },
   {
     slug: "huntingdon",
+    trustWord: "vetted",
     name: "Huntingdon",
     county: "Cambridgeshire",
     region: "East of England",
@@ -320,7 +328,7 @@ export const locations: Location[] = [
     workedExample:
       "A 3-bed semi within Huntingdon usually costs £420-£640. To Cambridge it's around £480-£720. A move to north London with packing is typically £950-£1,400.",
     pricingNote:
-      "A14 traffic can add 30-60 minutes to a Cambridge or Felixstowe run — movers will price total hours, not theoretical mileage.",
+      "A14 traffic can add 30-60 minutes to a Cambridge or Felixstowe run, movers will price total hours, not theoretical mileage.",
     commonRoutes: [
       { to: "Cambridge", oneBedBand: "£340-£500" },
       { to: "Peterborough", oneBedBand: "£260-£400" },
@@ -331,7 +339,7 @@ export const locations: Location[] = [
     faqs: [
       {
         q: "Do movers cover Hinchingbrooke Park and the newer estates?",
-        a: "Yes — standard runs. Roads are wide and parking is generally easy.",
+        a: "Yes, standard runs. Roads are wide and parking is generally easy.",
       },
       {
         q: "Can I get a quote that factors in A14 delays?",
@@ -339,7 +347,7 @@ export const locations: Location[] = [
       },
       {
         q: "Do you handle moves to and from St Ives and Godmanchester?",
-        a: "Yes — both are served by Huntingdon-based crews as part of normal coverage.",
+        a: "Yes, both are served by Huntingdon-based crews as part of normal coverage.",
       },
       {
         q: "Are weekend moves more expensive in PE28/PE29?",
@@ -350,13 +358,14 @@ export const locations: Location[] = [
     nearby: ["st-neots", "st-ives", "peterborough", "cambridge"],
     variantCopy: {
       commuter:
-        "Huntingdon is a serious commuter base for London King's Cross — movers regularly do early-morning loads so families can complete in town before evening.",
+        "Huntingdon is a serious commuter base for London King's Cross, movers regularly do early-morning loads so families can complete in town before evening.",
       rural:
         "Surrounding villages like Brampton, Buckden and Wyton mean rural pickups are common. Allow extra loading time for properties with long driveways or limited turning space.",
     },
   },
   {
     slug: "ely",
+    trustWord: "vetted",
     name: "Ely",
     county: "Cambridgeshire",
     region: "Fens",
@@ -369,7 +378,7 @@ export const locations: Location[] = [
     workedExample:
       "A 2-bed terrace within Ely typically runs £320-£480. A 3-bed move to Cambridge is usually £420-£620. A long-distance job to London is around £900-£1,300 including packing.",
     pricingNote:
-      "Historic-centre properties near the cathedral often need a smaller van plus a shuttle plan — confirm with the mover before booking.",
+      "Historic-centre properties near the cathedral often need a smaller van plus a shuttle plan, confirm with the mover before booking.",
     commonRoutes: [
       { to: "Cambridge", oneBedBand: "£280-£420" },
       { to: "Newmarket", oneBedBand: "£260-£400" },
@@ -381,7 +390,7 @@ export const locations: Location[] = [
     faqs: [
       {
         q: "Can a large van access streets near the cathedral?",
-        a: "Some streets — yes; others, no. Movers familiar with Ely will usually request a smaller van plus a couple of trolley runs for the tightest spots.",
+        a: "Some streets, yes; others, no. Movers familiar with Ely will usually request a smaller van plus a couple of trolley runs for the tightest spots.",
       },
       {
         q: "Do movers cover Soham, Littleport and Sutton?",
@@ -402,11 +411,12 @@ export const locations: Location[] = [
       historic:
         "The cathedral conservation area limits vehicle size on several streets. Plan extra time for trolley access from a nearby loading point.",
       rural:
-        "Fenland pickups around Soham and Littleport often add loading time — quotes are usually priced by hour, not just mileage.",
+        "Fenland pickups around Soham and Littleport often add loading time, quotes are usually priced by hour, not just mileage.",
     },
   },
   {
     slug: "st-ives",
+    trustWord: "vetted",
     name: "St Ives",
     county: "Cambridgeshire",
     region: "East of England",
@@ -419,7 +429,7 @@ export const locations: Location[] = [
     workedExample:
       "A 2-bed terrace in St Ives typically runs £340-£500. To Cambridge it's £300-£440. A 3-bed move within town with packing is around £600-£850.",
     pricingNote:
-      "Market-square and Bridge Street properties may need a smaller van and a shuttle to a nearby car park — flag this when quoting.",
+      "Market-square and Bridge Street properties may need a smaller van and a shuttle to a nearby car park, let the moving company know while you're discussing the quote.",
     commonRoutes: [
       { to: "Cambridge", oneBedBand: "£260-£400", notes: "Guided busway corridor" },
       { to: "Huntingdon", oneBedBand: "£220-£340" },
@@ -434,7 +444,7 @@ export const locations: Location[] = [
       },
       {
         q: "Do you cover the Hemingfords and Houghton?",
-        a: "Yes — both are standard pickups.",
+        a: "Yes, both are standard pickups.",
       },
       {
         q: "Are flood-zone properties handled differently?",
@@ -442,7 +452,7 @@ export const locations: Location[] = [
       },
       {
         q: "Is there a discount for midweek moves?",
-        a: "Often, yes — Tuesday to Thursday tends to be cheapest.",
+        a: "Often, yes, Tuesday to Thursday tends to be cheapest.",
       },
     ],
     sections: ["historic", "commuter"],
@@ -458,19 +468,20 @@ export const locations: Location[] = [
   // ===================== NORFOLK =====================
   {
     slug: "norwich",
+    trustWord: "verified",
     name: "Norwich",
     county: "Norfolk",
     region: "East of England",
     population: "~145,000",
     titleVariant: "removals",
     metaDescription:
-      "Vetted Norwich removal companies, free quotes within 24 hours. House, flat and student moves across NR postcodes — no obligation, compare in one place.",
+      "Verified Norwich removal companies, free quotes within 24 hours. House, flat and student moves across NR postcodes, no obligation, compare in one place.",
     intro:
       "Norwich is Norfolk's economic centre, with a removal market shaped by historic lanes inside the inner ring, family suburbs in Thorpe St Andrew and Eaton, and a strong UEA student turnover each summer. The A11 corridor sees regular runs down to Cambridge and London, while local moves dominate weekday bookings.",
     workedExample:
       "A 2-bed flat in central Norwich usually runs £340-£500. A 4-bed family move from Norwich to London is typically £1,400-£2,100 with packing. UEA student room moves often sit between £140 and £260.",
     pricingNote:
-      "Historic lanes inside the city walls (Elm Hill, Tombland, around the Cathedral) often need a smaller van and trolley runs — expect a small uplift vs a standard suburban move.",
+      "Historic lanes inside the city walls (Elm Hill, Tombland, around the Cathedral) often need a smaller van and trolley runs, expect a small uplift vs a standard suburban move.",
     commonRoutes: [
       { to: "Cambridge", oneBedBand: "£480-£700", notes: "A11 corridor" },
       { to: "London", oneBedBand: "£780-£1,150" },
@@ -478,11 +489,11 @@ export const locations: Location[] = [
       { to: "Ipswich", oneBedBand: "£420-£620" },
       { to: "King's Lynn", oneBedBand: "£380-£560" },
     ],
-    trustPoints: baseTrust("Norwich"),
+    trustPoints: baseTrust("Norwich", "verified"),
     faqs: [
       {
         q: "Do movers handle UEA student moves at the end of the academic year?",
-        a: "Yes — late June is the single busiest week. Book 4-6 weeks ahead for student rooms or shared houses near UEA, Earlham or Eaton.",
+        a: "Yes, late June is the single busiest week. Book 4-6 weeks ahead for student rooms or shared houses near UEA, Earlham or Eaton.",
       },
       {
         q: "Can a large van access Elm Hill or Tombland?",
@@ -507,13 +518,14 @@ export const locations: Location[] = [
       student:
         "UEA's student turnover is one of the biggest demand spikes of the Norwich moving calendar. Many local movers offer per-room and shared-house rates.",
       city:
-        "Norwich movers handle everything from a city-centre flat behind the Forum to a 5-bed family move in Eaton — different crew sizes, same booking process.",
+        "Norwich movers handle everything from a city-centre flat behind the Forum to a 5-bed family move in Eaton, different crew sizes, same booking process.",
       historic:
         "Inside the medieval city walls, narrow lanes and bollards limit vehicle access. Plan a shuttle to a loading bay for properties near the cathedral or Elm Hill.",
     },
   },
   {
     slug: "great-yarmouth",
+    trustWord: "vetted",
     name: "Great Yarmouth",
     county: "Norfolk",
     region: "Norfolk Coast",
@@ -526,7 +538,7 @@ export const locations: Location[] = [
     workedExample:
       "A 2-bed flat near the seafront usually costs £320-£480. A 3-bed move from Yarmouth to Norwich is around £480-£700. A long-distance run to London is typically £1,000-£1,500.",
     pricingNote:
-      "Summer (June-August) is the busiest season for Yarmouth movers due to seasonal demand — book early and expect a small uplift.",
+      "Summer (June-August) is the busiest season for Yarmouth movers due to seasonal demand, book early and expect a small uplift.",
     commonRoutes: [
       { to: "Norwich", oneBedBand: "£260-£400" },
       { to: "Lowestoft", oneBedBand: "£220-£340" },
@@ -537,11 +549,11 @@ export const locations: Location[] = [
     faqs: [
       {
         q: "Can movers handle seafront and Marine Parade access?",
-        a: "Yes — but parking is restricted in peak summer. Movers may request a temporary suspension or use a side-street loading point.",
+        a: "Yes, but parking is restricted in peak summer. Movers may request a temporary suspension or use a side-street loading point.",
       },
       {
         q: "Do you cover Gorleston and Bradwell?",
-        a: "Yes — both are standard pickups for Yarmouth-based crews.",
+        a: "Yes, both are standard pickups for Yarmouth-based crews.",
       },
       {
         q: "Are summer weekend moves significantly more expensive?",
@@ -549,31 +561,32 @@ export const locations: Location[] = [
       },
       {
         q: "How is sand and coastal damp handled during loading?",
-        a: "Movers usually bring extra protective covers and floor runners for coastal properties — flag any sensitive items.",
+        a: "Movers usually bring extra protective covers and floor runners for coastal properties, just mention any sensitive items to the moving company while you're discussing the quote.",
       },
     ],
     sections: ["coastal"],
     nearby: ["norwich", "lowestoft", "kings-lynn"],
     variantCopy: {
       coastal:
-        "Seafront and Marine Parade access requires planning — movers often arrange a temporary parking suspension or work from a side-street loading point. Allow extra time during summer peak.",
+        "Seafront and Marine Parade access requires planning, movers often arrange a temporary parking suspension or work from a side-street loading point. Allow extra time during summer peak.",
     },
   },
   {
     slug: "kings-lynn",
+    trustWord: "verified",
     name: "King's Lynn",
     county: "Norfolk",
     region: "Fens",
     population: "~43,000",
     titleVariant: "removals",
     metaDescription:
-      "Vetted King's Lynn removal companies, free quotes within 24 hours. PE30/PE31 house and flat moves across town and surrounding Fenland villages.",
+      "Verified King's Lynn removal companies, free quotes within 24 hours. PE30/PE31 house and flat moves across town and surrounding Fenland villages.",
     intro:
       "King's Lynn's removal market spans the historic Tuesday Market Place area, family suburbs in Gaywood and South Wootton, and rural pickups across the surrounding Fens. Long-distance jobs to Cambridge, Peterborough and London are common, and the local crews know the town's narrow medieval lanes well.",
     workedExample:
       "A 3-bed family home within King's Lynn usually runs £480-£720. A move to Cambridge is around £580-£860. A long-distance job to London tends to be £1,000-£1,500 with packing.",
     pricingNote:
-      "Properties inside the historic core often need a smaller van — confirm vehicle size when quoting.",
+      "Properties inside the historic core often need a smaller van, confirm vehicle size when quoting.",
     commonRoutes: [
       { to: "Cambridge", oneBedBand: "£420-£620" },
       { to: "Peterborough", oneBedBand: "£320-£480" },
@@ -581,7 +594,7 @@ export const locations: Location[] = [
       { to: "London", oneBedBand: "£900-£1,350" },
       { to: "Wisbech", oneBedBand: "£260-£400" },
     ],
-    trustPoints: baseTrust("King's Lynn"),
+    trustPoints: baseTrust("King's Lynn", "verified"),
     faqs: [
       {
         q: "Can a large van access the historic Tuesday Market Place?",
@@ -593,7 +606,7 @@ export const locations: Location[] = [
       },
       {
         q: "Are rural Fenland villages around Lynn handled?",
-        a: "Yes — pickups across Terrington, Clenchwarton and Watlington are common. Allow extra loading time for long driveways.",
+        a: "Yes, pickups across Terrington, Clenchwarton and Watlington are common. Allow extra loading time for long driveways.",
       },
       {
         q: "How early should I book in summer?",
@@ -611,6 +624,7 @@ export const locations: Location[] = [
   },
   {
     slug: "thetford",
+    trustWord: "vetted",
     name: "Thetford",
     county: "Norfolk",
     region: "Brecks",
@@ -623,7 +637,7 @@ export const locations: Location[] = [
     workedExample:
       "A 3-bed semi within Thetford usually runs £440-£660. To Norwich it's around £380-£560. A long-distance run to London is typically £950-£1,400.",
     pricingNote:
-      "Some Breckland properties have unsurfaced approaches — flag if your driveway is gravel or grass so movers can plan vehicle choice.",
+      "Some Breckland properties have unsurfaced approaches, let the moving company know if your driveway is gravel or grass so movers can plan vehicle choice.",
     commonRoutes: [
       { to: "Norwich", oneBedBand: "£280-£420" },
       { to: "Cambridge", oneBedBand: "£380-£560" },
@@ -633,12 +647,12 @@ export const locations: Location[] = [
     trustPoints: baseTrust("Thetford"),
     faqs: [
       {
-        q: "Do movers cover surrounding villages — Brandon, East Harling, Mundford?",
+        q: "Do movers cover surrounding villages, Brandon, East Harling, Mundford?",
         a: "Yes, all standard coverage for Thetford-based crews.",
       },
       {
         q: "Are there A11 traffic considerations for Norwich runs?",
-        a: "Yes — movers price by total time and plan around peak windows.",
+        a: "Yes, movers price by total time and plan around peak windows.",
       },
       {
         q: "Can I book for a Sunday move?",
@@ -646,7 +660,7 @@ export const locations: Location[] = [
       },
       {
         q: "Is military housing handled?",
-        a: "Yes — local movers regularly serve MOD relocations around Thetford and the wider area.",
+        a: "Yes, local movers regularly serve MOD relocations around Thetford and the wider area.",
       },
     ],
     sections: ["rural"],
@@ -658,6 +672,7 @@ export const locations: Location[] = [
   },
   {
     slug: "wymondham",
+    trustWord: "vetted",
     name: "Wymondham",
     county: "Norfolk",
     region: "East of England",
@@ -670,7 +685,7 @@ export const locations: Location[] = [
     workedExample:
       "A 3-bed family home within Wymondham usually costs £440-£660. A move to Norwich is around £280-£420.",
     pricingNote:
-      "Market-place properties may need smaller vans and short shuttle runs — flag location when quoting.",
+      "Market-place properties may need smaller vans and short shuttle runs, mention location when quoting.",
     commonRoutes: [
       { to: "Norwich", oneBedBand: "£260-£400" },
       { to: "Attleborough", oneBedBand: "£220-£340" },
@@ -685,7 +700,7 @@ export const locations: Location[] = [
       },
       {
         q: "Do you cover Hethersett, Spooner Row and the newer estates?",
-        a: "Yes — all standard coverage.",
+        a: "Yes, all standard coverage.",
       },
       {
         q: "Is the Norwich commute factored into pricing?",
@@ -707,6 +722,7 @@ export const locations: Location[] = [
   },
   {
     slug: "dereham",
+    trustWord: "vetted",
     name: "Dereham",
     county: "Norfolk",
     region: "East of England",
@@ -719,7 +735,7 @@ export const locations: Location[] = [
     workedExample:
       "A 3-bed home in Dereham usually costs £440-£660. A move to Norwich is around £320-£480.",
     pricingNote:
-      "Rural pickups often add an hour or more of loading — quotes are priced by total time, not just distance.",
+      "Rural pickups often add an hour or more of loading, quotes are priced by total time, not just distance.",
     commonRoutes: [
       { to: "Norwich", oneBedBand: "£300-£440" },
       { to: "King's Lynn", oneBedBand: "£340-£500" },
@@ -729,7 +745,7 @@ export const locations: Location[] = [
     trustPoints: baseTrust("Dereham"),
     faqs: [
       {
-        q: "Do you cover surrounding villages — Mattishall, Swanton Morley, Beetley?",
+        q: "Do you cover surrounding villages, Mattishall, Swanton Morley, Beetley?",
         a: "Yes, all standard pickups.",
       },
       {
@@ -738,11 +754,11 @@ export const locations: Location[] = [
       },
       {
         q: "Can I get a same-week midweek quote?",
-        a: "Often, yes — Tuesday to Thursday is the easiest window.",
+        a: "Often, yes, Tuesday to Thursday is the easiest window.",
       },
       {
         q: "Do movers handle barn conversions and outbuildings?",
-        a: "Yes — common around Dereham. Mention outbuildings up front so crew size is right.",
+        a: "Yes, common around Dereham. Mention outbuildings up front so crew size is right.",
       },
     ],
     sections: ["rural", "historic"],
@@ -756,6 +772,7 @@ export const locations: Location[] = [
   },
   {
     slug: "attleborough",
+    trustWord: "vetted",
     name: "Attleborough",
     county: "Norfolk",
     region: "East of England",
@@ -768,7 +785,7 @@ export const locations: Location[] = [
     workedExample:
       "A 3-bed home in Attleborough usually costs £420-£620. A move to Norwich is around £320-£480.",
     pricingNote:
-      "A11 traffic shapes pricing on Norwich and Cambridge runs — early starts often work out cheaper.",
+      "A11 traffic shapes pricing on Norwich and Cambridge runs, early starts often work out cheaper.",
     commonRoutes: [
       { to: "Norwich", oneBedBand: "£280-£420" },
       { to: "Thetford", oneBedBand: "£220-£340" },
@@ -779,7 +796,7 @@ export const locations: Location[] = [
     faqs: [
       {
         q: "Do you cover the newer estates off London Road?",
-        a: "Yes — all standard coverage.",
+        a: "Yes, all standard coverage.",
       },
       {
         q: "Are weekend moves significantly more expensive?",
@@ -787,7 +804,7 @@ export const locations: Location[] = [
       },
       {
         q: "Do movers offer packing as an add-on?",
-        a: "Most do — full or partial packing services are bookable at quote stage.",
+        a: "Most do, full or partial packing services are bookable at quote stage.",
       },
       {
         q: "How early should I book for a summer move?",
@@ -807,19 +824,20 @@ export const locations: Location[] = [
   // ===================== SUFFOLK =====================
   {
     slug: "ipswich",
+    trustWord: "verified",
     name: "Ipswich",
     county: "Suffolk",
     region: "East of England",
     population: "~140,000",
     titleVariant: "removals",
     metaDescription:
-      "Vetted Ipswich removal companies, free quotes within 24 hours. IP1-IP5 house, flat and man and van moves — no obligation, compare in one place.",
+      "Verified Ipswich removal companies, free quotes within 24 hours. IP1-IP5 house, flat and man and van moves, no obligation, compare in one place.",
     intro:
       "Ipswich is Suffolk's largest town with a moving market that spans waterfront flats, family suburbs in Rushmere and Kesgrave, and steady commuter traffic to London Liverpool Street. Movers here handle everything from single-room waterfront moves to full 5-bed family relocations.",
     workedExample:
       "A 2-bed flat on the waterfront usually costs £360-£540. A 4-bed family move from Ipswich to London is typically £1,300-£1,950 with packing.",
     pricingNote:
-      "Waterfront flat moves often need pre-booked lift slots and porter coordination — flag your building when quoting.",
+      "Waterfront flat moves often need pre-booked lift slots and porter coordination, mention your building when quoting.",
     commonRoutes: [
       { to: "London (E)", oneBedBand: "£640-£940", notes: "A12 corridor" },
       { to: "Colchester", oneBedBand: "£280-£420" },
@@ -827,11 +845,11 @@ export const locations: Location[] = [
       { to: "Bury St Edmunds", oneBedBand: "£320-£480" },
       { to: "Norwich", oneBedBand: "£480-£700" },
     ],
-    trustPoints: baseTrust("Ipswich"),
+    trustPoints: baseTrust("Ipswich", "verified"),
     faqs: [
       {
         q: "Do you handle waterfront apartment moves with lift restrictions?",
-        a: "Yes — Mill, Regatta Quay and similar developments are routine. Movers will pre-book lift slots.",
+        a: "Yes, Mill, Regatta Quay and similar developments are routine. Movers will pre-book lift slots.",
       },
       {
         q: "Are weekend Liverpool Street commuter moves more expensive?",
@@ -843,7 +861,7 @@ export const locations: Location[] = [
       },
       {
         q: "Can movers handle moves to and from Felixstowe port-area housing?",
-        a: "Yes — Felixstowe and Trimleys are regular runs.",
+        a: "Yes, Felixstowe and Trimleys are regular runs.",
       },
       {
         q: "How early should I book a summer move?",
@@ -861,6 +879,7 @@ export const locations: Location[] = [
   },
   {
     slug: "lowestoft",
+    trustWord: "vetted",
     name: "Lowestoft",
     county: "Suffolk",
     region: "Suffolk Coast",
@@ -873,7 +892,7 @@ export const locations: Location[] = [
     workedExample:
       "A 2-bed flat near the seafront usually costs £320-£480. A 3-bed move from Lowestoft to Norwich is around £380-£560.",
     pricingNote:
-      "Summer demand peaks — book ahead in July and August.",
+      "Summer demand peaks, book ahead in July and August.",
     commonRoutes: [
       { to: "Norwich", oneBedBand: "£300-£440" },
       { to: "Great Yarmouth", oneBedBand: "£220-£340" },
@@ -884,15 +903,15 @@ export const locations: Location[] = [
     faqs: [
       {
         q: "Can movers handle seafront and South Beach access?",
-        a: "Yes — parking is restricted in summer. Movers may request a temporary suspension or use a side-street loading point.",
+        a: "Yes, parking is restricted in summer. Movers may request a temporary suspension or use a side-street loading point.",
       },
       {
         q: "Do you cover Oulton Broad and Pakefield?",
-        a: "Yes — both are standard pickups.",
+        a: "Yes, both are standard pickups.",
       },
       {
         q: "Is the bascule bridge timing a factor on move days?",
-        a: "It can add 10-15 minutes occasionally — movers familiar with Lowestoft will plan around it.",
+        a: "It can add 10-15 minutes occasionally, movers familiar with Lowestoft will plan around it.",
       },
       {
         q: "Are coastal damp considerations factored in?",
@@ -908,19 +927,20 @@ export const locations: Location[] = [
   },
   {
     slug: "bury-st-edmunds",
+    trustWord: "verified",
     name: "Bury St Edmunds",
     county: "Suffolk",
     region: "East of England",
     population: "~42,000",
     titleVariant: "removals",
     metaDescription:
-      "Vetted Bury St Edmunds removal companies, free quotes in 24 hours. IP32/IP33 historic-centre and family-home moves across Suffolk.",
+      "Verified Bury St Edmunds removal companies, free quotes in 24 hours. IP32/IP33 historic-centre and family-home moves across Suffolk.",
     intro:
       "Bury St Edmunds is a historic Suffolk market town with a removal market shaped by Georgian townhouses around the Abbey, family suburbs in Moreton Hall and Westley, and rural pickups in surrounding villages. Movers here handle narrow historic-centre access weekly.",
     workedExample:
       "A 3-bed townhouse near the historic centre usually runs £520-£780. A move to Cambridge is around £380-£560.",
     pricingNote:
-      "Conservation-area properties often need smaller vans and short shuttles — flag location when quoting.",
+      "Conservation-area properties often need smaller vans and short shuttles, mention location when quoting.",
     commonRoutes: [
       { to: "Cambridge", oneBedBand: "£320-£460" },
       { to: "Ipswich", oneBedBand: "£320-£480" },
@@ -928,18 +948,18 @@ export const locations: Location[] = [
       { to: "London", oneBedBand: "£780-£1,150" },
       { to: "Norwich", oneBedBand: "£480-£700" },
     ],
-    trustPoints: baseTrust("Bury St Edmunds"),
+    trustPoints: baseTrust("Bury St Edmunds", "verified"),
     faqs: [
       {
         q: "Can a large van access streets near the Abbey?",
-        a: "Some — others have time-restricted bollards. Movers will plan around them.",
+        a: "Some, others have time-restricted bollards. Movers will plan around them.",
       },
       {
         q: "Do you cover Moreton Hall and Westley estates?",
-        a: "Yes — both are standard pickups.",
+        a: "Yes, both are standard pickups.",
       },
       {
-        q: "Are surrounding villages — Ixworth, Stanton, Pakenham — covered?",
+        q: "Are surrounding villages, Ixworth, Stanton, Pakenham, covered?",
         a: "Yes.",
       },
       {
@@ -956,6 +976,7 @@ export const locations: Location[] = [
   },
   {
     slug: "haverhill",
+    trustWord: "vetted",
     name: "Haverhill",
     county: "Suffolk",
     region: "East of England",
@@ -968,7 +989,7 @@ export const locations: Location[] = [
     workedExample:
       "A 3-bed home in Haverhill usually costs £460-£680. A move to Cambridge is around £340-£500.",
     pricingNote:
-      "Cambridge commute runs are common — movers usually quote total time including A1307 traffic.",
+      "Cambridge commute runs are common, movers usually quote total time including A1307 traffic.",
     commonRoutes: [
       { to: "Cambridge", oneBedBand: "£280-£420" },
       { to: "Bury St Edmunds", oneBedBand: "£260-£400" },
@@ -978,20 +999,20 @@ export const locations: Location[] = [
     trustPoints: baseTrust("Haverhill"),
     faqs: [
       {
-        q: "Do you cover surrounding villages — Kedington, Withersfield, Steeple Bumpstead?",
+        q: "Do you cover surrounding villages, Kedington, Withersfield, Steeple Bumpstead?",
         a: "Yes, all standard pickups.",
       },
       {
         q: "Are A1307 traffic delays factored into Cambridge runs?",
-        a: "Yes — movers price by total time.",
+        a: "Yes, movers price by total time.",
       },
       {
         q: "Can I book a same-week midweek move?",
-        a: "Often, yes — Tuesday to Thursday is the easiest window.",
+        a: "Often, yes, Tuesday to Thursday is the easiest window.",
       },
       {
         q: "Do you handle moves to Stansted relocations?",
-        a: "Yes — frequent route for aviation-sector relocations.",
+        a: "Yes, frequent route for aviation-sector relocations.",
       },
     ],
     sections: ["commuter", "rural"],
@@ -1005,30 +1026,31 @@ export const locations: Location[] = [
   },
   {
     slug: "felixstowe",
+    trustWord: "verified",
     name: "Felixstowe",
     county: "Suffolk",
     region: "Suffolk Coast",
     population: "~24,000",
     titleVariant: "removals",
     metaDescription:
-      "Vetted Felixstowe removal companies, free quotes within 24 hours. IP11 coastal house and flat moves with port-area and seafront experience.",
+      "Verified Felixstowe removal companies, free quotes within 24 hours. IP11 coastal house and flat moves with port-area and seafront experience.",
     intro:
       "Felixstowe's removal market combines coastal moves around the seafront and Hamilton Road area with steady family-home turnover near the Trimleys and Walton. Proximity to the UK's busiest container port also drives regular relocations into and out of the area for port-sector staff.",
     workedExample:
       "A 2-bed flat near the seafront usually costs £320-£480. A 3-bed family move to Ipswich is around £340-£500.",
     pricingNote:
-      "Summer-peak demand and port-shift timing patterns can affect availability — book ahead in July and August.",
+      "Summer-peak demand and port-shift timing patterns can affect availability, book ahead in July and August.",
     commonRoutes: [
       { to: "Ipswich", oneBedBand: "£240-£360" },
       { to: "Colchester", oneBedBand: "£340-£500" },
       { to: "London", oneBedBand: "£720-£1,060" },
       { to: "Bury St Edmunds", oneBedBand: "£420-£620" },
     ],
-    trustPoints: baseTrust("Felixstowe"),
+    trustPoints: baseTrust("Felixstowe", "verified"),
     faqs: [
       {
         q: "Can movers handle seafront properties with restricted parking?",
-        a: "Yes — temporary parking suspensions or side-street loading are common.",
+        a: "Yes, temporary parking suspensions or side-street loading are common.",
       },
       {
         q: "Do you cover Walton, Old Felixstowe and the Trimleys?",
@@ -1036,11 +1058,11 @@ export const locations: Location[] = [
       },
       {
         q: "Are port-relocation moves handled?",
-        a: "Yes — regular relocations into and out of Felixstowe for port-sector staff.",
+        a: "Yes, regular relocations into and out of Felixstowe for port-sector staff.",
       },
       {
         q: "Is summer demand a factor on pricing?",
-        a: "Yes — July and August typically run 15-25% above off-peak.",
+        a: "Yes, July and August typically run 15-25% above off-peak.",
       },
     ],
     sections: ["coastal"],
@@ -1052,6 +1074,7 @@ export const locations: Location[] = [
   },
   {
     slug: "newmarket",
+    trustWord: "vetted",
     name: "Newmarket",
     county: "Suffolk",
     region: "East of England",
@@ -1064,7 +1087,7 @@ export const locations: Location[] = [
     workedExample:
       "A 3-bed home in Newmarket usually costs £460-£680. A move to Cambridge is around £280-£420.",
     pricingNote:
-      "Large country properties with stables or outbuildings often need a larger crew — flag at quote stage.",
+      "Large country properties with stables or outbuildings often need a larger crew, mention at quote stage.",
     commonRoutes: [
       { to: "Cambridge", oneBedBand: "£260-£400" },
       { to: "Bury St Edmunds", oneBedBand: "£240-£360" },
@@ -1075,11 +1098,11 @@ export const locations: Location[] = [
     faqs: [
       {
         q: "Do movers handle equestrian-sector relocations with outbuildings?",
-        a: "Yes — common in the Newmarket area. Flag stables and tack rooms when quoting.",
+        a: "Yes, common in the Newmarket area. Flag stables and tack rooms when quoting.",
       },
       {
         q: "Can a large van access the High Street area?",
-        a: "Most of it — but race-day timing may require planning around traffic management.",
+        a: "Most of it, but race-day timing may require planning around traffic management.",
       },
       {
         q: "Do you cover Exning and Burwell?",
@@ -1087,7 +1110,7 @@ export const locations: Location[] = [
       },
       {
         q: "Is Cambridge commute traffic factored in?",
-        a: "Yes — movers price by total time.",
+        a: "Yes, movers price by total time.",
       },
     ],
     sections: ["historic", "rural"],
@@ -1096,11 +1119,12 @@ export const locations: Location[] = [
       historic:
         "High Street and surrounding period properties have conservation considerations. Race-day timing can also affect access.",
       rural:
-        "Country properties with stables and outbuildings are common — larger crews and longer loading times are standard.",
+        "Country properties with stables and outbuildings are common, larger crews and longer loading times are standard.",
     },
   },
   {
     slug: "stowmarket",
+    trustWord: "vetted",
     name: "Stowmarket",
     county: "Suffolk",
     region: "East of England",
@@ -1113,7 +1137,7 @@ export const locations: Location[] = [
     workedExample:
       "A 3-bed home in Stowmarket usually costs £440-£660. A move to Ipswich is around £260-£400.",
     pricingNote:
-      "A14 traffic can affect Ipswich and Bury runs — movers price by total time.",
+      "A14 traffic can affect Ipswich and Bury runs, movers price by total time.",
     commonRoutes: [
       { to: "Ipswich", oneBedBand: "£240-£360" },
       { to: "Bury St Edmunds", oneBedBand: "£260-£400" },
@@ -1128,7 +1152,7 @@ export const locations: Location[] = [
       },
       {
         q: "Is the rail commuter pattern factored into pricing?",
-        a: "Yes — early loads help avoid station-area congestion.",
+        a: "Yes, early loads help avoid station-area congestion.",
       },
       {
         q: "Can I get a same-week midweek quote?",
@@ -1136,7 +1160,7 @@ export const locations: Location[] = [
       },
       {
         q: "Are surrounding mid-Suffolk villages covered?",
-        a: "Yes — standard coverage from Stowmarket-based crews.",
+        a: "Yes, standard coverage from Stowmarket-based crews.",
       },
     ],
     sections: ["commuter", "rural"],
@@ -1152,19 +1176,20 @@ export const locations: Location[] = [
   // ===================== ESSEX =====================
   {
     slug: "southend-on-sea",
+    trustWord: "verified",
     name: "Southend-on-Sea",
     county: "Essex",
     region: "Essex Coast",
     population: "~183,000",
     titleVariant: "removals",
     metaDescription:
-      "Vetted Southend-on-Sea removal companies, free quotes in 24 hours. SS1-SS3 coastal flat and house moves with seafront access experience.",
+      "Verified Southend-on-Sea removal companies, free quotes in 24 hours. SS1-SS3 coastal flat and house moves with seafront access experience.",
     intro:
-      "Southend-on-Sea has one of the most varied removal markets in Essex — seafront flats around Marine Parade, terraced family homes inland in Westcliff and Leigh-on-Sea, and steady commuter activity to London Fenchurch Street. Movers here know the seafront's parking restrictions and seasonal traffic patterns inside out.",
+      "Southend-on-Sea has one of the most varied removal markets in Essex, seafront flats around Marine Parade, terraced family homes inland in Westcliff and Leigh-on-Sea, and steady commuter activity to London Fenchurch Street. Movers here know the seafront's parking restrictions and seasonal traffic patterns inside out.",
     workedExample:
       "A 2-bed seafront flat usually costs £360-£540. A 4-bed family move from Southend to London is typically £1,100-£1,650 with packing.",
     pricingNote:
-      "Marine Parade and Western Esplanade have seasonal parking restrictions — temporary suspensions take 5-10 working days from Southend-on-Sea City Council.",
+      "Marine Parade and Western Esplanade have seasonal parking restrictions, temporary suspensions take 5-10 working days from Southend-on-Sea City Council.",
     commonRoutes: [
       { to: "London (E)", oneBedBand: "£540-£800", notes: "Fenchurch St line" },
       { to: "Basildon", oneBedBand: "£260-£400" },
@@ -1172,19 +1197,19 @@ export const locations: Location[] = [
       { to: "Brentwood", oneBedBand: "£380-£560" },
       { to: "Colchester", oneBedBand: "£480-£700" },
     ],
-    trustPoints: baseTrust("Southend-on-Sea"),
+    trustPoints: baseTrust("Southend-on-Sea", "verified"),
     faqs: [
       {
         q: "Can movers handle seafront access restrictions on Marine Parade?",
-        a: "Yes — movers familiar with the seafront will arrange a temporary parking suspension where needed, or work from a side-street loading point. Allow extra time during summer.",
+        a: "Yes, movers familiar with the seafront will arrange a temporary parking suspension where needed, or work from a side-street loading point. Allow extra time during summer.",
       },
       {
         q: "Do you cover Leigh-on-Sea and the Old Town?",
-        a: "Yes — Leigh Old Town has narrow lanes; movers will usually use a smaller van plus trolley runs.",
+        a: "Yes, Leigh Old Town has narrow lanes; movers will usually use a smaller van plus trolley runs.",
       },
       {
         q: "Are Fenchurch Street commuter moves common?",
-        a: "Yes — Southend is one of the busier c2c commuter towns. Midweek moves to London are very common.",
+        a: "Yes, Southend is one of the busier c2c commuter towns. Midweek moves to London are very common.",
       },
       {
         q: "Is summer demand a real factor?",
@@ -1192,7 +1217,7 @@ export const locations: Location[] = [
       },
       {
         q: "Do you handle moves out of seafront apartment blocks with lift bookings?",
-        a: "Yes — movers will pre-book a lift slot and confirm with the building manager.",
+        a: "Yes, movers will pre-book a lift slot and confirm with the building manager.",
       },
     ],
     sections: ["coastal", "commuter"],
@@ -1206,19 +1231,20 @@ export const locations: Location[] = [
   },
   {
     slug: "colchester",
+    trustWord: "verified",
     name: "Colchester",
     county: "Essex",
     region: "East of England",
     population: "~195,000",
     titleVariant: "removals",
     metaDescription:
-      "Free quotes from vetted Colchester removal companies. CO1-CO4 house, flat and student moves with historic-centre and garrison-area experience.",
+      "Free quotes from verified Colchester removal companies. CO1-CO4 house, flat and student moves with historic-centre and garrison-area experience.",
     intro:
       "Colchester, Britain's oldest recorded town, has a moving market shaped by the historic centre's narrow Roman-era lanes, family suburbs in Highwoods and Stanway, a major university student turnover at Essex, and steady relocations into the garrison community. Movers here handle a remarkably mixed weekly load.",
     workedExample:
       "A 2-bed flat near the town centre usually costs £340-£500. A 4-bed family move from Colchester to London is typically £1,200-£1,800 with packing. Student rooms at Essex often sit at £140-£260.",
     pricingNote:
-      "Historic-centre access around the High Street and Castle Park is restricted — smaller vans plus trolley runs are common.",
+      "Historic-centre access around the High Street and Castle Park is restricted, smaller vans plus trolley runs are common.",
     commonRoutes: [
       { to: "London (E)", oneBedBand: "£560-£820", notes: "Liverpool St line" },
       { to: "Chelmsford", oneBedBand: "£320-£480" },
@@ -1226,15 +1252,15 @@ export const locations: Location[] = [
       { to: "Braintree", oneBedBand: "£260-£400" },
       { to: "Cambridge", oneBedBand: "£480-£700" },
     ],
-    trustPoints: baseTrust("Colchester"),
+    trustPoints: baseTrust("Colchester", "verified"),
     faqs: [
       {
         q: "Do movers handle University of Essex student moves at term-end?",
-        a: "Yes — late June is a major demand week. Book 4-6 weeks ahead.",
+        a: "Yes, late June is a major demand week. Book 4-6 weeks ahead.",
       },
       {
         q: "Can a large van access historic-centre streets?",
-        a: "Some — others have time-restricted bollards. Movers will plan around them and often use a shuttle from the closest loading point.",
+        a: "Some, others have time-restricted bollards. Movers will plan around them and often use a shuttle from the closest loading point.",
       },
       {
         q: "Do you cover Highwoods, Stanway and Mile End?",
@@ -1242,7 +1268,7 @@ export const locations: Location[] = [
       },
       {
         q: "Are garrison relocations handled?",
-        a: "Yes — local movers regularly serve military families relocating to and from the garrison.",
+        a: "Yes, local movers regularly serve military families relocating to and from the garrison.",
       },
       {
         q: "Is Liverpool Street commuter pricing different?",
@@ -1262,19 +1288,20 @@ export const locations: Location[] = [
   },
   {
     slug: "chelmsford",
+    trustWord: "verified",
     name: "Chelmsford",
     county: "Essex",
     region: "East of England",
     population: "~120,000",
     titleVariant: "removals",
     metaDescription:
-      "Vetted Chelmsford removal companies, free quotes in 24 hours. CM1-CM3 house and flat moves with strong London commuter links.",
+      "Verified Chelmsford removal companies, free quotes in 24 hours. CM1-CM3 house and flat moves with strong London commuter links.",
     intro:
       "Chelmsford is one of the strongest London commuter cities in Essex, with a moving market dominated by family homes around Springfield, Beaulieu and Great Baddow, and city-centre flats near the station. Movers here handle a heavy weekly flow of relocations both into and out of London.",
     workedExample:
       "A 2-bed flat near the station usually costs £340-£500. A 3-bed family move from Chelmsford to north London is typically £900-£1,350 with packing.",
     pricingNote:
-      "City-centre flats often need lift coordination — flag building name when quoting.",
+      "City-centre flats often need lift coordination, mention building name when quoting.",
     commonRoutes: [
       { to: "London (E/NE)", oneBedBand: "£520-£780", notes: "Liverpool St line" },
       { to: "Brentwood", oneBedBand: "£260-£400" },
@@ -1282,7 +1309,7 @@ export const locations: Location[] = [
       { to: "Basildon", oneBedBand: "£280-£420" },
       { to: "Cambridge", oneBedBand: "£480-£700" },
     ],
-    trustPoints: baseTrust("Chelmsford"),
+    trustPoints: baseTrust("Chelmsford", "verified"),
     faqs: [
       {
         q: "Are Liverpool Street commuter moves expensive on weekends?",
@@ -1294,7 +1321,7 @@ export const locations: Location[] = [
       },
       {
         q: "Can movers handle lift-managed apartment blocks near the station?",
-        a: "Yes — pre-booked lift slots are routine.",
+        a: "Yes, pre-booked lift slots are routine.",
       },
       {
         q: "How early should I book an end-of-month family move?",
@@ -1305,33 +1332,34 @@ export const locations: Location[] = [
     nearby: ["brentwood", "colchester", "basildon", "braintree"],
     variantCopy: {
       commuter:
-        "Chelmsford to London is one of the busiest commuter routes in the East — movers run loads on the A12 daily.",
+        "Chelmsford to London is one of the busiest commuter routes in the East, movers run loads on the A12 daily.",
       city:
         "City-centre flats around the station mix with sprawling family homes in Beaulieu. Different crew sizes, same booking flow.",
     },
   },
   {
     slug: "basildon",
+    trustWord: "verified",
     name: "Basildon",
     county: "Essex",
     region: "East of England",
     population: "~107,000",
     titleVariant: "removals",
     metaDescription:
-      "Free quotes from vetted Basildon removal companies. SS13-SS16 house and flat moves with strong London Fenchurch Street commuter links.",
+      "Free quotes from verified Basildon removal companies. SS13-SS16 house and flat moves with strong London Fenchurch Street commuter links.",
     intro:
       "Basildon's removal market is dominated by family-home turnover across Pitsea, Laindon and Vange, with steady commuter activity to London Fenchurch Street and frequent moves to neighbouring Brentwood and Chelmsford. Movers here keep busy with weekday and weekend bookings year-round.",
     workedExample:
       "A 3-bed semi in Basildon usually costs £460-£680. A move to east London is around £540-£800.",
     pricingNote:
-      "End-of-month dates are particularly busy — book 3-4 weeks ahead where possible.",
+      "End-of-month dates are particularly busy, book 3-4 weeks ahead where possible.",
     commonRoutes: [
       { to: "London (E)", oneBedBand: "£480-£700" },
       { to: "Southend", oneBedBand: "£260-£400" },
       { to: "Chelmsford", oneBedBand: "£280-£420" },
       { to: "Brentwood", oneBedBand: "£240-£360" },
     ],
-    trustPoints: baseTrust("Basildon"),
+    trustPoints: baseTrust("Basildon", "verified"),
     faqs: [
       {
         q: "Do you cover Pitsea, Laindon and Vange?",
@@ -1347,7 +1375,7 @@ export const locations: Location[] = [
       },
       {
         q: "Do movers handle larger semi-detached family homes?",
-        a: "Yes — standard work for Basildon-based crews.",
+        a: "Yes, standard work for Basildon-based crews.",
       },
     ],
     sections: ["commuter"],
@@ -1359,26 +1387,27 @@ export const locations: Location[] = [
   },
   {
     slug: "harlow",
+    trustWord: "verified",
     name: "Harlow",
     county: "Essex",
     region: "East of England",
     population: "~93,000",
     titleVariant: "removals",
     metaDescription:
-      "Vetted Harlow removal companies, free quotes in 24 hours. CM17-CM20 house and flat moves with strong London Liverpool Street commuter links.",
+      "Verified Harlow removal companies, free quotes in 24 hours. CM17-CM20 house and flat moves with strong London Liverpool Street commuter links.",
     intro:
       "Harlow's removal market spans the original new-town estates, newer developments around Newhall and Gilden Park, and steady commuter activity to London Liverpool Street and Stansted. Movers here handle a high volume of family-home turnover plus regular long-distance jobs.",
     workedExample:
       "A 3-bed home in Harlow usually costs £440-£660. A move to north London is around £460-£680.",
     pricingNote:
-      "Stansted relocations are common — flag if you need the mover to handle airport-area pickups.",
+      "Stansted relocations are common, mention if you need the mover to handle airport-area pickups.",
     commonRoutes: [
       { to: "London (NE)", oneBedBand: "£440-£640" },
       { to: "Stansted area", oneBedBand: "£260-£400" },
       { to: "Chelmsford", oneBedBand: "£280-£420" },
       { to: "Cambridge", oneBedBand: "£420-£620" },
     ],
-    trustPoints: baseTrust("Harlow"),
+    trustPoints: baseTrust("Harlow", "verified"),
     faqs: [
       {
         q: "Do you cover Newhall and Gilden Park?",
@@ -1386,11 +1415,11 @@ export const locations: Location[] = [
       },
       {
         q: "Are Stansted relocations handled?",
-        a: "Yes — regular runs.",
+        a: "Yes, regular runs.",
       },
       {
         q: "Can movers handle lift-managed apartment blocks?",
-        a: "Yes — pre-booked lift slots are routine.",
+        a: "Yes, pre-booked lift slots are routine.",
       },
       {
         q: "How early should I book a summer move?",
@@ -1406,6 +1435,7 @@ export const locations: Location[] = [
   },
   {
     slug: "braintree",
+    trustWord: "vetted",
     name: "Braintree",
     county: "Essex",
     region: "East of England",
@@ -1418,7 +1448,7 @@ export const locations: Location[] = [
     workedExample:
       "A 3-bed home in Braintree usually costs £440-£660. A move to north London is around £540-£800.",
     pricingNote:
-      "Surrounding villages can add loading time — flag if you have a long driveway.",
+      "Surrounding villages can add loading time, mention if you have a long driveway.",
     commonRoutes: [
       { to: "London", oneBedBand: "£500-£740" },
       { to: "Chelmsford", oneBedBand: "£260-£400" },
@@ -1455,26 +1485,27 @@ export const locations: Location[] = [
   },
   {
     slug: "brentwood",
+    trustWord: "verified",
     name: "Brentwood",
     county: "Essex",
     region: "East of England",
     population: "~76,000",
     titleVariant: "removals",
     metaDescription:
-      "Vetted Brentwood removal companies, free quotes in 24 hours. CM13-CM15 house and flat moves with Elizabeth Line commuter links.",
+      "Verified Brentwood removal companies, free quotes in 24 hours. CM13-CM15 house and flat moves with Elizabeth Line commuter links.",
     intro:
       "Brentwood has become one of the most popular London commuter towns thanks to the Elizabeth Line, with a strong removal market for high-value family homes in Shenfield, Hutton and Warley. Movers here handle frequent west-bound runs into east and central London.",
     workedExample:
       "A 3-bed family home in Brentwood usually costs £520-£780. A move to east or central London is typically £700-£1,050.",
     pricingNote:
-      "Hutton Mount and Shenfield properties are often larger — confirm room count and item complexity (pianos, art) when quoting.",
+      "Hutton Mount and Shenfield properties are often larger, confirm room count and item complexity (pianos, art) when quoting.",
     commonRoutes: [
       { to: "London (E/Central)", oneBedBand: "£480-£700", notes: "Elizabeth Line" },
       { to: "Chelmsford", oneBedBand: "£260-£400" },
       { to: "Basildon", oneBedBand: "£240-£360" },
       { to: "Romford", oneBedBand: "£240-£360" },
     ],
-    trustPoints: baseTrust("Brentwood"),
+    trustPoints: baseTrust("Brentwood", "verified"),
     faqs: [
       {
         q: "Do you cover Shenfield, Hutton and Warley?",
@@ -1482,7 +1513,7 @@ export const locations: Location[] = [
       },
       {
         q: "Are large-home moves with pianos and art handled?",
-        a: "Yes — common in Hutton Mount. Specialist handling is bookable at quote stage.",
+        a: "Yes, common in Hutton Mount. Specialist handling is bookable at quote stage.",
       },
       {
         q: "Are weekend Elizabeth Line commuter moves more expensive?",
@@ -1504,19 +1535,20 @@ export const locations: Location[] = [
   // ===================== BEDFORDSHIRE =====================
   {
     slug: "luton",
+    trustWord: "verified",
     name: "Luton",
     county: "Bedfordshire",
     region: "Home Counties",
     population: "~225,000",
     titleVariant: "removals",
     metaDescription:
-      "Vetted Luton removal companies, free quotes in 24 hours. LU1-LU4 house, flat and student moves with airport-area and commuter experience.",
+      "Verified Luton removal companies, free quotes in 24 hours. LU1-LU4 house, flat and student moves with airport-area and commuter experience.",
     intro:
-      "Luton's removal market is one of the busiest in the East — a mix of town-centre flats, family homes across Stopsley and Bushmead, University of Bedfordshire student turnover, and steady relocations driven by London commuting and Luton Airport employment. Movers here handle the full mix weekly.",
+      "Luton's removal market is one of the busiest in the East, a mix of town-centre flats, family homes across Stopsley and Bushmead, University of Bedfordshire student turnover, and steady relocations driven by London commuting and Luton Airport employment. Movers here handle the full mix weekly.",
     workedExample:
       "A 2-bed flat in central Luton usually costs £340-£500. A 3-bed family move from Luton to north London is typically £750-£1,150. Student room moves around the University of Bedfordshire campus often sit at £140-£260.",
     pricingNote:
-      "Airport-area pickups and shift-pattern timings can affect availability — flag if you need an evening or early-morning load.",
+      "Airport-area pickups and shift-pattern timings can affect availability, mention if you need an evening or early-morning load.",
     commonRoutes: [
       { to: "London (N)", oneBedBand: "£480-£700", notes: "M1/Thameslink" },
       { to: "Bedford", oneBedBand: "£280-£420" },
@@ -1524,15 +1556,15 @@ export const locations: Location[] = [
       { to: "St Albans", oneBedBand: "£260-£400" },
       { to: "Dunstable", oneBedBand: "£220-£340" },
     ],
-    trustPoints: baseTrust("Luton"),
+    trustPoints: baseTrust("Luton", "verified"),
     faqs: [
       {
         q: "Do you cover student moves around the University of Bedfordshire campus?",
-        a: "Yes — late June and early September are the busiest weeks. Many movers offer per-room rates.",
+        a: "Yes, late June and early September are the busiest weeks. Many movers offer per-room rates.",
       },
       {
         q: "Are airport-area or shift-worker pickups handled?",
-        a: "Yes — early morning and late evening loads are bookable, sometimes at a small premium.",
+        a: "Yes, early morning and late evening loads are bookable, sometimes at a small premium.",
       },
       {
         q: "Do you cover Stopsley, Bushmead and Wigmore?",
@@ -1540,7 +1572,7 @@ export const locations: Location[] = [
       },
       {
         q: "Is M1 traffic factored into London pricing?",
-        a: "Yes — movers price by total time.",
+        a: "Yes, movers price by total time.",
       },
       {
         q: "How early should I book an end-of-month family move?",
@@ -1558,19 +1590,20 @@ export const locations: Location[] = [
   },
   {
     slug: "bedford",
+    trustWord: "verified",
     name: "Bedford",
     county: "Bedfordshire",
     region: "East of England",
     population: "~106,000",
     titleVariant: "removals",
     metaDescription:
-      "Free quotes from vetted Bedford removal companies. MK40-MK45 house, flat and student moves with strong London commuter and East-Midlands experience.",
+      "Free quotes from verified Bedford removal companies. MK40-MK45 house, flat and student moves with strong London commuter and East-Midlands experience.",
     intro:
-      "Bedford has a varied removal market — riverside flats around the Embankment, family homes in Putnoe and Brickhill, University of Bedfordshire student turnover, and a strong London commuter pull via Thameslink. Movers here handle around 50-60% local moves and 40-50% longer-distance jobs.",
+      "Bedford has a varied removal market, riverside flats around the Embankment, family homes in Putnoe and Brickhill, University of Bedfordshire student turnover, and a strong London commuter pull via Thameslink. Movers here handle around 50-60% local moves and 40-50% longer-distance jobs.",
     workedExample:
       "A 1-bed flat move from Bedford to London usually costs £470-£650. Add a piano and that can jump £150-£250. A 3-bed family move from Bedford to Cambridge is around £580-£860.",
     pricingNote:
-      "Embankment and riverside flats can have parking restrictions — flag location when quoting.",
+      "Embankment and riverside flats can have parking restrictions, mention location when quoting.",
     commonRoutes: [
       { to: "London (St Pancras)", oneBedBand: "£470-£650", notes: "Thameslink corridor" },
       { to: "Milton Keynes", oneBedBand: "£300-£440" },
@@ -1578,15 +1611,15 @@ export const locations: Location[] = [
       { to: "Luton", oneBedBand: "£280-£420" },
       { to: "Northampton", oneBedBand: "£340-£500" },
     ],
-    trustPoints: baseTrust("Bedford"),
+    trustPoints: baseTrust("Bedford", "verified"),
     faqs: [
       {
         q: "Do you cover student moves at the University of Bedfordshire Bedford campus?",
-        a: "Yes — busiest in late June and early September.",
+        a: "Yes, busiest in late June and early September.",
       },
       {
         q: "Are Embankment flats handled with parking restrictions?",
-        a: "Yes — temporary suspensions or side-street loading are common.",
+        a: "Yes, temporary suspensions or side-street loading are common.",
       },
       {
         q: "Do you cover Kempston, Putnoe and Brickhill?",
@@ -1594,7 +1627,7 @@ export const locations: Location[] = [
       },
       {
         q: "Are Thameslink commuter moves common?",
-        a: "Yes — a significant share of weekday work.",
+        a: "Yes, a significant share of weekday work.",
       },
       {
         q: "How is a piano or specialty item priced?",
@@ -1612,6 +1645,7 @@ export const locations: Location[] = [
   },
   {
     slug: "dunstable",
+    trustWord: "vetted",
     name: "Dunstable",
     county: "Bedfordshire",
     region: "Home Counties",
@@ -1624,7 +1658,7 @@ export const locations: Location[] = [
     workedExample:
       "A 3-bed home in Dunstable usually costs £440-£660. A move to north London is around £540-£800.",
     pricingNote:
-      "M1 timing matters — early starts often save 30-60 minutes vs mid-morning loads.",
+      "M1 timing matters, early starts often save 30-60 minutes vs mid-morning loads.",
     commonRoutes: [
       { to: "London (N)", oneBedBand: "£500-£740" },
       { to: "Luton", oneBedBand: "£220-£340" },
@@ -1659,6 +1693,7 @@ export const locations: Location[] = [
   },
   {
     slug: "ampthill",
+    trustWord: "vetted",
     name: "Ampthill",
     county: "Bedfordshire",
     region: "East of England",
@@ -1671,7 +1706,7 @@ export const locations: Location[] = [
     workedExample:
       "A 3-bed period home in Ampthill usually costs £480-£720. A move to Bedford is around £260-£400.",
     pricingNote:
-      "Period properties may need extra protective handling — flag fragile features when quoting.",
+      "Period properties may need extra protective handling, mention fragile features when quoting.",
     commonRoutes: [
       { to: "Bedford", oneBedBand: "£240-£360" },
       { to: "Milton Keynes", oneBedBand: "£280-£420" },
@@ -1686,7 +1721,7 @@ export const locations: Location[] = [
       },
       {
         q: "Are Georgian period property features handled with care?",
-        a: "Yes — protective covers and corner pads are standard.",
+        a: "Yes, protective covers and corner pads are standard.",
       },
       {
         q: "Can I book a same-week midweek move?",
@@ -1694,7 +1729,7 @@ export const locations: Location[] = [
       },
       {
         q: "Are larger country homes handled?",
-        a: "Yes — common around Ampthill.",
+        a: "Yes, common around Ampthill.",
       },
     ],
     sections: ["historic", "rural"],
@@ -1708,19 +1743,20 @@ export const locations: Location[] = [
   },
   {
     slug: "leighton-buzzard",
+    trustWord: "verified",
     name: "Leighton Buzzard",
     county: "Bedfordshire",
     region: "Home Counties",
     population: "~38,000",
     titleVariant: "removals",
     metaDescription:
-      "Vetted Leighton Buzzard removal companies, free quotes in 24 hours. LU7 house and flat moves with strong London Euston commuter links.",
+      "Verified Leighton Buzzard removal companies, free quotes in 24 hours. LU7 house and flat moves with strong London Euston commuter links.",
     intro:
       "Leighton Buzzard is a busy commuter town with steady Euston-line rail traffic, family-home turnover across Linslade and Heath and Reach, and frequent moves to neighbouring Milton Keynes and Dunstable. Movers here handle high weekday volumes throughout the year.",
     workedExample:
       "A 3-bed home in Leighton Buzzard usually costs £440-£660. A move to north London is around £580-£860.",
     pricingNote:
-      "Linslade station-area pickups often need parking coordination — flag location when quoting.",
+      "Linslade station-area pickups often need parking coordination, mention location when quoting.",
     commonRoutes: [
       { to: "London (Euston)", oneBedBand: "£500-£740" },
       { to: "Milton Keynes", oneBedBand: "£240-£360" },
@@ -1728,7 +1764,7 @@ export const locations: Location[] = [
       { to: "Dunstable", oneBedBand: "£220-£340" },
       { to: "Bedford", oneBedBand: "£280-£420" },
     ],
-    trustPoints: baseTrust("Leighton Buzzard"),
+    trustPoints: baseTrust("Leighton Buzzard", "verified"),
     faqs: [
       {
         q: "Do you cover Linslade and Heath and Reach?",
