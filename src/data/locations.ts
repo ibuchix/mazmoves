@@ -43,8 +43,8 @@ export interface Location {
   variantCopy?: Partial<Record<VariantBlock, string>>;
 }
 
-const baseTrust = (town: string) => [
-  `Vetted removal companies covering ${town} and surrounding postcodes.`,
+const baseTrust = (town: string, word: "verified" | "vetted" = "vetted") => [
+  `${word.charAt(0).toUpperCase() + word.slice(1)} removal companies covering ${town} and surrounding postcodes.`,
   "Multiple quotes side by side, pick on price, reviews, or availability.",
   "Free to use for customers. You pay the mover you choose, not us.",
   "No obligation: ignore quotes you don't like, no chasing calls.",
