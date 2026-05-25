@@ -44,7 +44,7 @@ export default function TownRemovals() {
     {
       "@context": "https://schema.org",
       "@type": "LocalBusiness",
-      name: `HouseMove — Removals in ${loc.name}`,
+      name: `HouseMove, Removals in ${loc.name}`,
       url,
       areaServed: { "@type": "City", name: loc.name, addressRegion: loc.county },
       priceRange: "££",
