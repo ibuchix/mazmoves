@@ -94,7 +94,7 @@ export default function TownRemovals() {
         </ol>
       </nav>
 
-      <TownHero townName={loc.name} county={loc.county} />
+      <TownHero townName={loc.name} county={loc.county} trustWord={loc.trustWord} />
 
       {/* Intro */}
       <section className="py-12 px-4 sm:px-6 lg:px-8">
