@@ -23,7 +23,7 @@ export default function Removals() {
     <div className="flex-1">
       <SeoHead
         title="Removals Across the East of England & Home Counties | HouseMove"
-        description="Compare free, no-obligation removal quotes from vetted movers across 34 towns in the East of England and Home Counties — Cambridge, Norwich, Milton Keynes, Southend and more."
+        description="Compare free, no-obligation removal quotes from verified movers across 34 towns in the East of England and Home Counties, including Cambridge, Norwich, Milton Keynes and Southend. All movers carry public liability and goods-in-transit insurance."
         path="/removals"
         type="website"
       />
