@@ -23,10 +23,11 @@ export default function TownRemovals() {
 
   if (!loc) return <Navigate to="/removals" replace />;
 
+  const trustWordCap = loc.trustWord.charAt(0).toUpperCase() + loc.trustWord.slice(1);
   const title =
     loc.titleVariant === "manAndVan"
-      ? `Man and Van in ${loc.name} — Free Quotes from Verified Movers | HouseMove`
-      : `House Removals in ${loc.name} — Free Quotes from Verified Movers | HouseMove`;
+      ? `Man and Van in ${loc.name} | Free Quotes from ${trustWordCap} Movers | HouseMove`
+      : `House Removals in ${loc.name} | Free Quotes from ${trustWordCap} Movers | HouseMove`;
 
   const path = `/removals/${loc.slug}`;
   const url = `${SITE}${path}`;
