@@ -1,4 +1,5 @@
 // CommonRoutes.tsx - Town-specific table of common move routes with price bands.
+// Removed the Notes column entirely as most rows had no notes content.
 import type { PriceRoute } from "@/data/locations";
 
 interface CommonRoutesProps {
@@ -23,7 +24,6 @@ export function CommonRoutes({ townName, routes }: CommonRoutesProps) {
               <tr>
                 <th className="px-4 py-3 text-sm">From {townName} to</th>
                 <th className="px-4 py-3 text-sm">Typical band (1-2 bed)</th>
-                <th className="px-4 py-3 text-sm hidden md:table-cell">Notes</th>
               </tr>
             </thead>
             <tbody className="font-roboto">
@@ -31,9 +31,6 @@ export function CommonRoutes({ townName, routes }: CommonRoutesProps) {
                 <tr key={r.to} className="border-t">
                   <td className="px-4 py-3 font-medium text-brand-slate">{r.to}</td>
                   <td className="px-4 py-3 text-gray-800">{r.oneBedBand}</td>
-                  <td className="px-4 py-3 text-gray-600 text-sm hidden md:table-cell">
-                    {r.notes || "-"}
-                  </td>
                 </tr>
               ))}
             </tbody>
