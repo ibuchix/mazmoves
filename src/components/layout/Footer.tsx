@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 export function Footer() {
   const year = new Date().getFullYear();
   const links = [
+    { to: "/removals", label: "Locations" },
     { to: "/privacy-policy", label: "Privacy Policy" },
     { to: "/terms-and-conditions", label: "Terms & Conditions" },
     { to: "/contact", label: "Contact" },
