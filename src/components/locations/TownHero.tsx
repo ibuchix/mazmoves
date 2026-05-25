@@ -9,9 +9,10 @@ import { Check } from "lucide-react";
 interface TownHeroProps {
   townName: string;
   county: string;
+  trustWord?: "verified" | "vetted";
 }
 
-export function TownHero({ townName, county }: TownHeroProps) {
+export function TownHero({ townName, county, trustWord = "vetted" }: TownHeroProps) {
   const [moveType, setMoveType] = useState<MoveType | null>(null);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -22,8 +23,9 @@ export function TownHero({ townName, county }: TownHeroProps) {
     }
   };
 
+  const trustWordCap = trustWord.charAt(0).toUpperCase() + trustWord.slice(1);
   const bullets = [
-    `Vetted ${townName} removal companies`,
+    `${trustWordCap} ${townName} removal companies`,
     "Multiple free quotes, no obligation",
     "Compare prices, reviews and availability",
   ];
