@@ -37,9 +37,11 @@ export default function Removals() {
             Removals across the East of England & Home Counties
           </h1>
           <p className="text-lg text-white/90 font-roboto max-w-3xl mx-auto">
-            HouseMove connects you with vetted removal companies in 34 towns across Bedfordshire,
+            HouseMove connects you with verified removal companies in 34 towns across Bedfordshire,
             Buckinghamshire, Cambridgeshire, Essex, Norfolk and Suffolk. Pick your town to see local
-            price guidance, common routes, and FAQs — then request free quotes in one place.
+            price guidance, common routes, and FAQs, then request free quotes in one place. Every
+            mover in our network carries public liability and goods-in-transit insurance, so your
+            property is protected throughout the move.
           </p>
         </div>
       </section>
