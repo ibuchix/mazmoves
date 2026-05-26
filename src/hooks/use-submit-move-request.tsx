@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { MoveRequestForm } from "@/types/move-request";
 import type { Address } from "@/types/address";
 import { identifyUser, trackEvent } from "@/utils/tracking/tiktok";
+import { track } from "@/lib/campaign-tracking";
 
 export interface SubmitMoveRequestHook {
   isSubmitting: boolean;

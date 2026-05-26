@@ -34,7 +34,10 @@ export const HeroForm = ({ moveType, setMoveType, onGetQuotes }: HeroFormProps) 
         </h2>
         <MoveTypeStep
           value={moveType}
-          onChange={(value) => setMoveType(value)}
+          onChange={(value) => {
+            setMoveType(value);
+            track({ event_type: "move_type_selected", move_type: value });
+          }}
           onNext={handleGetQuotes}
         />
         <Button
