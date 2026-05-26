@@ -1,70 +1,37 @@
-## On the URL structure (`/removals/[slug]`)
+## Campaign tracking implementation plan
 
-Short answer: **yes, this structure is correct and is what ranks**. It's the same pattern Compare My Move, Reallymoving, AnyVan and Shiply use for their location pages. Google reads `/removals/cambridge` as a clean, hierarchical service-in-location URL — it groups the 34 pages under a single topical hub (`/removals`), which strengthens internal link equity and gives the hub itself a shot at ranking for broader terms like "house removals east of england".
+Wire the customer app to the admin campaign system. Three new files, two route updates, three call-site hooks. Edge functions `track-event` and `campaign-redirect` already exist on the shared Supabase project (verified — both return 200 on OPTIONS).
 
-What actually decides whether we rank is not the URL — it's:
-1. Per-page content depth and uniqueness (already done — 500-word intros, unique FAQs, varied section blocks).
-2. Internal linking (hub → towns, town → nearby towns — already done).
-3. The sitemap entries (already done).
-4. Backlinks over time (nothing the code can fix).
+### Corrections to the spec
 
-Slug structure is a solved problem here. I'd leave it as-is.
+1. **Slug list** — the spec has `"norfolk"` but the actual route slug is `"norwich"`. Other slugs (kings-lynn, st-neots, st-ives, bury-st-edmunds, felixstowe, southend-on-sea, leighton-buzzard, milton-keynes) all match the customer app exactly.
+2. **No drift risk** — instead of hard-coding the slug set in `useCampaignTracking`, we import `locations` from `src/data/locations.ts` (the single source of truth used by the routes).
+3. **Route shape** — the spec's hook does `pathname.split("/")[0]`, but our landing pages live at `/removals/:slug`, not `/:slug`. We'll parse the slug as the segment after `/removals/`.
 
-## Content edits across all 34 town pages + hub
+### Files to create
 
-Four passes over `src/data/locations.ts`, `src/pages/Removals.tsx`, `src/pages/TownRemovals.tsx`, and the components under `src/components/locations/`:
+- `src/lib/campaign-tracking.ts` — visitor/session id storage, `?cid` capture (first-touch preserved, last-touch updated), and `track(payload)` using `navigator.sendBeacon` with `fetch keepalive` fallback. Posts to `${VITE_SUPABASE_URL}/functions/v1/track-event` with the anon key.
+- `src/hooks/useCampaignTracking.ts` — on every route change, runs `captureCidFromUrl()` and fires `landing_view` when `pathname` matches `/removals/:slug` and the slug exists in the imported `locations` array.
+- `src/pages/CampaignRedirect.tsx` — `/go/:code` page. Calls `campaign-redirect` edge fn with `code`, `visitor_id`, `base_url`, `referrer`, then `window.location.replace(destination)`.
 
-### 1. Remove every em-dash (—)
+### Files to edit
 
-Every `—` character gets replaced with a natural alternative depending on context:
-- Mid-sentence parenthetical → comma or full stop ("Yes, late June is the busiest week").
-- List joins → comma or "and" ("price, reviews, or availability").
-- Range hyphens stay as regular hyphens (already `-`, not affected).
+- `src/config/routes.tsx` — add `{ path: "/go/:code", element: <CampaignRedirect /> }` (lazy import).
+- `src/App.tsx` — mount `useCampaignTracking()` inside a component rendered under `MainLayout` (router context is needed; add a tiny `<TrackingMount />` inside `<MainLayout>` or call inside an inner component above `<Routes>`).
+- `src/components/move-request/hooks/useMoveRequestForm.tsx` — in `handleMoveTypeChange`, call `track({ event_type: "move_type_selected", move_type: type })`.
+- `src/components/home/hero/HeroForm.tsx` — when the user picks a type via the hero `MoveTypeStep`, also fire `move_type_selected` (the hero `setMoveType` setter is in `HeroSection`; add the track call in the `setMoveType` handler there — confirm by reading the file at build time).
+- `src/hooks/use-submit-move-request.tsx` — after `insertMoveRequest` returns `moveRequestId`, call `track({ event_type: "form_submitted", request_id: moveRequestId, move_type: data.moveType, location_slug: <derived from referrer/landing if available> })`. The edge function will stamp `campaign_id` on the `move_requests` row server-side as the durable attribution.
 
-Applies to: intros, worked examples, pricing notes, FAQ answers, variant copy, trust points, hub copy, page titles ("Man and Van in {Town} | Free Quotes…" instead of " — "), and the breadcrumb-area copy.
+### Notes
 
-No em-dashes left anywhere in the public-facing town content.
+- `track-event` is public (no JWT) per the spec; we still send the anon key in the `fetch` fallback path because Supabase functions require it by default.
+- `sendBeacon` cannot send custom headers, so the public edge fn must accept unauthenticated POSTs (already deployed that way — verified via OPTIONS preflight).
+- All tracking is wrapped in try/catch; no failure can ever surface to the user or block submission.
+- `landing_view` fires once per route change (React Router triggers the effect on `pathname` change), preventing double-fires.
 
-### 2. Mix "verified" and "vetted" across pages
+### Verification after build
 
-Currently every page says "vetted". I'll alternate roughly 50/50 based on town, so the corpus reads less templated:
-- "Verified" towns (example split): Cambridge, Milton Keynes, Norwich, Ipswich, Colchester, Chelmsford, Southend-on-Sea, Luton, Bedford, Peterborough, Brentwood, Basildon, Harlow, Bury St Edmunds, Felixstowe, King's Lynn, Leighton Buzzard.
-- "Vetted" towns: St Neots, Wisbech, Huntingdon, Ely, St Ives, Great Yarmouth, Thetford, Wymondham, Dereham, Attleborough, Lowestoft, Haverhill, Newmarket, Stowmarket, Braintree, Dunstable, Ampthill.
-
-Hub page (`/removals`) uses "verified". The `TownHero` component already says "vetted" — I'll make it accept a `trustWord: "verified" | "vetted"` prop so each town renders its assigned word in the H1 supporting line, bullets, meta description, and intro.
-
-### 3. Add insurance messaging
-
-Add a single short line to every town page's trust points (and the hub's intro paragraph):
-
-> "All movers in our network carry public liability and goods-in-transit insurance, so your property is protected throughout the move."
-
-Each town keeps its existing 3-4 trust points and gains this one as a standard fifth point. The hub page gets a single matching sentence in its intro paragraph. No new component — uses the existing `TrustPoints` list and the existing hub intro paragraph.
-
-### 4. Soften "flag at quote stage" / "flag when quoting" phrasing
-
-Every variant of "flag this when quoting", "mention when requesting quotes", "flag in your request" gets rewritten to sound human:
-
-> "Let the moving company know when you're discussing your quote, so they can plan the right van size and crew."
-
-Or shorter variants depending on the FAQ context, e.g.:
-> "Just mention it to the moving company while you're discussing the quote."
-
-Same meaning, friendlier tone, no instructional "flag" verb.
-
-## Files touched
-
-- `src/data/locations.ts` — all 34 records: rewrite intros, worked examples, pricing notes, FAQ answers, variant copy. Add insurance trust point. Replace em-dashes. Apply verified/vetted assignment via a new optional `trustWord` field on each record (defaults to "vetted" if unset, but every record gets one explicitly).
-- `src/components/locations/TownHero.tsx` — accept and render `trustWord` in the bullets and supporting line.
-- `src/components/locations/TrustPoints.tsx` — unchanged structurally; just rendering the now-5-point list.
-- `src/pages/TownRemovals.tsx` — pass `trustWord` through to `TownHero`; clean em-dashes from the title template ("House Removals in {Town} | Free Quotes from {Word} Movers | HouseMove").
-- `src/pages/Removals.tsx` — em-dash sweep, insurance line in intro, "verified" wording.
-
-## What I will NOT change
-
-- URL structure, route config, sitemap entries.
-- DB, move-request form, submission flow.
-- Design tokens, layout, components' visual structure.
-- The 34-town list, slugs, or county groupings.
-
-Approve and I'll run the edits.
+1. Visit `/removals/cambridge?cid=TEST1` → check Network for a `track-event` POST with `event_type: landing_view`, `location_slug: cambridge`, `cid: TEST1`.
+2. Pick a move type on the hero or wizard → second event `move_type_selected`.
+3. Submit a full move request → third event `form_submitted` with `request_id`.
+4. Visit `/go/TEST1` → redirects via `campaign-redirect`.
