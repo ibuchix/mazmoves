@@ -89,6 +89,182 @@ export type Database = {
         }
         Relationships: []
       }
+      campaign_clicks: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          id: string
+          ip: string | null
+          referrer: string | null
+          user_agent: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          id?: string
+          ip?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          id?: string
+          ip?: string | null
+          referrer?: string | null
+          user_agent?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_clicks_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_funnel_v"
+            referencedColumns: ["campaign_id"]
+          },
+          {
+            foreignKeyName: "campaign_clicks_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaign_events: {
+        Row: {
+          campaign_id: string | null
+          created_at: string
+          event_type: Database["public"]["Enums"]["campaign_event_type"]
+          first_campaign_id: string | null
+          id: string
+          location_slug: string | null
+          metadata: Json | null
+          move_type: string | null
+          request_id: string | null
+          session_id: string | null
+          visitor_id: string | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string
+          event_type: Database["public"]["Enums"]["campaign_event_type"]
+          first_campaign_id?: string | null
+          id?: string
+          location_slug?: string | null
+          metadata?: Json | null
+          move_type?: string | null
+          request_id?: string | null
+          session_id?: string | null
+          visitor_id?: string | null
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string
+          event_type?: Database["public"]["Enums"]["campaign_event_type"]
+          first_campaign_id?: string | null
+          id?: string
+          location_slug?: string | null
+          metadata?: Json | null
+          move_type?: string | null
+          request_id?: string | null
+          session_id?: string | null
+          visitor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_funnel_v"
+            referencedColumns: ["campaign_id"]
+          },
+          {
+            foreignKeyName: "campaign_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_events_first_campaign_id_fkey"
+            columns: ["first_campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_funnel_v"
+            referencedColumns: ["campaign_id"]
+          },
+          {
+            foreignKeyName: "campaign_events_first_campaign_id_fkey"
+            columns: ["first_campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          channel: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          ends_at: string | null
+          id: string
+          name: string
+          short_code: string
+          starts_at: string | null
+          status: Database["public"]["Enums"]["campaign_status"]
+          target_location_slug: string | null
+          updated_at: string
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+        }
+        Insert: {
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          name: string
+          short_code: string
+          starts_at?: string | null
+          status?: Database["public"]["Enums"]["campaign_status"]
+          target_location_slug?: string | null
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          ends_at?: string | null
+          id?: string
+          name?: string
+          short_code?: string
+          starts_at?: string | null
+          status?: Database["public"]["Enums"]["campaign_status"]
+          target_location_slug?: string | null
+          updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           auth_user_id: string
@@ -768,6 +944,7 @@ export type Database = {
       }
       move_requests: {
         Row: {
+          campaign_id: string | null
           created_at: string | null
           customer_email: string
           customer_name: string
@@ -778,9 +955,11 @@ export type Database = {
           delivery_longitude: number | null
           estimated_size: string | null
           estimated_value: number | null
+          first_campaign_id: string | null
           id: string
           inventory_list: Json | null
           ip_origin: string | null
+          landing_location_slug: string | null
           move_type: string | null
           pending_review: boolean
           pickup_address: Json
@@ -792,8 +971,10 @@ export type Database = {
           special_instructions: string | null
           status: Database["public"]["Enums"]["request_status"] | null
           updated_at: string | null
+          visitor_id: string | null
         }
         Insert: {
+          campaign_id?: string | null
           created_at?: string | null
           customer_email: string
           customer_name: string
@@ -804,9 +985,11 @@ export type Database = {
           delivery_longitude?: number | null
           estimated_size?: string | null
           estimated_value?: number | null
+          first_campaign_id?: string | null
           id?: string
           inventory_list?: Json | null
           ip_origin?: string | null
+          landing_location_slug?: string | null
           move_type?: string | null
           pending_review?: boolean
           pickup_address: Json
@@ -818,8 +1001,10 @@ export type Database = {
           special_instructions?: string | null
           status?: Database["public"]["Enums"]["request_status"] | null
           updated_at?: string | null
+          visitor_id?: string | null
         }
         Update: {
+          campaign_id?: string | null
           created_at?: string | null
           customer_email?: string
           customer_name?: string
@@ -830,9 +1015,11 @@ export type Database = {
           delivery_longitude?: number | null
           estimated_size?: string | null
           estimated_value?: number | null
+          first_campaign_id?: string | null
           id?: string
           inventory_list?: Json | null
           ip_origin?: string | null
+          landing_location_slug?: string | null
           move_type?: string | null
           pending_review?: boolean
           pickup_address?: Json
@@ -844,8 +1031,38 @@ export type Database = {
           special_instructions?: string | null
           status?: Database["public"]["Enums"]["request_status"] | null
           updated_at?: string | null
+          visitor_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "move_requests_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_funnel_v"
+            referencedColumns: ["campaign_id"]
+          },
+          {
+            foreignKeyName: "move_requests_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "move_requests_first_campaign_id_fkey"
+            columns: ["first_campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaign_funnel_v"
+            referencedColumns: ["campaign_id"]
+          },
+          {
+            foreignKeyName: "move_requests_first_campaign_id_fkey"
+            columns: ["first_campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notification_logs: {
         Row: {
@@ -1133,6 +1350,20 @@ export type Database = {
           name: string | null
           registration_status: string | null
           total_assignments: number | null
+        }
+        Relationships: []
+      }
+      campaign_funnel_v: {
+        Row: {
+          campaign_id: string | null
+          campaign_name: string | null
+          channel: string | null
+          clicks: number | null
+          landings: number | null
+          selections: number | null
+          short_code: string | null
+          status: Database["public"]["Enums"]["campaign_status"] | null
+          submissions: number | null
         }
         Relationships: []
       }
@@ -2359,6 +2590,11 @@ export type Database = {
     Enums: {
       app_role: "admin" | "company" | "customer"
       assignment_status: "active" | "completed" | "cancelled" | "accepted"
+      campaign_event_type:
+        | "landing_view"
+        | "move_type_selected"
+        | "form_submitted"
+      campaign_status: "active" | "paused" | "archived"
       company_registration_status: "pending" | "active" | "suspended"
       invoice_status: "draft" | "pending" | "paid" | "failed" | "void"
       rate_limit_type: "hourly" | "daily" | "monthly"
@@ -2509,6 +2745,12 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "company", "customer"],
       assignment_status: ["active", "completed", "cancelled", "accepted"],
+      campaign_event_type: [
+        "landing_view",
+        "move_type_selected",
+        "form_submitted",
+      ],
+      campaign_status: ["active", "paused", "archived"],
       company_registration_status: ["pending", "active", "suspended"],
       invoice_status: ["draft", "pending", "paid", "failed", "void"],
       rate_limit_type: ["hourly", "daily", "monthly"],
