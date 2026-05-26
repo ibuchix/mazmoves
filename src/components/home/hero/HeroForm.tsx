@@ -2,10 +2,13 @@
 // since registration has been removed from the platform.
 // Fires TikTok ClickButton event when the user clicks "Get Free Quotes" so the
 // lead-gen funnel (ViewContent → ClickButton → SubmitForm → CompleteRegistration) is complete.
+// Also fires the internal campaign `move_type_selected` event when the user
+// picks a move type, so admin campaign attribution captures hero selections.
 import { Button } from "@/components/ui/button";
 import { MoveTypeStep } from "@/components/move-request/MoveTypeStep";
 import { MoveType } from "@/types/move-request";
 import { trackEvent } from "@/utils/tracking/tiktok";
+import { track } from "@/lib/campaign-tracking";
 
 interface HeroFormProps {
   moveType: MoveType | null;
@@ -31,7 +34,10 @@ export const HeroForm = ({ moveType, setMoveType, onGetQuotes }: HeroFormProps) 
         </h2>
         <MoveTypeStep
           value={moveType}
-          onChange={(value) => setMoveType(value)}
+          onChange={(value) => {
+            setMoveType(value);
+            track({ event_type: "move_type_selected", move_type: value });
+          }}
           onNext={handleGetQuotes}
         />
         <Button

@@ -21,6 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { MoveRequestForm } from "@/types/move-request";
 import type { Address } from "@/types/address";
 import { identifyUser, trackEvent } from "@/utils/tracking/tiktok";
+import { track } from "@/lib/campaign-tracking";
 
 export interface SubmitMoveRequestHook {
   isSubmitting: boolean;
@@ -171,6 +172,30 @@ export function useSubmitMoveRequest(): SubmitMoveRequestHook {
         pickupCoords,
         deliveryCoords,
       );
+
+      // 2b. Campaign attribution event. The track-event edge function also
+      // stamps campaign_id directly on the move_requests row, so attribution
+      // survives even if the beacon is blocked.
+      try {
+        const landingSlug = (() => {
+          try {
+            const ref = document.referrer ? new URL(document.referrer) : null;
+            if (!ref) return undefined;
+            const parts = ref.pathname.replace(/^\/+|\/+$/g, "").split("/");
+            return parts[0] === "removals" && parts[1] ? parts[1] : undefined;
+          } catch {
+            return undefined;
+          }
+        })();
+        track({
+          event_type: "form_submitted",
+          request_id: moveRequestId,
+          move_type: data.moveType,
+          location_slug: landingSlug,
+        });
+      } catch {
+        // never block submission on tracking
+      }
 
       // 3. Kick off matching. Non-blocking.
       if (pickupCoords || deliveryCoords) {
