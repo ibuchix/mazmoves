@@ -15,6 +15,7 @@ import { useUrlParams } from "./url/useUrlParams";
 import { useFormSubmission } from "./form/useFormSubmission";
 import { useSubmitMoveRequest } from "@/hooks/use-submit-move-request";
 import { useToast } from "@/hooks/use-toast";
+import { track } from "@/lib/campaign-tracking";
 
 const STORAGE_KEY = "moveRequestForm:v1";
 
@@ -205,6 +206,7 @@ export function useMoveRequestForm() {
     setValue('moveType', type);
     setValue('propertySize', undefined);
     setStep(2);
+    track({ event_type: "move_type_selected", move_type: type });
   };
 
   const propertySize = watch('propertySize');
