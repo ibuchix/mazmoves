@@ -81,7 +81,12 @@ export interface TrackPayload {
   metadata?: Record<string, unknown>;
 }
 
-export function track(payload: TrackPayload): void {
+// Use fetch + keepalive (returns a Promise so callers can await before
+// navigating). sendBeacon is retained only as a last-ditch fallback if the
+// fetch itself rejects — beacons are fire-and-forget, hide their status,
+// and get canceled by post-submit navigations, which is why they're no
+// longer the primary transport.
+export async function track(payload: TrackPayload): Promise<void> {
   try {
     const { cid, first_cid } = captureCidFromUrl();
     const body = JSON.stringify({
@@ -91,12 +96,7 @@ export function track(payload: TrackPayload): void {
       visitor_id: getVisitorId(),
       session_id: getSessionId(),
     });
-    if (typeof navigator !== "undefined" && "sendBeacon" in navigator) {
-      const blob = new Blob([body], { type: "application/json" });
-      navigator.sendBeacon(TRACK_URL, blob);
-      return;
-    }
-    fetch(TRACK_URL, {
+    await fetch(TRACK_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -105,7 +105,15 @@ export function track(payload: TrackPayload): void {
       },
       body,
       keepalive: true,
-    }).catch(() => {});
+      credentials: "omit",
+    }).catch(() => {
+      if (typeof navigator !== "undefined" && "sendBeacon" in navigator) {
+        navigator.sendBeacon(
+          TRACK_URL,
+          new Blob([body], { type: "application/json" }),
+        );
+      }
+    });
   } catch {
     // never throw from tracking
   }
