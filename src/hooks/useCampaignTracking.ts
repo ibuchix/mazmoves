@@ -1,8 +1,9 @@
 // useCampaignTracking
 // Mount once at the app root (inside the Router). Captures ?cid= on every
-// navigation and fires a `landing_view` event whenever the user lands on one
-// of the /removals/:slug location pages. Slugs are imported directly from
-// src/data/locations.ts so this list cannot drift from the actual routes.
+// navigation and fires a `landing_view` event whenever the user lands on a
+// location landing page. Primary match is /removals/:slug; falls back to
+// first-segment slugs in case any location is ever served at the root.
+// Slugs imported from src/data/locations.ts so this list cannot drift.
 
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
@@ -16,10 +17,12 @@ export function useCampaignTracking() {
 
   useEffect(() => {
     captureCidFromUrl();
-    // Match /removals/:slug exactly (ignore trailing slash, optional query)
+    // Location landing pages live under /removals/<slug>; fall back to first
+    // segment in case any slugs are ever served at the root.
     const parts = location.pathname.replace(/^\/+|\/+$/g, "").split("/");
-    if (parts[0] === "removals" && parts[1] && LOCATION_SLUGS.has(parts[1])) {
-      track({ event_type: "landing_view", location_slug: parts[1] });
+    const slug = parts[0] === "removals" ? parts[1] : parts[0];
+    if (slug && LOCATION_SLUGS.has(slug)) {
+      track({ event_type: "landing_view", location_slug: slug });
     }
   }, [location.pathname, location.search]);
 }
