@@ -2,8 +2,10 @@
 // Reads ?cid=<short_code> on every page load and persists it alongside a stable
 // visitor_id. First-touch (hm_first_cid) is preserved; last-touch (hm_cid) is
 // overwritten on each new ?cid. Events POST to the public `track-event` Supabase
-// edge function via navigator.sendBeacon (fallback: fetch keepalive) so they
-// never block the user. All errors are swallowed — tracking must never throw.
+// edge function via fetch + keepalive (awaitable Promise) so callers like the
+// form-submit handler can ensure the request completes before navigating away.
+// sendBeacon is retained only as a fallback if fetch itself rejects. All errors
+// are swallowed — tracking must never throw.
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
