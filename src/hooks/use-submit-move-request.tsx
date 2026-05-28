@@ -187,7 +187,10 @@ export function useSubmitMoveRequest(): SubmitMoveRequestHook {
             return undefined;
           }
         })();
-        track({
+        // Awaited so the edge function can stamp campaign_id onto the
+        // move_requests row BEFORE we show the success dialog / navigate —
+        // otherwise the in-flight request gets canceled and attribution is lost.
+        await track({
           event_type: "form_submitted",
           request_id: moveRequestId,
           move_type: data.moveType,

@@ -2,8 +2,10 @@
 // Reads ?cid=<short_code> on every page load and persists it alongside a stable
 // visitor_id. First-touch (hm_first_cid) is preserved; last-touch (hm_cid) is
 // overwritten on each new ?cid. Events POST to the public `track-event` Supabase
-// edge function via navigator.sendBeacon (fallback: fetch keepalive) so they
-// never block the user. All errors are swallowed — tracking must never throw.
+// edge function via fetch + keepalive (awaitable Promise) so callers like the
+// form-submit handler can ensure the request completes before navigating away.
+// sendBeacon is retained only as a fallback if fetch itself rejects. All errors
+// are swallowed — tracking must never throw.
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
@@ -81,7 +83,12 @@ export interface TrackPayload {
   metadata?: Record<string, unknown>;
 }
 
-export function track(payload: TrackPayload): void {
+// Use fetch + keepalive (returns a Promise so callers can await before
+// navigating). sendBeacon is retained only as a last-ditch fallback if the
+// fetch itself rejects — beacons are fire-and-forget, hide their status,
+// and get canceled by post-submit navigations, which is why they're no
+// longer the primary transport.
+export async function track(payload: TrackPayload): Promise<void> {
   try {
     const { cid, first_cid } = captureCidFromUrl();
     const body = JSON.stringify({
@@ -91,12 +98,7 @@ export function track(payload: TrackPayload): void {
       visitor_id: getVisitorId(),
       session_id: getSessionId(),
     });
-    if (typeof navigator !== "undefined" && "sendBeacon" in navigator) {
-      const blob = new Blob([body], { type: "application/json" });
-      navigator.sendBeacon(TRACK_URL, blob);
-      return;
-    }
-    fetch(TRACK_URL, {
+    await fetch(TRACK_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -105,7 +107,15 @@ export function track(payload: TrackPayload): void {
       },
       body,
       keepalive: true,
-    }).catch(() => {});
+      credentials: "omit",
+    }).catch(() => {
+      if (typeof navigator !== "undefined" && "sendBeacon" in navigator) {
+        navigator.sendBeacon(
+          TRACK_URL,
+          new Blob([body], { type: "application/json" }),
+        );
+      }
+    });
   } catch {
     // never throw from tracking
   }
