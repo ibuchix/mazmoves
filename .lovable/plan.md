@@ -1,39 +1,39 @@
-## Update `useCampaignTracking` hook
 
-Replace the body of `src/hooks/useCampaignTracking.ts` with the snippet from `customer-app-snippets/README.md` (lines 150–159).
+## Goal
 
-### What changes
+Produce `/mnt/documents/uk_movers_east_england.csv` with up to 500 moving companies across your 34 East-of-England towns, columns: `name, phone, website, email, location`.
 
-Current logic only fires `landing_view` for `/removals/:slug`. The new logic:
+## Approach
 
-1. Parses the URL the same way.
-2. Uses `parts[1]` when `parts[0] === "removals"` (unchanged behavior for our 34 pages).
-3. **New:** falls back to `parts[0]` as the slug otherwise — so if a campaign ever points at `/cambridge` directly (root-level slug), `landing_view` still fires.
-4. Still gated by `LOCATION_SLUGS` (imported from `src/data/locations.ts`), so non-location routes like `/contact` or `/agents` will never trigger an event.
+This is a one-off data-gathering task — no app changes. I'll use the **Firecrawl** connector (search + scrape) because it's the only realistic way to get verified phone/email straight from each company's own website.
 
-### Why it's safe
+### Steps
 
-- For all current routes (`/removals/cambridge`, `/removals/norwich`, etc.) behavior is identical.
-- The root fallback only activates for paths whose first segment matches a known location slug — which today never happens, so no false positives.
-- No new dependencies; the existing `LOCATION_SLUGS` set, `captureCidFromUrl`, and `track` calls are reused.
+1. **Connect Firecrawl** (if not already linked to this project) so `FIRECRAWL_API_KEY` is available to a short Deno/Node script.
+2. **For each of the 34 towns**, run a Firecrawl `search` for queries like `"removals company {town} UK"` and `"man and van {town}"` to collect ~20–25 candidate company sites per town.
+3. **Deduplicate** by root domain so national chains don't dominate.
+4. **Scrape each candidate site** (`/`, `/contact`, `/about`) with Firecrawl, extracting:
+   - `name` → from `<title>` / OpenGraph / H1
+   - `phone` → regex for UK formats (`+44`, `0xxxx`)
+   - `email` → regex for `mailto:` and visible addresses (skip role addresses like `noreply@`)
+   - `website` → final URL
+   - `location` → the town the search came from
+5. **Quality rules** (since you said 100% accuracy):
+   - Drop any row where phone OR email can't be verified on the company's own site.
+   - Drop directory/aggregator domains (yell.com, checkatrade.com, reallymoving.com, compareremovals.com, etc.).
+   - Validate UK phone format; normalise to `+44`.
+6. **Cap at 500 total**, distributed roughly evenly across towns (~15 per town, more for big cities like Milton Keynes/Norwich/Cambridge/Peterborough/Ipswich/Chelmsford if smaller towns run dry).
+7. **Output** CSV to `/mnt/documents/` and surface it as a `<presentation-artifact>` for download. I'll also report the actual row count and per-town breakdown.
 
-### Files
+### Honest expectations
 
-- `src/hooks/useCampaignTracking.ts` — replace the `useEffect` body with the snippet, update the top-of-file comment.
+- Hitting **exactly 500 with all 4 fields verified** is unlikely. Many small movers don't publish an email — they use contact forms. Realistic deliverable: **300–500 rows**, with email present on ~60–70% of them. I will not invent or guess any value — blank beats wrong.
+- Firecrawl credits: ~34 searches + ~600–900 scrapes. Make sure your Firecrawl plan has headroom (or has the managed `LOVABLE50` coupon room).
 
-### Verification
+### Out of scope
 
-After republish:
-1. `/removals/cambridge?cid=TEST1` → `landing_view` POST with `location_slug: cambridge` (unchanged).
-2. `/contact` → no event (correct, not a location).
-3. Hypothetical `/cambridge` → would now fire `landing_view` (new fallback, harmless since route doesn't exist yet).
+No code changes to the customer app. This is purely a script run that writes a CSV artifact.
 
-### Nothing else needs fixing
+---
 
-- `/go/:code` route is registered ✅
-- `CampaignRedirect.tsx` exists ✅
-- `track-event` + `campaign-redirect` edge functions are live (200 on OPTIONS) ✅
-- `useCampaignTracking()` is mounted inside the Router in `App.tsx` ✅
-- `?cid` capture + visitor/session ids + `sendBeacon` dispatch all in place ✅
-
-The only outstanding action after this edit is **republish housemove.co** so the new bundle ships.
+Approve this plan and I'll connect Firecrawl (if needed), run the script, and hand back the CSV.
