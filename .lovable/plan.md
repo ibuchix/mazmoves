@@ -1,39 +1,37 @@
+## Plan: Install Google Ads tag (AW-18198179087) site-wide + conversion-ready submission
 
-## Goal
+### 1. Add gtag to `index.html`
+Insert the Google tag snippet inside `<head>` (loads on every route, including the 34 `/removals/:slug` pages and `/go/:code` redirects — they all use the same `index.html` shell in this SPA). Place it just after the TikTok pixel.
 
-Produce `/mnt/documents/uk_movers_east_england.csv` with up to 500 moving companies across your 34 East-of-England towns, columns: `name, phone, website, email, location`.
+### 2. Update Content Security Policy in `index.html`
+The current CSP only allows TikTok and Supabase. Extend it so Google Ads/Tag Manager isn't blocked:
+- `script-src`: add `https://www.googletagmanager.com https://www.google-analytics.com`
+- `img-src`: add `https://www.google.com https://www.google.co.uk https://www.googletagmanager.com https://www.google-analytics.com` (Google Ads fires 1×1 conversion pixels from these)
+- `connect-src`: add `https://www.googletagmanager.com https://www.google-analytics.com https://*.google-analytics.com`
+- `frame-src`: add `https://td.doubleclick.net` (conversion linker iframe)
 
-## Approach
+### 3. Create `src/utils/tracking/google-ads.ts`
+Small typed helper with two functions:
+- `gtagEvent(eventName, params)` — generic wrapper around `window.gtag` with a safety check.
+- `trackAdsConversion(params: { sendTo: string; value?: number; currency?: string; transactionId?: string })` — fires `gtag('event', 'conversion', { send_to, value, currency: 'GBP', transaction_id })`.
 
-This is a one-off data-gathering task — no app changes. I'll use the **Firecrawl** connector (search + scrape) because it's the only realistic way to get verified phone/email straight from each company's own website.
+Declare `window.gtag` and `window.dataLayer` in the file (or in `src/vite-env.d.ts`) so TypeScript is happy.
 
-### Steps
+### 4. Wire the conversion into `src/hooks/use-submit-move-request.tsx`
+After a successful insert (right next to the existing TikTok `trackEvent("SubmitForm", ...)` block), call `trackAdsConversion({ sendTo: GOOGLE_ADS_CONVERSION_ID, transactionId: moveRequestId, currency: "GBP" })`.
 
-1. **Connect Firecrawl** (if not already linked to this project) so `FIRECRAWL_API_KEY` is available to a short Deno/Node script.
-2. **For each of the 34 towns**, run a Firecrawl `search` for queries like `"removals company {town} UK"` and `"man and van {town}"` to collect ~20–25 candidate company sites per town.
-3. **Deduplicate** by root domain so national chains don't dominate.
-4. **Scrape each candidate site** (`/`, `/contact`, `/about`) with Firecrawl, extracting:
-   - `name` → from `<title>` / OpenGraph / H1
-   - `phone` → regex for UK formats (`+44`, `0xxxx`)
-   - `email` → regex for `mailto:` and visible addresses (skip role addresses like `noreply@`)
-   - `website` → final URL
-   - `location` → the town the search came from
-5. **Quality rules** (since you said 100% accuracy):
-   - Drop any row where phone OR email can't be verified on the company's own site.
-   - Drop directory/aggregator domains (yell.com, checkatrade.com, reallymoving.com, compareremovals.com, etc.).
-   - Validate UK phone format; normalise to `+44`.
-6. **Cap at 500 total**, distributed roughly evenly across towns (~15 per town, more for big cities like Milton Keynes/Norwich/Cambridge/Peterborough/Ipswich/Chelmsford if smaller towns run dry).
-7. **Output** CSV to `/mnt/documents/` and surface it as a `<presentation-artifact>` for download. I'll also report the actual row count and per-town breakdown.
+Store the `send_to` value as a single constant in `google-ads.ts`:
+```ts
+// Replace with the full AW-18198179087/XXXX label once provided
+export const GOOGLE_ADS_CONVERSION_SEND_TO = "AW-18198179087/REPLACE_WITH_LABEL";
+```
+Until the real label is pasted, the conversion call is a no-op-safe placeholder (Google will simply not record a conversion for an unknown label). When you share the value, it's a one-line edit.
 
-### Honest expectations
+### 5. Verification
+- DevTools → Network filter `googletagmanager.com` on `/`, `/removals/bedford`, `/go/...` — confirm `gtag/js?id=AW-18198179087` loads on each.
+- Submit a test move request, confirm a `collect` / `conversion` request fires with the `send_to` parameter.
+- Google Ads → Tag Assistant for live validation once the label is in.
 
-- Hitting **exactly 500 with all 4 fields verified** is unlikely. Many small movers don't publish an email — they use contact forms. Realistic deliverable: **300–500 rows**, with email present on ~60–70% of them. I will not invent or guess any value — blank beats wrong.
-- Firecrawl credits: ~34 searches + ~600–900 scrapes. Make sure your Firecrawl plan has headroom (or has the managed `LOVABLE50` coupon room).
-
-### Out of scope
-
-No code changes to the customer app. This is purely a script run that writes a CSV artifact.
-
----
-
-Approve this plan and I'll connect Firecrawl (if needed), run the script, and hand back the CSV.
+### Notes
+- All 34 location pages and the campaign redirect are part of the same SPA, so a single `<script>` in `index.html` covers them — no per-page wiring needed.
+- The `<noscript>` fallback for Google Ads is intentionally omitted because CSP rules + our SPA's JS-required nature already preclude meaningful no-JS tracking, and we follow the project rule of not adding pixel `<noscript>` to `<head>`.
