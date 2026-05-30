@@ -249,8 +249,9 @@ export function useSubmitMoveRequest(): SubmitMoveRequestHook {
       // has been filled in. Safe no-op until then.
       trackAdsConversion({
         sendTo: GOOGLE_ADS_CONVERSION_SEND_TO,
-        transactionId: moveRequestId,
+        value: GOOGLE_ADS_CONVERSION_VALUE,
         currency: "GBP",
+        transactionId: moveRequestId,
       });
 
       setShowSuccess(true);
