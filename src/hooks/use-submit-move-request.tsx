@@ -21,7 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { MoveRequestForm } from "@/types/move-request";
 import type { Address } from "@/types/address";
 import { identifyUser, trackEvent } from "@/utils/tracking/tiktok";
-import { trackAdsConversion, GOOGLE_ADS_CONVERSION_SEND_TO } from "@/utils/tracking/google-ads";
+import { trackAdsConversion, GOOGLE_ADS_CONVERSION_SEND_TO, GOOGLE_ADS_CONVERSION_VALUE } from "@/utils/tracking/google-ads";
 import { track } from "@/lib/campaign-tracking";
 
 export interface SubmitMoveRequestHook {
@@ -249,8 +249,9 @@ export function useSubmitMoveRequest(): SubmitMoveRequestHook {
       // has been filled in. Safe no-op until then.
       trackAdsConversion({
         sendTo: GOOGLE_ADS_CONVERSION_SEND_TO,
-        transactionId: moveRequestId,
+        value: GOOGLE_ADS_CONVERSION_VALUE,
         currency: "GBP",
+        transactionId: moveRequestId,
       });
 
       setShowSuccess(true);

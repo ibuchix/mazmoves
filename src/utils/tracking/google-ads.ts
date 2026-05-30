@@ -13,8 +13,10 @@ declare global {
 
 export const GOOGLE_ADS_ID = "AW-18198179087";
 
-// TODO: replace REPLACE_WITH_LABEL with the conversion label from Google Ads.
-export const GOOGLE_ADS_CONVERSION_SEND_TO = "AW-18198179087/REPLACE_WITH_LABEL";
+// Submit lead form conversion label from Google Ads.
+export const GOOGLE_ADS_CONVERSION_SEND_TO = "AW-18198179087/xmIOCK2v97UcEI_ayOVD";
+// Default conversion value (GBP) — matches the value configured in Google Ads.
+export const GOOGLE_ADS_CONVERSION_VALUE = 1.0;
 
 export function gtagEvent(eventName: string, params: Record<string, unknown> = {}): void {
   if (typeof window === "undefined" || typeof window.gtag !== "function") return;
