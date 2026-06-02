@@ -9,9 +9,11 @@
 //      rows in move_requests; no new infra required.
 //   3. Strict zod validation + HTML stripping for special_instructions.
 //   4. Service-role insert with the same column set the frontend used
-//      to write directly. Trigger derives PostGIS columns. Matching
-//      pipeline (notify-companies / process-matches) is unaffected
-//      because it runs with the service role and reads by id.
+//      to write directly. Trigger derives PostGIS columns.
+//   5. Server-side fire of notify-companies (kept alive via
+//      EdgeRuntime.waitUntil) so matched-company emails go out reliably
+//      regardless of whether the browser stays open. Backstop matching
+//      (process-matches cron) is still in place but does not email.
 //
 // Phase 2 will slot Cloudflare Turnstile verification in between
 // origin check and rate limit.
@@ -105,6 +107,40 @@ serve(async (req) => {
     if (insertError || !inserted) {
       console.error("Insert failed:", insertError);
       return json({ error: insertError?.message ?? "Failed to save move request" }, 500);
+    }
+
+    // Fire notify-companies server-side so it always runs. Browser
+    // fire-and-forget calls were being lost on navigation. We use fetch
+    // directly (not supabase.functions.invoke) so we can set the Origin
+    // header that notify-companies' verifyOrigin requires.
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const notifyPromise = fetch(`${supabaseUrl}/functions/v1/notify-companies`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${serviceKey}`,
+        apikey: serviceKey,
+        Origin: "https://housemove.co",
+      },
+      body: JSON.stringify({ moveRequestId: inserted.id }),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          console.error(
+            `notify-companies returned ${res.status} (non-blocking): ${text}`,
+          );
+        }
+      })
+      .catch((err) => {
+        console.error("notify-companies fetch threw (non-blocking):", err);
+      });
+
+    // @ts-ignore — EdgeRuntime is provided by Supabase Edge Runtime
+    if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) {
+      // @ts-ignore
+      EdgeRuntime.waitUntil(notifyPromise);
     }
 
     return json({ success: true, id: inserted.id }, 200);
