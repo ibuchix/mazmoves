@@ -9,9 +9,11 @@
 //      rows in move_requests; no new infra required.
 //   3. Strict zod validation + HTML stripping for special_instructions.
 //   4. Service-role insert with the same column set the frontend used
-//      to write directly. Trigger derives PostGIS columns. Matching
-//      pipeline (notify-companies / process-matches) is unaffected
-//      because it runs with the service role and reads by id.
+//      to write directly. Trigger derives PostGIS columns.
+//   5. Server-side fire of notify-companies (kept alive via
+//      EdgeRuntime.waitUntil) so matched-company emails go out reliably
+//      regardless of whether the browser stays open. Backstop matching
+//      (process-matches cron) is still in place but does not email.
 //
 // Phase 2 will slot Cloudflare Turnstile verification in between
 // origin check and rate limit.
