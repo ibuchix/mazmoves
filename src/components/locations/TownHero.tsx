@@ -1,4 +1,7 @@
 // TownHero.tsx - Slate gradient hero for town pages, reusing homepage hero form.
+// Mobile fix: slate background covers full section on phones so the form sits cleanly
+// inside the slate (section padding becomes the inner inset) instead of appearing to
+// float past the slate's top edge on small viewports.
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MoveType } from "@/types/move-request";
