@@ -9,3 +9,11 @@ SUPABASE_DB_URL = "env"
 [[functions]]
 name = "register-company"
 verify_jwt = false
+
+[[functions]]
+name = "notify-companies"
+verify_jwt = false
+
+[[functions]]
+name = "submit-move-request"
+verify_jwt = false
