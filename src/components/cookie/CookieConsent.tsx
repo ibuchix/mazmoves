@@ -78,7 +78,7 @@ export default function CookieConsent() {
             </Button>
             <Button 
               onClick={acceptAll}
-              className="w-full sm:w-auto bg-brand-green hover:bg-brand-orange whitespace-nowrap text-sm"
+              className="w-full sm:w-auto bg-brand-green hover:bg-brand-orange text-brand-slate hover:text-white whitespace-nowrap text-sm font-semibold"
               size="sm"
             >
               Accept All
