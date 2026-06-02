@@ -107,18 +107,32 @@ serve(async (req) => {
       return json({ error: insertError?.message ?? "Failed to save move request" }, 500);
     }
 
-    // Fire notify-companies server-side so it always runs (browser
-    // fire-and-forget calls were being lost on navigation / JWT verify).
-    // Kept alive past the response via EdgeRuntime.waitUntil when available.
-    const notifyPromise = supabase.functions
-      .invoke("notify-companies", { body: { moveRequestId: inserted.id } })
-      .then(({ error }) => {
-        if (error) {
-          console.error("notify-companies invocation error (non-blocking):", error);
+    // Fire notify-companies server-side so it always runs. Browser
+    // fire-and-forget calls were being lost on navigation. We use fetch
+    // directly (not supabase.functions.invoke) so we can set the Origin
+    // header that notify-companies' verifyOrigin requires.
+    const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
+    const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    const notifyPromise = fetch(`${supabaseUrl}/functions/v1/notify-companies`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${serviceKey}`,
+        apikey: serviceKey,
+        Origin: "https://housemove.co",
+      },
+      body: JSON.stringify({ moveRequestId: inserted.id }),
+    })
+      .then(async (res) => {
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          console.error(
+            `notify-companies returned ${res.status} (non-blocking): ${text}`,
+          );
         }
       })
       .catch((err) => {
-        console.error("notify-companies threw (non-blocking):", err);
+        console.error("notify-companies fetch threw (non-blocking):", err);
       });
 
     // @ts-ignore — EdgeRuntime is provided by Supabase Edge Runtime
