@@ -116,21 +116,6 @@ const insertMoveRequest = async (
   return inserted.id as string;
 };
 
-const triggerMatching = async (moveRequestId: string): Promise<void> => {
-  // Fire-and-forget. The backstop process-matches cron will retry any
-  // request whose status stays `pending` because of an inline failure.
-  try {
-    const { error } = await supabase.functions.invoke("notify-companies", {
-      body: { moveRequestId },
-    });
-    if (error) {
-      console.error("notify-companies invocation error (non-blocking):", error);
-    }
-  } catch (err) {
-    console.error("notify-companies threw (non-blocking):", err);
-  }
-};
-
 const sendConfirmationEmail = async (
   email: string,
   fullName: string,
