@@ -1,4 +1,7 @@
 // TownHero.tsx - Slate gradient hero for town pages, reusing homepage hero form.
+// Mobile fix: slate background covers full section on phones so the form sits cleanly
+// inside the slate (section padding becomes the inner inset) instead of appearing to
+// float past the slate's top edge on small viewports.
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MoveType } from "@/types/move-request";
@@ -31,12 +34,12 @@ export function TownHero({ townName, county, trustWord = "vetted" }: TownHeroPro
   ];
 
   return (
-    <section className="relative flex items-center px-4 sm:px-6 lg:px-8 pt-8 pb-8 md:pt-12 md:pb-24">
-      <div className="absolute inset-x-4 sm:inset-x-6 lg:inset-x-8 top-8 md:top-12 bottom-8 md:bottom-24 rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-brand-slate via-brand-slateLight to-brand-slate shadow-2xl">
+    <section className="relative flex items-center px-3 sm:px-6 lg:px-8 py-4 md:pt-12 md:pb-24">
+      <div className="absolute inset-x-3 sm:inset-x-6 lg:inset-x-8 inset-y-0 md:top-12 md:bottom-24 rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-brand-slate via-brand-slateLight to-brand-slate shadow-2xl">
         <div className="absolute inset-0 opacity-20 bg-[url('/grid.svg')] bg-center" />
         <div className="absolute inset-0 bg-black/5" />
       </div>
-      <div className="relative w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-8 py-8 md:py-20">
+      <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-8 py-6 md:py-20">
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-stretch">
           <div className={`${isMobile ? "order-1" : "order-2 md:order-1"} animate-fade-in`}>
             <HeroForm moveType={moveType} setMoveType={setMoveType} onGetQuotes={onGetQuotes} />
