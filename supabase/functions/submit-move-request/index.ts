@@ -107,6 +107,26 @@ serve(async (req) => {
       return json({ error: insertError?.message ?? "Failed to save move request" }, 500);
     }
 
+    // Fire notify-companies server-side so it always runs (browser
+    // fire-and-forget calls were being lost on navigation / JWT verify).
+    // Kept alive past the response via EdgeRuntime.waitUntil when available.
+    const notifyPromise = supabase.functions
+      .invoke("notify-companies", { body: { moveRequestId: inserted.id } })
+      .then(({ error }) => {
+        if (error) {
+          console.error("notify-companies invocation error (non-blocking):", error);
+        }
+      })
+      .catch((err) => {
+        console.error("notify-companies threw (non-blocking):", err);
+      });
+
+    // @ts-ignore — EdgeRuntime is provided by Supabase Edge Runtime
+    if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) {
+      // @ts-ignore
+      EdgeRuntime.waitUntil(notifyPromise);
+    }
+
     return json({ success: true, id: inserted.id }, 200);
   } catch (err) {
     console.error("submit-move-request unexpected error:", err);
