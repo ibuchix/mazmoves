@@ -31,12 +31,12 @@ export function TownHero({ townName, county, trustWord = "vetted" }: TownHeroPro
   ];
 
   return (
-    <section className="relative flex items-center px-4 sm:px-6 lg:px-8 pt-8 pb-16 md:pt-12 md:pb-24">
-      <div className="absolute inset-x-4 sm:inset-x-6 lg:inset-x-8 top-8 md:top-12 bottom-16 md:bottom-24 rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-brand-slate via-brand-slateLight to-brand-slate shadow-2xl">
+    <section className="relative flex items-center px-4 sm:px-6 lg:px-8 pt-8 pb-8 md:pt-12 md:pb-24">
+      <div className="absolute inset-x-4 sm:inset-x-6 lg:inset-x-8 top-8 md:top-12 bottom-8 md:bottom-24 rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-brand-slate via-brand-slateLight to-brand-slate shadow-2xl">
         <div className="absolute inset-0 opacity-20 bg-[url('/grid.svg')] bg-center" />
         <div className="absolute inset-0 bg-black/5" />
       </div>
-      <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20">
+      <div className="relative w-full max-w-7xl mx-auto px-6 sm:px-8 lg:px-8 py-8 md:py-20">
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-stretch">
           <div className={`${isMobile ? "order-1" : "order-2 md:order-1"} animate-fade-in`}>
             <HeroForm moveType={moveType} setMoveType={setMoveType} onGetQuotes={onGetQuotes} />
@@ -45,7 +45,7 @@ export function TownHero({ townName, county, trustWord = "vetted" }: TownHeroPro
             <p className="text-brand-green font-montserrat font-semibold tracking-wide text-sm uppercase mb-2">
               {county}
             </p>
-            <h1 className="text-4xl md:text-5xl font-bold font-montserrat mb-4 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-montserrat mb-4 leading-tight break-words">
               House Removals in {townName}
             </h1>
             <p className="text-lg text-white/90 font-roboto mb-6 max-w-xl">
