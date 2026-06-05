@@ -1,6 +1,8 @@
 // signing.ts
 // HMAC-SHA256 helpers used to sign and verify move-cost estimates so the
 // browser cannot tamper with the price between calculation and booking.
+// Updated: payload now carries an optional commercialProfile so commercial
+// estimates can be re-verified on the booking step.
 
 const encoder = new TextEncoder();
 
@@ -32,7 +34,8 @@ export interface EstimatePayload {
   low: number;
   high: number;
   moveType: string;
-  propertySize: string;
+  propertySize: string | null;
+  commercialProfile: { premisesType: string; scale: string } | null;
   pickupLat: number;
   pickupLng: number;
   deliveryLat: number;

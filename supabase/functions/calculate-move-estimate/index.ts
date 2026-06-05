@@ -5,18 +5,27 @@
 // cannot be tampered with from the browser. Returns a price range plus
 // an HMAC-signed token the booking step verifies before persisting.
 //
-// Inputs are validated with zod; distance is recomputed server-side
-// from coordinates (we do not trust a client-supplied distance).
+// Changes in this revision:
+//   - Commercial moves now take a commercialProfile { premisesType, scale }.
+//     "enterprise" scale short-circuits to requiresCustomQuote with no price.
+//   - Short-notice surcharge fires when the move is < 2 days out (was 7).
+//   - Weekend surcharge is now 5% (was 10%).
+//
+// Inputs validated with zod; distance recomputed server-side from
+// coordinates using Mapbox driving directions (we do not trust any
+// client-supplied distance).
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { z } from "https://esm.sh/zod@3.23.8";
 import { verifyOrigin, corsHeaders } from "../_shared/verify-origin.ts";
 import {
   BASE_BY_SIZE,
+  COMMERCIAL_BASE,
   TYPE_MULTIPLIER,
   MIN_BY_TYPE,
   MAX_BY_TYPE,
   SURCHARGE_SHORT_NOTICE,
+  SURCHARGE_SHORT_NOTICE_DAYS,
   SURCHARGE_WEEKEND,
   RANGE_SPREAD,
   INTERNATIONAL_CUSTOM_QUOTE_MILES,
@@ -30,9 +39,15 @@ const coordsSchema = z.object({
   longitude: z.number().min(-180).max(180),
 });
 
+const commercialProfileSchema = z.object({
+  premisesType: z.enum(["office", "retail", "warehouse", "industrial", "other"]),
+  scale: z.enum(["small", "medium", "large", "enterprise"]),
+});
+
 const inputSchema = z.object({
   moveType: z.enum(["domestic", "commercial", "international"]),
-  propertySize: z.string().min(1).max(20),
+  propertySize: z.string().min(1).max(20).optional(),
+  commercialProfile: commercialProfileSchema.optional(),
   pickupCoords: coordsSchema,
   deliveryCoords: coordsSchema,
   moveDate: z.string().refine((v) => {
@@ -44,9 +59,13 @@ const inputSchema = z.object({
     yearAhead.setFullYear(yearAhead.getFullYear() + 1);
     return d >= today && d <= yearAhead;
   }, "Move date must be between today and 12 months ahead"),
-});
-
-const round10 = (n: number) => Math.round(n / 10) * 10;
+}).refine(
+  (v) =>
+    v.moveType === "commercial"
+      ? !!v.commercialProfile
+      : !!v.propertySize,
+  { message: "propertySize or commercialProfile is required for this move type" },
+);
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -79,9 +98,29 @@ serve(async (req) => {
       return json({ error: "Server misconfigured" }, 500);
     }
 
-    const base = BASE_BY_SIZE[data.propertySize];
-    if (base === undefined) {
-      return json({ error: "Unsupported property size for estimate" }, 400);
+    // Resolve base price (and detect bespoke-quote cases).
+    let base: number | null = null;
+    if (data.moveType === "commercial") {
+      const { premisesType, scale } = data.commercialProfile!;
+      const lookup = COMMERCIAL_BASE[premisesType][scale];
+      if (lookup === "custom") {
+        return json(
+          {
+            success: true,
+            requiresCustomQuote: true,
+            message:
+              "Enterprise commercial moves need a tailored quote. Book now and a specialist will be in touch.",
+          },
+          200,
+        );
+      }
+      base = lookup;
+    } else {
+      const propBase = BASE_BY_SIZE[data.propertySize!];
+      if (propBase === undefined) {
+        return json({ error: "Unsupported property size for estimate" }, 400);
+      }
+      base = propBase;
     }
 
     const distanceMiles = await getDrivingDistanceMiles(
@@ -112,13 +151,16 @@ serve(async (req) => {
     const daysUntil = Math.round((moveDate.getTime() - today.getTime()) / 86_400_000);
     const dow = moveDate.getDay(); // 0 Sun, 6 Sat
     const isWeekend = dow === 0 || dow === 6;
-    const isShortNotice = daysUntil < 7;
+    const isShortNotice = daysUntil < SURCHARGE_SHORT_NOTICE_DAYS;
 
     let surcharge = 0;
     const appliedSurcharges: Array<{ label: string; pct: number }> = [];
     if (isShortNotice) {
       surcharge += SURCHARGE_SHORT_NOTICE;
-      appliedSurcharges.push({ label: "Short notice (under 7 days)", pct: SURCHARGE_SHORT_NOTICE });
+      appliedSurcharges.push({
+        label: `Short notice (under ${SURCHARGE_SHORT_NOTICE_DAYS} days)`,
+        pct: SURCHARGE_SHORT_NOTICE,
+      });
     }
     if (isWeekend) {
       surcharge += SURCHARGE_WEEKEND;
@@ -128,6 +170,7 @@ serve(async (req) => {
     let total = subtotal * (1 + surcharge);
     total = Math.max(MIN_BY_TYPE[data.moveType], Math.min(MAX_BY_TYPE[data.moveType], total));
 
+    const round10 = (n: number) => Math.round(n / 10) * 10;
     const low = round10(total * (1 - RANGE_SPREAD));
     const high = round10(total * (1 + RANGE_SPREAD));
 
@@ -140,7 +183,8 @@ serve(async (req) => {
         low,
         high,
         moveType: data.moveType,
-        propertySize: data.propertySize,
+        propertySize: data.propertySize ?? null,
+        commercialProfile: data.commercialProfile ?? null,
         pickupLat: data.pickupCoords.latitude,
         pickupLng: data.pickupCoords.longitude,
         deliveryLat: data.deliveryCoords.latitude,
