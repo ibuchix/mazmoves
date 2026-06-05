@@ -141,7 +141,7 @@ serve(async (req) => {
       .from("move_requests")
       .insert([{
         move_type: data.moveType,
-        estimated_size: data.propertySize,
+        estimated_size: estimatedSize,
         pickup_address: data.pickupAddress as never,
         delivery_address: data.deliveryAddress as never,
         requested_date: data.moveDate,
