@@ -953,6 +953,10 @@ export type Database = {
           delivery_latitude: number | null
           delivery_location: unknown
           delivery_longitude: number | null
+          estimate_distance_miles: number | null
+          estimate_issued_at: string | null
+          estimated_price_high: number | null
+          estimated_price_low: number | null
           estimated_size: string | null
           estimated_value: number | null
           first_campaign_id: string | null
@@ -983,6 +987,10 @@ export type Database = {
           delivery_latitude?: number | null
           delivery_location?: unknown
           delivery_longitude?: number | null
+          estimate_distance_miles?: number | null
+          estimate_issued_at?: string | null
+          estimated_price_high?: number | null
+          estimated_price_low?: number | null
           estimated_size?: string | null
           estimated_value?: number | null
           first_campaign_id?: string | null
@@ -1013,6 +1021,10 @@ export type Database = {
           delivery_latitude?: number | null
           delivery_location?: unknown
           delivery_longitude?: number | null
+          estimate_distance_miles?: number | null
+          estimate_issued_at?: string | null
+          estimated_price_high?: number | null
+          estimated_price_low?: number | null
           estimated_size?: string | null
           estimated_value?: number | null
           first_campaign_id?: string | null
