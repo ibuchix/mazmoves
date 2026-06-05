@@ -90,7 +90,7 @@ export default function MoveCalculator() {
 
             {/* Wizard: right on desktop, below copy on mobile */}
             <div className="order-2 animate-fade-in [animation-delay:150ms] min-w-0">
-              <CalculatorWizard onEstimate={handleEstimate} />
+              <CalculatorWizard key={wizardKey} onEstimate={handleEstimate} />
             </div>
           </div>
         </div>
@@ -166,6 +166,7 @@ export default function MoveCalculator() {
           estimateToken={estimate.estimateToken}
           estimateLow={estimate.low}
           estimateHigh={estimate.high}
+          onBookingComplete={handleBookingComplete}
         />
       )}
     </div>
