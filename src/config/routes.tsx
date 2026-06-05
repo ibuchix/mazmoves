@@ -13,6 +13,7 @@ const RequestMove = lazy(() => import("@/pages/RequestMove"));
 const Agents = lazy(() => import("@/pages/Agents"));
 const Removals = lazy(() => import("@/pages/Removals"));
 const TownRemovals = lazy(() => import("@/pages/TownRemovals"));
+const MoveCalculator = lazy(() => import("@/pages/MoveCalculator"));
 const CampaignRedirect = lazy(() => import("@/pages/CampaignRedirect"));
 
 export const publicRoutes: RouteConfig[] = [
@@ -24,6 +25,7 @@ export const publicRoutes: RouteConfig[] = [
   { path: "/agents", element: <Agents /> },
   { path: "/removals", element: <Removals /> },
   { path: "/removals/:slug", element: <TownRemovals /> },
+  { path: "/move-calculator", element: <MoveCalculator /> },
   { path: "/go/:code", element: <CampaignRedirect /> },
 ];
 

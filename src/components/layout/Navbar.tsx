@@ -15,6 +15,7 @@ import {
 
 const navLinks = [
   { to: "/", label: "Home", end: true },
+  { to: "/move-calculator", label: "Move Calculator", end: false },
   { to: "/contact", label: "Contact", end: false },
 ];
 
