@@ -35,6 +35,12 @@ interface BookEstimateDialogProps {
   estimateToken?: string;
   estimateLow?: number;
   estimateHigh?: number;
+  /**
+   * Fired once the booking has been submitted successfully AND the user has
+   * dismissed the success dialog (via Done / outside click / Esc). The page
+   * uses this to clear the estimate result and reset the calculator wizard.
+   */
+  onBookingComplete?: () => void;
 }
 
 interface ContactForm {
