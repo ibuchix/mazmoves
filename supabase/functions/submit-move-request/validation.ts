@@ -58,7 +58,7 @@ export const moveRequestSchema = z.object({
 }).refine(
   (v) =>
     v.moveType === "commercial"
-      ? !!v.commercialProfile
+      ? (!!v.commercialProfile || !!v.propertySize)
       : !!v.propertySize,
   { message: "propertySize or commercialProfile is required", path: ["propertySize"] },
 );
