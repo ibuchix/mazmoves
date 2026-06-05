@@ -94,7 +94,7 @@ export function AddressStep({
 
         <div className="space-y-2">
           <Label htmlFor={`${type}-state`} className="text-sm font-medium text-brand-slate">
-            State/Province
+            County
             <span className="text-red-500 ml-1">*</span>
           </Label>
           <Input
@@ -103,14 +103,14 @@ export function AddressStep({
               addressErrors?.state ? "border-red-500" : ""
             }`}
             {...register(`${type}Address.state` as any, { 
-              required: "State/Province is required",
+              required: "County is required",
               maxLength: {
-                value: 20,
-                message: "State/Province name cannot exceed 20 characters"
+                value: 50,
+                message: "County name cannot exceed 50 characters"
               },
               pattern: {
                 value: /^[a-zA-Z\s\-']+$/,
-                message: "Please enter a valid state or province name"
+                message: "Please enter a valid county name"
               }
             })}
             disabled={isGeocoding}
