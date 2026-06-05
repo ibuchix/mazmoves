@@ -25,7 +25,7 @@ const commercialProfileSchema = z.object({
 
 export const moveRequestSchema = z.object({
   moveType: z.enum(["domestic", "commercial", "international"]),
-  propertySize: z.enum(["1", "2", "3", "4", "5+", "business"]).optional(),
+  propertySize: z.enum(["1", "2", "3", "4", "5+", "business", "office", "warehouse", "retail"]).optional(),
   commercialProfile: commercialProfileSchema.optional(),
   pickupAddress: addressSchema,
   deliveryAddress: addressSchema,
