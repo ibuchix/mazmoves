@@ -1,8 +1,11 @@
 // estimate-verify.ts
-// Local copy of HMAC verification + recalculation for submit-move-request.
-// Cross-function imports are not supported by the Edge bundler so we
-// duplicate the small amount of logic needed to validate an estimate token
-// produced by calculate-move-estimate.
+// Local copy of HMAC verification for submit-move-request. Cross-function
+// imports are not supported by the Edge bundler so we duplicate the
+// minimal logic needed to validate an estimate token produced by
+// calculate-move-estimate.
+//
+// Updated: payload now carries an optional commercialProfile and a
+// nullable propertySize so commercial estimates re-verify correctly.
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
@@ -20,7 +23,8 @@ export interface VerifiedEstimate {
   low: number;
   high: number;
   moveType: string;
-  propertySize: string;
+  propertySize: string | null;
+  commercialProfile: { premisesType: string; scale: string } | null;
   pickupLat: number;
   pickupLng: number;
   deliveryLat: number;

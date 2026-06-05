@@ -3,6 +3,9 @@
 // move request via /submit-move-request with the signed estimate token
 // attached so the price persists alongside the row. Reuses the existing
 // success dialog UX (toast) from the standard form.
+//
+// Updated: supports commercial profile (premises + scale) and bespoke
+// quote responses (no low/high price). Em-dash removed from footer copy.
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -15,22 +18,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { CheckCircle, Clock, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import type { MoveType, PropertySize } from "@/types/move-request";
+import type { MoveType, PropertySize, CommercialProfile } from "@/types/move-request";
 import type { Address } from "@/types/address";
 
 interface BookEstimateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   moveType: MoveType;
-  propertySize: PropertySize;
+  propertySize?: PropertySize;
+  commercialProfile?: CommercialProfile;
   pickupAddress: Address;
   deliveryAddress: Address;
   pickupCoords: { latitude: number; longitude: number };
   deliveryCoords: { latitude: number; longitude: number };
   moveDate: string;
-  estimateToken: string;
-  estimateLow: number;
-  estimateHigh: number;
+  estimateToken?: string;
+  estimateLow?: number;
+  estimateHigh?: number;
 }
 
 interface ContactForm {
@@ -45,9 +49,12 @@ const gbp = (n: number) =>
 
 export function BookEstimateDialog(props: BookEstimateDialogProps) {
   const {
-    open, onOpenChange, moveType, propertySize, pickupAddress, deliveryAddress,
+    open, onOpenChange, moveType, propertySize, commercialProfile,
+    pickupAddress, deliveryAddress,
     pickupCoords, deliveryCoords, moveDate, estimateToken, estimateLow, estimateHigh,
   } = props;
+
+  const hasPrice = typeof estimateLow === "number" && typeof estimateHigh === "number";
 
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -59,7 +66,9 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
       const { data, error } = await supabase.functions.invoke("submit-move-request", {
         body: {
           moveRequest: {
-            moveType, propertySize,
+            moveType,
+            propertySize,
+            commercialProfile,
             pickupAddress, deliveryAddress,
             moveDate,
             fullName: form.fullName,
@@ -67,14 +76,13 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
             phone: form.phone,
             specialInstructions: form.specialInstructions ?? null,
             pickupCoords, deliveryCoords,
-            estimate: { token: estimateToken },
+            estimate: estimateToken ? { token: estimateToken } : null,
           },
         },
       });
       if (error || !data?.success) {
         throw new Error(data?.error || error?.message || "Failed to book this move");
       }
-      // Fire customer confirmation email (non-blocking).
       supabase.functions.invoke("send-confirmation-email", {
         body: { customerEmail: form.email, customerName: form.fullName },
       }).catch(() => undefined);
@@ -86,6 +94,14 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
     }
   });
 
+  const headerTitle = hasPrice
+    ? `Book this move at ${gbp(estimateLow!)} to ${gbp(estimateHigh!)}`
+    : "Request your bespoke quote";
+
+  const successBody = hasPrice
+    ? `We've matched your move (${gbp(estimateLow!)} to ${gbp(estimateHigh!)}) with verified local movers. They'll contact you shortly to confirm.`
+    : "We've received your request. A specialist will prepare a tailored quote and be in touch shortly.";
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
@@ -93,11 +109,10 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
           <div className="text-center py-2">
             <CheckCircle className="h-12 w-12 text-brand-green mx-auto" />
             <h3 className="text-xl font-bold font-montserrat text-brand-slate mt-3">
-              Booking received
+              {hasPrice ? "Booking received" : "Quote request received"}
             </h3>
             <p className="text-sm font-roboto text-gray-600 mt-2">
-              We've matched your move ({gbp(estimateLow)}–{gbp(estimateHigh)}) with verified local
-              movers. They'll contact you shortly to confirm.
+              {successBody}
             </p>
             <div className="mt-5 space-y-2 text-sm font-roboto text-brand-slate">
               <div className="flex items-center justify-center gap-2"><Clock className="h-4 w-4 text-brand-slateLight" /><span>Responses within 2 hours</span></div>
@@ -114,7 +129,7 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
           <>
             <DialogHeader>
               <DialogTitle className="font-montserrat text-brand-slate">
-                Book this move at {gbp(estimateLow)}–{gbp(estimateHigh)}
+                {headerTitle}
               </DialogTitle>
             </DialogHeader>
             <form onSubmit={onSubmit} className="space-y-4 mt-2">
@@ -142,10 +157,10 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
                 disabled={submitting}
                 className="w-full bg-brand-orange hover:bg-brand-green text-white font-montserrat font-semibold py-6 text-base"
               >
-                {submitting ? <><LoadingSpinner size="sm" className="border-white mr-2" /> Submitting...</> : "Confirm booking"}
+                {submitting ? <><LoadingSpinner size="sm" className="border-white mr-2" /> Submitting...</> : hasPrice ? "Confirm booking" : "Submit request"}
               </Button>
               <p className="text-xs text-center text-brand-slateLight font-roboto">
-                Free for you — movers pay to be matched. No card required.
+                Free for you. Movers pay to be matched. No card required.
               </p>
             </form>
           </>

@@ -1,9 +1,13 @@
 // CalculatorWizard.tsx
 // Five-step wizard that mirrors the Start Your Move flow but produces a
-// server-signed price estimate at the end. We reuse the existing
-// MoveTypeStep / PropertySizeStep / AddressStep components so the look
-// and validation rules stay consistent. The final step is a date picker
-// that triggers geocoding + the calculate-move-estimate edge call.
+// server-signed price estimate at the end. Reuses MoveTypeStep /
+// AddressStep / PropertySizeStep where possible; commercial moves use a
+// dedicated CommercialProfileStep (premises type + scale) instead of the
+// legacy single radio.
+//
+// Updated: step 2 branches on move type. Commercial step requires both
+// premisesType and scale before the user can advance. Em-dashes removed
+// from the surcharge hint copy.
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -14,8 +18,14 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { FormProgress } from "@/components/move-request/FormProgress";
 import { MoveTypeStep } from "@/components/move-request/MoveTypeStep";
 import { PropertySizeStep } from "@/components/move-request/PropertySizeStep";
+import { CommercialProfileStep } from "@/components/move-calculator/CommercialProfileStep";
 import { AddressStep } from "@/components/move-request/AddressStep";
-import type { MoveType, PropertySize, MoveRequestForm } from "@/types/move-request";
+import type {
+  MoveType,
+  PropertySize,
+  CommercialProfile,
+  MoveRequestForm,
+} from "@/types/move-request";
 import { geocodeAddress } from "@/utils/geocoding";
 import { useCalculateEstimate, type EstimateResponse } from "@/hooks/use-calculate-estimate";
 import { toast } from "sonner";
@@ -25,7 +35,8 @@ interface CalculatorWizardProps {
     estimate: EstimateResponse,
     inputs: {
       moveType: MoveType;
-      propertySize: PropertySize;
+      propertySize?: PropertySize;
+      commercialProfile?: CommercialProfile;
       pickupAddress: MoveRequestForm["pickupAddress"];
       deliveryAddress: MoveRequestForm["deliveryAddress"];
       pickupCoords: { latitude: number; longitude: number };
@@ -41,6 +52,7 @@ export function CalculatorWizard({ onEstimate }: CalculatorWizardProps) {
   const [step, setStep] = useState(1);
   const [moveType, setMoveType] = useState<MoveType | null>(null);
   const [propertySize, setPropertySize] = useState<PropertySize | undefined>(undefined);
+  const [commercialProfile, setCommercialProfile] = useState<CommercialProfile | undefined>(undefined);
   const [geocoding, setGeocoding] = useState(false);
   const { calculate, isCalculating } = useCalculateEstimate();
 
@@ -48,16 +60,19 @@ export function CalculatorWizard({ onEstimate }: CalculatorWizardProps) {
     mode: "onChange",
   });
 
-  // Watch fields so the Next/Calculate button reactively enables as the user fills inputs
-  // (getValues alone doesn't trigger re-renders, which left "Calculate my estimate" stuck disabled).
   const watchedPickup = watch("pickupAddress");
   const watchedDelivery = watch("deliveryAddress");
   const watchedDate = watch("moveDate");
 
+  const step2Ready =
+    moveType === "commercial"
+      ? !!(commercialProfile?.premisesType && commercialProfile?.scale)
+      : !!propertySize;
+
   const canNext = (() => {
     switch (step) {
       case 1: return !!moveType;
-      case 2: return !!propertySize;
+      case 2: return step2Ready;
       case 3:
         return !!(watchedPickup?.street && watchedPickup?.city && watchedPickup?.state && watchedPickup?.zipCode);
       case 4:
@@ -82,7 +97,8 @@ export function CalculatorWizard({ onEstimate }: CalculatorWizardProps) {
   const prev = () => setStep((s) => Math.max(1, s - 1));
 
   const handleCalculate = async () => {
-    if (!moveType || !propertySize) return;
+    if (!moveType) return;
+    if (moveType === "commercial" ? !commercialProfile : !propertySize) return;
     const values = getValues();
     if (!values.moveDate) return;
     setGeocoding(true);
@@ -93,7 +109,8 @@ export function CalculatorWizard({ onEstimate }: CalculatorWizardProps) {
       ]);
       const estimate = await calculate({
         moveType,
-        propertySize,
+        propertySize: moveType === "commercial" ? undefined : propertySize,
+        commercialProfile: moveType === "commercial" ? commercialProfile : undefined,
         pickupCoords: { latitude: pickup.latitude, longitude: pickup.longitude },
         deliveryCoords: { latitude: delivery.latitude, longitude: delivery.longitude },
         moveDate: values.moveDate,
@@ -104,7 +121,8 @@ export function CalculatorWizard({ onEstimate }: CalculatorWizardProps) {
       }
       onEstimate(estimate, {
         moveType,
-        propertySize,
+        propertySize: moveType === "commercial" ? undefined : propertySize,
+        commercialProfile: moveType === "commercial" ? commercialProfile : undefined,
         pickupAddress: values.pickupAddress,
         deliveryAddress: values.deliveryAddress,
         pickupCoords: { latitude: pickup.latitude, longitude: pickup.longitude },
@@ -128,15 +146,25 @@ export function CalculatorWizard({ onEstimate }: CalculatorWizardProps) {
         {step === 1 && (
           <MoveTypeStep
             value={moveType}
-            onChange={(v) => { setMoveType(v); setPropertySize(undefined); }}
+            onChange={(v) => {
+              setMoveType(v);
+              setPropertySize(undefined);
+              setCommercialProfile(undefined);
+            }}
             onNext={() => setStep(2)}
           />
         )}
-        {step === 2 && moveType && (
+        {step === 2 && moveType && moveType !== "commercial" && (
           <PropertySizeStep
             moveType={moveType}
             value={propertySize}
             onChange={setPropertySize}
+          />
+        )}
+        {step === 2 && moveType === "commercial" && (
+          <CommercialProfileStep
+            value={commercialProfile}
+            onChange={setCommercialProfile}
           />
         )}
         {step === 3 && (
@@ -174,8 +202,8 @@ export function CalculatorWizard({ onEstimate }: CalculatorWizardProps) {
                 className="h-11 border-brand-slateLight focus:ring-brand-green"
               />
               <p className="text-xs text-brand-slateLight font-roboto">
-                Weekend moves and moves within the next 7 days carry a small premium —
-                we'll show it in the breakdown.
+                Weekend moves carry a small 5% premium. Moves booked within the next 2 days
+                carry a 15% short-notice premium. We'll show any premium in the breakdown.
               </p>
             </div>
           </div>

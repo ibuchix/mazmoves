@@ -1,10 +1,15 @@
 // use-calculate-estimate.ts
 // Calls the `calculate-move-estimate` edge function with geocoded
 // pickup/delivery coords and returns the signed estimate response.
+//
+// Updated: input now supports an optional commercialProfile so the
+// calculator can request commercial estimates with the new
+// premises-type + scale model. The hook also accepts the bespoke
+// quote response shape (no low/high price).
 
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { MoveType, PropertySize } from "@/types/move-request";
+import type { MoveType, PropertySize, CommercialProfile } from "@/types/move-request";
 
 export interface EstimateBreakdown {
   base: number;
@@ -15,18 +20,20 @@ export interface EstimateBreakdown {
 
 export interface EstimateResponse {
   success: true;
-  low: number;
-  high: number;
-  distanceMiles: number;
-  breakdown: EstimateBreakdown;
+  low?: number;
+  high?: number;
+  distanceMiles?: number;
+  breakdown?: EstimateBreakdown;
   requiresCustomQuote: boolean;
-  estimateToken: string;
-  issuedAt: number;
+  message?: string;
+  estimateToken?: string;
+  issuedAt?: number;
 }
 
 interface CalcInput {
   moveType: MoveType;
-  propertySize: PropertySize;
+  propertySize?: PropertySize;
+  commercialProfile?: CommercialProfile;
   pickupCoords: { latitude: number; longitude: number };
   deliveryCoords: { latitude: number; longitude: number };
   moveDate: string;
