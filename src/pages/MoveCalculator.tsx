@@ -48,34 +48,43 @@ export default function MoveCalculator() {
         type="website"
       />
 
-      {/* Hero — same rounded slate inset used on Home / Removals */}
+      {/* Hero — two-column layout: copy on the left, calculator wizard on the right,
+          inside the same rounded slate inset used on Home / Removals. */}
       <section className="relative px-2 sm:px-6 lg:px-8 pt-4 md:pt-12 pb-8 md:pb-16">
         <div className="absolute inset-x-2 sm:inset-x-6 lg:inset-x-8 inset-y-0 md:top-12 md:bottom-16 rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-brand-slate via-brand-slateLight to-brand-slate shadow-2xl">
           <div className="absolute inset-0 opacity-20 bg-[url('/grid.svg')] bg-center" />
           <div className="absolute inset-0 bg-black/5" />
         </div>
-        <div className="relative max-w-5xl mx-auto text-center text-white px-4 sm:px-6 lg:px-8 py-12 md:py-20">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm text-xs font-roboto mb-5">
-            <Sparkles className="w-3.5 h-3.5 text-brand-green" />
-            <span>Free • Instant • No signup</span>
+        <div className="relative w-full max-w-7xl mx-auto px-3 sm:px-8 lg:px-8 py-8 md:py-16">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-start">
+            {/* Copy — left on desktop, top on mobile */}
+            <div className="text-white order-1 animate-fade-in min-w-0 md:pt-6">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm text-xs font-roboto mb-5">
+                <Sparkles className="w-3.5 h-3.5 text-brand-green" />
+                <span>Free • Instant • No signup</span>
+              </div>
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold font-montserrat mb-4 leading-tight">
+                Estimate your move in 60 seconds
+              </h1>
+              <p className="text-base md:text-lg text-white/90 font-roboto max-w-xl">
+                Tell us a few details and we'll show you a transparent price range
+                based on distance, property size and your moving date — then book
+                it with verified local movers in one click.
+              </p>
+            </div>
+
+            {/* Wizard — right on desktop, below copy on mobile */}
+            <div className="order-2 animate-fade-in [animation-delay:150ms] min-w-0">
+              <CalculatorWizard onEstimate={handleEstimate} />
+            </div>
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold font-montserrat mb-4">
-            Estimate your move in 60 seconds
-          </h1>
-          <p className="text-lg text-white/90 font-roboto max-w-2xl mx-auto">
-            Tell us a few details and we'll show you a transparent price range
-            based on distance, property size and your moving date — then book
-            it with verified local movers in one click.
-          </p>
         </div>
       </section>
 
-      {/* Wizard + Result */}
-      <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 -mt-4 md:-mt-8 pb-12">
-        <CalculatorWizard onEstimate={handleEstimate} />
-
+      {/* Result */}
+      <section className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
         {estimate && inputs && (
-          <div id="estimate-result" className="mt-8">
+          <div id="estimate-result" className="mt-2">
             <EstimateResult
               estimate={estimate}
               onBook={() => setBookOpen(true)}
