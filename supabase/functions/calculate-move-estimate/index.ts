@@ -84,7 +84,23 @@ serve(async (req) => {
       return json({ error: "Unsupported property size for estimate" }, 400);
     }
 
-    const distanceMiles = haversineMiles(data.pickupCoords, data.deliveryCoords);
+    const distanceMiles = await getDrivingDistanceMiles(
+      data.pickupCoords,
+      data.deliveryCoords,
+    );
+    if (distanceMiles === null) {
+      // No drivable route (e.g. sea crossing for an international move).
+      // Refuse to quote rather than fall back to a misleading straight-line.
+      return json(
+        {
+          success: true,
+          requiresCustomQuote: true,
+          message:
+            "We can't auto-price this route. A specialist will follow up with a bespoke quote.",
+        },
+        200,
+      );
+    }
     const distCost = distanceCostMiles(distanceMiles);
     const typeMult = TYPE_MULTIPLIER[data.moveType];
 
