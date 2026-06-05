@@ -22,6 +22,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.0";
 import { verifyOrigin, corsHeaders } from "../_shared/verify-origin.ts";
 import { moveRequestSchema, sanitizeInstructions } from "./validation.ts";
+import { verifyEstimateToken } from "./estimate-verify.ts";
 
 const RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000; // 1 hour
 const MAX_PER_EMAIL = 5;
@@ -84,6 +85,43 @@ serve(async (req) => {
       );
     }
 
+    // Optional signed estimate (only set when the request came from the
+    // /move-calculator flow). We verify the HMAC and recompute coords match
+    // so the price persisted to the DB cannot be tampered with from the
+    // browser.
+    let estimateLow: number | null = null;
+    let estimateHigh: number | null = null;
+    let estimateDistanceMiles: number | null = null;
+    let estimateIssuedAt: string | null = null;
+    let source: "web" | "calculator" = "web";
+
+    if (data.estimate?.token) {
+      const secret = Deno.env.get("MOVE_ESTIMATE_SIGNING_SECRET") ?? "";
+      const verified = await verifyEstimateToken(data.estimate.token, secret);
+      if (!verified) {
+        return json({ error: "Invalid or expired estimate. Please recalculate." }, 400);
+      }
+      // Confirm the estimate was issued for the same inputs the customer
+      // is now booking. Coords are matched with a small tolerance.
+      const sameInputs =
+        verified.moveType === data.moveType &&
+        verified.propertySize === data.propertySize &&
+        verified.moveDate === data.moveDate &&
+        !!data.pickupCoords && !!data.deliveryCoords &&
+        Math.abs(verified.pickupLat - data.pickupCoords.latitude) < 0.01 &&
+        Math.abs(verified.pickupLng - data.pickupCoords.longitude) < 0.01 &&
+        Math.abs(verified.deliveryLat - data.deliveryCoords.latitude) < 0.01 &&
+        Math.abs(verified.deliveryLng - data.deliveryCoords.longitude) < 0.01;
+      if (!sameInputs) {
+        return json({ error: "Estimate does not match move details. Please recalculate." }, 400);
+      }
+      estimateLow = verified.low;
+      estimateHigh = verified.high;
+      estimateDistanceMiles = verified.distanceMiles;
+      estimateIssuedAt = new Date(verified.issuedAt).toISOString();
+      source = "calculator";
+    }
+
     const { data: inserted, error: insertError } = await supabase
       .from("move_requests")
       .insert([{
@@ -100,6 +138,11 @@ serve(async (req) => {
         pickup_longitude: data.pickupCoords?.longitude ?? null,
         delivery_latitude: data.deliveryCoords?.latitude ?? null,
         delivery_longitude: data.deliveryCoords?.longitude ?? null,
+        source,
+        estimated_price_low: estimateLow,
+        estimated_price_high: estimateHigh,
+        estimate_distance_miles: estimateDistanceMiles,
+        estimate_issued_at: estimateIssuedAt,
       }])
       .select("id")
       .single();

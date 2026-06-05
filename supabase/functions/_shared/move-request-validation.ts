@@ -37,6 +37,13 @@ export const moveRequestSchema = z.object({
     latitude: z.number().min(-90).max(90),
     longitude: z.number().min(-180).max(180),
   }).nullable().optional(),
+  // Optional signed estimate produced by /calculate-move-estimate. When
+  // present, submit-move-request verifies the HMAC and persists the
+  // estimate range alongside the request. Direct "Start Your Move"
+  // submissions omit this entirely.
+  estimate: z.object({
+    token: z.string().min(10).max(2048),
+  }).nullable().optional(),
 });
 
 export type ValidatedMoveRequest = z.infer<typeof moveRequestSchema>;
