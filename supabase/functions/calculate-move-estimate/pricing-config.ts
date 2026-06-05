@@ -64,13 +64,17 @@ export function vehicleRateForVolume(volume: number): number {
 }
 
 export function crewSizeForVolume(volume: number): number {
-  return Math.min(6, Math.max(2, Math.ceil(volume / 12)));
+  // ~1 mover per ~18 m3 reflects real UK crew sizing more accurately
+  // (e.g. 4-bed @ 60 m3 ~= 4 movers, not 5).
+  return Math.min(5, Math.max(2, Math.ceil(volume / 18)));
 }
 
 // Hours model: load + unload + drive (round trip at ~30 mph avg).
+// Tuned down from 0.10/0.08 per m3 so labour cost reflects realistic
+// pace for an experienced crew on average-access properties.
 export function totalHours(volume: number, distanceMiles: number): number {
-  const load = volume * 0.10;
-  const unload = volume * 0.08;
+  const load = volume * 0.09;
+  const unload = volume * 0.07;
   const drive = (distanceMiles / 30) * 2;
   return Math.max(2, load + unload + drive);
 }
@@ -95,12 +99,12 @@ export const MAX_BY_TYPE: Record<string, number> = {
 
 // Demand lifts.
 export const SURCHARGE_SHORT_NOTICE_DAYS = 2;
-export const SURCHARGE_SHORT_NOTICE = 0.15;       // < 2 days out
-export const SURCHARGE_NEAR_TERM = 0.05;          // 2..6 days out
+export const SURCHARGE_SHORT_NOTICE = 0.10;       // < 2 days out
+export const SURCHARGE_NEAR_TERM = 0.04;          // 2..6 days out
 export const SURCHARGE_NEAR_TERM_MAX_DAYS = 6;
 export const SURCHARGE_WEEKEND = 0.05;            // Sat / Sun
 export const SURCHARGE_FRIDAY = 0.02;
-export const SURCHARGE_PEAK_SEASON = 0.05;        // Jun/Jul/Aug
+export const SURCHARGE_PEAK_SEASON = 0.03;        // Jun/Jul/Aug
 export const DISCOUNT_OFF_PEAK = -0.03;           // Dec/Jan
 
 export function seasonalLift(month: number): { pct: number; label?: string } {

@@ -121,7 +121,7 @@ export function EstimateResult({ estimate, onBook, onRecalculate }: Props) {
                     </li>
                   ))}
                   <li className="pt-2 mt-2 border-t border-brand-slateLight/30 text-xs text-brand-slateLight">
-                    The range shown is the central total +/- 10%, rounded to the
+                    The range shown is the central total +/- 8%, rounded to the
                     nearest £10. Local availability, access difficulty and
                     packing services may move the final price within or just
                     beyond this band.
