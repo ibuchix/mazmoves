@@ -4,7 +4,7 @@
 // Replaces direct anon INSERTs into `move_requests` so the table can be
 // locked down by RLS. Pipeline:
 //   1. Origin check (reuses _shared/verify-origin.ts).
-//   2. Soft IP/email rate limit — max 5 requests / hour for the same
+//   2. Soft IP/email rate limit , max 5 requests / hour for the same
 //      customer email, max 20 / hour from the same IP. Counts existing
 //      rows in move_requests; no new infra required.
 //   3. Strict zod validation + HTML stripping for special_instructions.
@@ -67,7 +67,7 @@ serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
     );
 
-    // Rate limit by customer email — simple count of recent rows.
+    // Rate limit by customer email , simple count of recent rows.
     const sinceIso = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
     const { count, error: countError } = await supabase
       .from("move_requests")
@@ -77,7 +77,7 @@ serve(async (req) => {
 
     if (countError) {
       console.error("Rate limit check failed:", countError);
-      // Fail open — don't block legitimate users on a count failure.
+      // Fail open , don't block legitimate users on a count failure.
     } else if ((count ?? 0) >= MAX_PER_EMAIL) {
       return json(
         { error: "You've submitted too many requests recently. Please try again later." },
@@ -195,7 +195,7 @@ serve(async (req) => {
         console.error("notify-companies fetch threw (non-blocking):", err);
       });
 
-    // @ts-ignore — EdgeRuntime is provided by Supabase Edge Runtime
+    // @ts-ignore , EdgeRuntime is provided by Supabase Edge Runtime
     if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) {
       // @ts-ignore
       EdgeRuntime.waitUntil(notifyPromise);
