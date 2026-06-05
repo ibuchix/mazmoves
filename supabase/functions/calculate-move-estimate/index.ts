@@ -23,6 +23,7 @@ import {
   distanceCostMiles,
 } from "./pricing-config.ts";
 import { signEstimate } from "./signing.ts";
+import { getDrivingDistanceMiles } from "./mapbox-distance.ts";
 
 const coordsSchema = z.object({
   latitude: z.number().min(-90).max(90),
@@ -44,20 +45,6 @@ const inputSchema = z.object({
     return d >= today && d <= yearAhead;
   }, "Move date must be between today and 12 months ahead"),
 });
-
-function haversineMiles(
-  a: { latitude: number; longitude: number },
-  b: { latitude: number; longitude: number },
-): number {
-  const R = 3958.8;
-  const toRad = (n: number) => (n * Math.PI) / 180;
-  const dLat = toRad(b.latitude - a.latitude);
-  const dLng = toRad(b.longitude - a.longitude);
-  const s =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(a.latitude)) * Math.cos(toRad(b.latitude)) * Math.sin(dLng / 2) ** 2;
-  return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
-}
 
 const round10 = (n: number) => Math.round(n / 10) * 10;
 
@@ -97,7 +84,23 @@ serve(async (req) => {
       return json({ error: "Unsupported property size for estimate" }, 400);
     }
 
-    const distanceMiles = haversineMiles(data.pickupCoords, data.deliveryCoords);
+    const distanceMiles = await getDrivingDistanceMiles(
+      data.pickupCoords,
+      data.deliveryCoords,
+    );
+    if (distanceMiles === null) {
+      // No drivable route (e.g. sea crossing for an international move).
+      // Refuse to quote rather than fall back to a misleading straight-line.
+      return json(
+        {
+          success: true,
+          requiresCustomQuote: true,
+          message:
+            "We can't auto-price this route. A specialist will follow up with a bespoke quote.",
+        },
+        200,
+      );
+    }
     const distCost = distanceCostMiles(distanceMiles);
     const typeMult = TYPE_MULTIPLIER[data.moveType];
 
