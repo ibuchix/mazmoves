@@ -43,7 +43,7 @@ export function EstimateResult({ estimate, onBook, onRecalculate }: Props) {
           {gbp(estimate.high)}
         </p>
         <p className="text-sm text-white/80 font-roboto mt-3 max-w-md mx-auto">
-          Approximately {estimate.distanceMiles} miles. Final price confirmed by
+          Approximately {estimate.distanceMiles} miles by road. Final price confirmed by
           your matched mover. This reflects typical UK market rates.
         </p>
       </div>
