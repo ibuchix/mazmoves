@@ -31,8 +31,12 @@ export default function Removals() {
         <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
-      <section className="bg-gradient-to-br from-brand-slate via-brand-slateLight to-brand-slate text-white px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-        <div className="max-w-5xl mx-auto text-center">
+      <section className="relative px-2 sm:px-6 lg:px-8 pt-4 md:pt-12 pb-8 md:pb-16">
+        <div className="absolute inset-x-2 sm:inset-x-6 lg:inset-x-8 inset-y-0 md:top-12 md:bottom-16 rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-brand-slate via-brand-slateLight to-brand-slate shadow-2xl">
+          <div className="absolute inset-0 opacity-20 bg-[url('/grid.svg')] bg-center" />
+          <div className="absolute inset-0 bg-black/5" />
+        </div>
+        <div className="relative max-w-5xl mx-auto text-center text-white px-4 sm:px-6 lg:px-8 py-12 md:py-20">
           <h1 className="text-4xl md:text-5xl font-bold font-montserrat mb-4">
             Removals across the East of England & Home Counties
           </h1>
