@@ -44,23 +44,25 @@ export function CalculatorWizard({ onEstimate }: CalculatorWizardProps) {
   const [geocoding, setGeocoding] = useState(false);
   const { calculate, isCalculating } = useCalculateEstimate();
 
-  const { register, formState: { errors }, getValues, trigger } = useForm<MoveRequestForm>({
+  const { register, formState: { errors }, getValues, trigger, watch } = useForm<MoveRequestForm>({
     mode: "onChange",
   });
+
+  // Watch fields so the Next/Calculate button reactively enables as the user fills inputs
+  // (getValues alone doesn't trigger re-renders, which left "Calculate my estimate" stuck disabled).
+  const watchedPickup = watch("pickupAddress");
+  const watchedDelivery = watch("deliveryAddress");
+  const watchedDate = watch("moveDate");
 
   const canNext = (() => {
     switch (step) {
       case 1: return !!moveType;
       case 2: return !!propertySize;
-      case 3: {
-        const a = getValues("pickupAddress");
-        return !!(a?.street && a?.city && a?.state && a?.zipCode);
-      }
-      case 4: {
-        const a = getValues("deliveryAddress");
-        return !!(a?.street && a?.city && a?.state && a?.zipCode);
-      }
-      case 5: return !!getValues("moveDate");
+      case 3:
+        return !!(watchedPickup?.street && watchedPickup?.city && watchedPickup?.state && watchedPickup?.zipCode);
+      case 4:
+        return !!(watchedDelivery?.street && watchedDelivery?.city && watchedDelivery?.state && watchedDelivery?.zipCode);
+      case 5: return !!watchedDate;
       default: return false;
     }
   })();
