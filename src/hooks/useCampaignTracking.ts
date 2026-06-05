@@ -23,6 +23,10 @@ export function useCampaignTracking() {
     const slug = parts[0] === "removals" ? parts[1] : parts[0];
     if (slug && LOCATION_SLUGS.has(slug)) {
       track({ event_type: "landing_view", location_slug: slug });
+    } else if (location.pathname === "/move-calculator") {
+      // Treat the calculator as a virtual location so it appears alongside
+      // the 34 town pages in campaign-performance reports.
+      track({ event_type: "landing_view", location_slug: "move-calculator" });
     }
   }, [location.pathname, location.search]);
 }
