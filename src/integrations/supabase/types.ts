@@ -1435,6 +1435,7 @@ export type Database = {
           pickup_longitude: number | null
           pickup_postcode: string | null
           requested_date: string | null
+          submitted_at: string | null
         }
         Insert: {
           delivery_city?: never
@@ -1449,6 +1450,7 @@ export type Database = {
           pickup_longitude?: number | null
           pickup_postcode?: never
           requested_date?: string | null
+          submitted_at?: string | null
         }
         Update: {
           delivery_city?: never
@@ -1463,6 +1465,7 @@ export type Database = {
           pickup_longitude?: number | null
           pickup_postcode?: never
           requested_date?: string | null
+          submitted_at?: string | null
         }
         Relationships: []
       }
