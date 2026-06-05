@@ -4,6 +4,9 @@
 // lead-gen funnel (ViewContent → ClickButton → SubmitForm → CompleteRegistration) is complete.
 // Also fires the internal campaign `move_type_selected` event when the user
 // picks a move type, so admin campaign attribution captures hero selections.
+// Added a subtle SSL-encryption trust line under the "Get Free Quotes" button to
+// reassure customers that their details are protected.
+import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MoveTypeStep } from "@/components/move-request/MoveTypeStep";
 import { MoveType } from "@/types/move-request";
@@ -47,6 +50,10 @@ export const HeroForm = ({ moveType, setMoveType, onGetQuotes }: HeroFormProps) 
         >
           Get Free Quotes
         </Button>
+        <div className="flex items-center justify-center gap-1.5 mt-3 text-xs text-gray-500 font-roboto">
+          <Lock className="w-3.5 h-3.5" aria-hidden="true" />
+          <span>Your information is protected by 128-bit SSL encryption.</span>
+        </div>
       </div>
     </div>
   );
