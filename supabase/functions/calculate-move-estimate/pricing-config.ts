@@ -99,12 +99,12 @@ export const MAX_BY_TYPE: Record<string, number> = {
 
 // Demand lifts.
 export const SURCHARGE_SHORT_NOTICE_DAYS = 2;
-export const SURCHARGE_SHORT_NOTICE = 0.15;       // < 2 days out
-export const SURCHARGE_NEAR_TERM = 0.05;          // 2..6 days out
+export const SURCHARGE_SHORT_NOTICE = 0.10;       // < 2 days out
+export const SURCHARGE_NEAR_TERM = 0.04;          // 2..6 days out
 export const SURCHARGE_NEAR_TERM_MAX_DAYS = 6;
 export const SURCHARGE_WEEKEND = 0.05;            // Sat / Sun
 export const SURCHARGE_FRIDAY = 0.02;
-export const SURCHARGE_PEAK_SEASON = 0.05;        // Jun/Jul/Aug
+export const SURCHARGE_PEAK_SEASON = 0.03;        // Jun/Jul/Aug
 export const DISCOUNT_OFF_PEAK = -0.03;           // Dec/Jan
 
 export function seasonalLift(month: number): { pct: number; label?: string } {
