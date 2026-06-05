@@ -202,8 +202,8 @@ export function CalculatorWizard({ onEstimate }: CalculatorWizardProps) {
                 className="h-11 border-brand-slateLight focus:ring-brand-green"
               />
               <p className="text-xs text-brand-slateLight font-roboto">
-                Weekend moves carry a small 5% premium. Moves booked within the next 2 days
-                carry a 15% short-notice premium. We'll show any premium in the breakdown.
+                Weekend moves carry 5% premium. Short notice moves that must happen within 2
+                days of booking carry a 10% short notice premium.
               </p>
             </div>
           </div>
