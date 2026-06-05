@@ -35,6 +35,12 @@ interface BookEstimateDialogProps {
   estimateToken?: string;
   estimateLow?: number;
   estimateHigh?: number;
+  /**
+   * Fired once the booking has been submitted successfully AND the user has
+   * dismissed the success dialog (via Done / outside click / Esc). The page
+   * uses this to clear the estimate result and reset the calculator wizard.
+   */
+  onBookingComplete?: () => void;
 }
 
 interface ContactForm {
@@ -52,6 +58,7 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
     open, onOpenChange, moveType, propertySize, commercialProfile,
     pickupAddress, deliveryAddress,
     pickupCoords, deliveryCoords, moveDate, estimateToken, estimateLow, estimateHigh,
+    onBookingComplete,
   } = props;
 
   const hasPrice = typeof estimateLow === "number" && typeof estimateHigh === "number";
@@ -59,6 +66,22 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<ContactForm>();
+
+  const finishAndReset = () => {
+    onOpenChange(false);
+    setSuccess(false);
+    onBookingComplete?.();
+  };
+
+  // When the user dismisses the dialog (outside click / Esc / close button)
+  // after a successful booking, treat it as a completed flow and reset.
+  const handleOpenChange = (next: boolean) => {
+    if (!next && success) {
+      finishAndReset();
+      return;
+    }
+    onOpenChange(next);
+  };
 
   const onSubmit = handleSubmit(async (form) => {
     setSubmitting(true);
@@ -103,7 +126,7 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
     : "We've received your request. A specialist will prepare a tailored quote and be in touch shortly.";
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         {success ? (
           <div className="text-center py-2">
@@ -119,7 +142,7 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
               <div className="flex items-center justify-center gap-2"><Mail className="h-4 w-4 text-brand-slateLight" /><span>Confirmation sent to your inbox</span></div>
             </div>
             <Button
-              onClick={() => { onOpenChange(false); setSuccess(false); }}
+              onClick={finishAndReset}
               className="mt-6 bg-brand-slate hover:bg-brand-slateLight text-white font-montserrat"
             >
               Done
@@ -159,9 +182,7 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
               >
                 {submitting ? <><LoadingSpinner size="sm" className="border-white mr-2" /> Submitting...</> : hasPrice ? "Confirm booking" : "Submit request"}
               </Button>
-              <p className="text-xs text-center text-brand-slateLight font-roboto">
-                Free for you. Movers pay to be matched. No card required.
-              </p>
+
             </form>
           </>
         )}

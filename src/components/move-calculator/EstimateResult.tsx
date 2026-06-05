@@ -52,7 +52,7 @@ export function EstimateResult({ estimate, onBook, onRecalculate }: Props) {
             {typeof estimate.distanceMiles === "number" && (
               <p className="text-sm text-white/80 font-roboto mt-3 max-w-md mx-auto">
                 Approximately {estimate.distanceMiles} miles by road. Final price confirmed by
-                your matched mover. This reflects typical UK market rates.
+                your matched mover.
               </p>
             )}
           </>

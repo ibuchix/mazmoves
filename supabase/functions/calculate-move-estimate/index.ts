@@ -1,35 +1,38 @@
 // calculate-move-estimate edge function
 // -------------------------------------
-// Server-side proprietary move-cost estimator. Runs all pricing math
-// (constants + formula) inside the edge runtime so the calculation
-// cannot be tampered with from the browser. Returns a price range plus
-// an HMAC-signed token the booking step verifies before persisting.
+// Server-side proprietary move-cost estimator. Pricing runs inside the
+// edge runtime so the browser cannot tamper with the numbers, and the
+// result is returned alongside an HMAC-signed token the booking step
+// re-verifies before persisting.
 //
 // Changes in this revision:
-//   - Commercial moves now take a commercialProfile { premisesType, scale }.
-//     "enterprise" scale short-circuits to requiresCustomQuote with no price.
-//   - Short-notice surcharge fires when the move is < 2 days out (was 7).
-//   - Weekend surcharge is now 5% (was 10%).
-//
-// Inputs validated with zod; distance recomputed server-side from
-// coordinates using Mapbox driving directions (we do not trust any
-// client-supplied distance).
+//   - Replaced flat base-by-size pricing with a labour + vehicle + fuel
+//     + materials model that flexes with volume, distance and a live
+//     demand factor (seasonal lift, day of week, short-notice lift).
+//   - Range spread tightened to +/- 8% and rounded to the nearest £10.
+//   - Breakdown now reports the cost components used so the UI panel
+//     ("How we calculated this") stays meaningful.
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { z } from "https://esm.sh/zod@3.23.8";
 import { verifyOrigin, corsHeaders } from "../_shared/verify-origin.ts";
 import {
-  BASE_BY_SIZE,
-  COMMERCIAL_BASE,
+  VOLUME_M3,
+  COMMERCIAL_VOLUME_M3,
   TYPE_MULTIPLIER,
   MIN_BY_TYPE,
   MAX_BY_TYPE,
-  SURCHARGE_SHORT_NOTICE,
-  SURCHARGE_SHORT_NOTICE_DAYS,
-  SURCHARGE_WEEKEND,
+  HOURLY_RATE,
+  FUEL_PER_MILE,
+  MATERIALS_PER_M3,
   RANGE_SPREAD,
   INTERNATIONAL_CUSTOM_QUOTE_MILES,
-  distanceCostMiles,
+  crewSizeForVolume,
+  vehicleRateForVolume,
+  totalHours,
+  seasonalLift,
+  dayOfWeekLift,
+  noticeLift,
 } from "./pricing-config.ts";
 import { signEstimate } from "./signing.ts";
 import { getDrivingDistanceMiles } from "./mapbox-distance.ts";
@@ -98,11 +101,11 @@ serve(async (req) => {
       return json({ error: "Server misconfigured" }, 500);
     }
 
-    // Resolve base price (and detect bespoke-quote cases).
-    let base: number | null = null;
+    // Resolve volume (and detect bespoke-quote cases).
+    let volume: number | null = null;
     if (data.moveType === "commercial") {
       const { premisesType, scale } = data.commercialProfile!;
-      const lookup = COMMERCIAL_BASE[premisesType][scale];
+      const lookup = COMMERCIAL_VOLUME_M3[premisesType][scale];
       if (lookup === "custom") {
         return json(
           {
@@ -114,13 +117,13 @@ serve(async (req) => {
           200,
         );
       }
-      base = lookup;
+      volume = lookup;
     } else {
-      const propBase = BASE_BY_SIZE[data.propertySize!];
-      if (propBase === undefined) {
+      const v = VOLUME_M3[data.propertySize!];
+      if (v === undefined) {
         return json({ error: "Unsupported property size for estimate" }, 400);
       }
-      base = propBase;
+      volume = v;
     }
 
     const distanceMiles = await getDrivingDistanceMiles(
@@ -128,8 +131,6 @@ serve(async (req) => {
       data.deliveryCoords,
     );
     if (distanceMiles === null) {
-      // No drivable route (e.g. sea crossing for an international move).
-      // Refuse to quote rather than fall back to a misleading straight-line.
       return json(
         {
           success: true,
@@ -140,34 +141,37 @@ serve(async (req) => {
         200,
       );
     }
-    const distCost = distanceCostMiles(distanceMiles);
+
+    // Core cost components.
+    const crew = crewSizeForVolume(volume);
+    const hours = totalHours(volume, distanceMiles);
+    const labour = crew * HOURLY_RATE * hours;
+    const vehicle = vehicleRateForVolume(volume);
+    const fuel = distanceMiles * 2 * FUEL_PER_MILE;
+    const materials = volume * MATERIALS_PER_M3;
     const typeMult = TYPE_MULTIPLIER[data.moveType];
+    const subtotal = (labour + vehicle + fuel + materials) * typeMult;
 
-    const subtotal = (base + distCost) * typeMult;
-
+    // Live demand lifts.
     const moveDate = new Date(data.moveDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const daysUntil = Math.round((moveDate.getTime() - today.getTime()) / 86_400_000);
-    const dow = moveDate.getDay(); // 0 Sun, 6 Sat
-    const isWeekend = dow === 0 || dow === 6;
-    const isShortNotice = daysUntil < SURCHARGE_SHORT_NOTICE_DAYS;
-
-    let surcharge = 0;
+    const lifts = [
+      noticeLift(daysUntil),
+      dayOfWeekLift(moveDate.getDay()),
+      seasonalLift(moveDate.getMonth()),
+    ];
     const appliedSurcharges: Array<{ label: string; pct: number }> = [];
-    if (isShortNotice) {
-      surcharge += SURCHARGE_SHORT_NOTICE;
-      appliedSurcharges.push({
-        label: `Short notice (under ${SURCHARGE_SHORT_NOTICE_DAYS} days)`,
-        pct: SURCHARGE_SHORT_NOTICE,
-      });
-    }
-    if (isWeekend) {
-      surcharge += SURCHARGE_WEEKEND;
-      appliedSurcharges.push({ label: "Weekend move", pct: SURCHARGE_WEEKEND });
+    let demand = 1;
+    for (const l of lifts) {
+      if (l.pct !== 0 && l.label) {
+        demand += l.pct;
+        appliedSurcharges.push({ label: l.label, pct: l.pct });
+      }
     }
 
-    let total = subtotal * (1 + surcharge);
+    let total = subtotal * demand;
     total = Math.max(MIN_BY_TYPE[data.moveType], Math.min(MAX_BY_TYPE[data.moveType], total));
 
     const round10 = (n: number) => Math.round(n / 10) * 10;
@@ -203,8 +207,11 @@ serve(async (req) => {
         high,
         distanceMiles: Math.round(distanceMiles * 10) / 10,
         breakdown: {
-          base: Math.round(base),
-          distanceCost: Math.round(distCost),
+          // "base" here represents the combined labour + materials + vehicle
+          // baseline before fuel and demand lifts, so the UI breakdown stays
+          // intuitive without leaking the full proprietary model.
+          base: Math.round(labour + vehicle + materials),
+          distanceCost: Math.round(fuel),
           typeMultiplier: typeMult,
           surcharges: appliedSurcharges,
         },
