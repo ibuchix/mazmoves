@@ -103,9 +103,16 @@ serve(async (req) => {
       }
       // Confirm the estimate was issued for the same inputs the customer
       // is now booking. Coords are matched with a small tolerance.
+      const sizeMatches =
+        data.moveType === "commercial"
+          ? !!verified.commercialProfile &&
+            !!data.commercialProfile &&
+            verified.commercialProfile.premisesType === data.commercialProfile.premisesType &&
+            verified.commercialProfile.scale === data.commercialProfile.scale
+          : verified.propertySize === data.propertySize;
       const sameInputs =
         verified.moveType === data.moveType &&
-        verified.propertySize === data.propertySize &&
+        sizeMatches &&
         verified.moveDate === data.moveDate &&
         !!data.pickupCoords && !!data.deliveryCoords &&
         Math.abs(verified.pickupLat - data.pickupCoords.latitude) < 0.01 &&
@@ -121,6 +128,14 @@ serve(async (req) => {
       estimateIssuedAt = new Date(verified.issuedAt).toISOString();
       source = "calculator";
     }
+
+    // Compose a stable estimated_size string for storage. Domestic /
+    // international keep the existing keys; commercial is "premises-scale"
+    // so admin views can read the profile back without a join.
+    const estimatedSize =
+      data.moveType === "commercial" && data.commercialProfile
+        ? `${data.commercialProfile.premisesType}-${data.commercialProfile.scale}`
+        : (data.propertySize ?? null);
 
     const { data: inserted, error: insertError } = await supabase
       .from("move_requests")
