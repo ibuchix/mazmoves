@@ -1,104 +1,84 @@
-# Calculator: Commercial Rework, Surcharge Fixes & Copy Cleanup
+# Move calculator: smarter pricing, cleaner copy, post-booking reset
 
-The Mapbox driving-distance fix is already shipped. This plan picks up the remaining items from the earlier plan that did not get implemented.
+Four changes, all scoped to the calculator surface (frontend) and the `calculate-move-estimate` edge function.
 
-## 1. Commercial move profile (replace single radio)
+## 1. New "alive" pricing algorithm
 
-Today commercial is a single choice of `office | warehouse | retail` with one base price each. That can't tell the difference between a small shop and a 10,000 sq ft warehouse, which is why the 7-mile commercial move came back at £950.
+Replace the current flat `base + distanceCost` model in `supabase/functions/calculate-move-estimate/pricing-config.ts` and `index.ts` with a **labour + vehicle + demand** model. Pricing reflects what actually drives a UK removal cost: crew hours, vehicle, fuel, and live demand signals.
 
-Replace the single picker with **two questions** when `moveType === "commercial"`:
+**Formula**
 
-- **Premises type:** Office, Retail, Warehouse, Industrial / Storage, Other
-- **Move scale:**
-  - Small — up to ~5 staff / ~500 sq ft / van-load
-  - Medium — ~6–20 staff / ~500–2,000 sq ft / Luton or 7.5t
-  - Large — ~21–75 staff / ~2,000–8,000 sq ft / 18t or multi-vehicle
-  - Enterprise — 75+ staff / 8,000+ sq ft / multi-day project
+```text
+volume        = VOLUME_M3[propertySize | commercial profile]
+crewSize      = ceil(volume / 12)          // 1 mover per ~12 m3, min 2, max 6
+loadHours     = volume * 0.10              // ~6 min per m3 to load
+unloadHours   = volume * 0.08
+driveHours    = (distanceMiles / 30) * 2   // round trip at 30 mph avg UK
+totalHours    = max(2, loadHours + unloadHours + driveHours)
 
-Server-side base pricing becomes a `COMMERCIAL_BASE[premisesType][scale]` table tuned to typical UK commercial removals (anchors below in Technical section). **Enterprise always returns `requiresCustomQuote: true`** with no auto price — the UI shows a "book to receive a bespoke quote" CTA instead of a range.
+labour        = crewSize * HOURLY_RATE * totalHours
+vehicle       = VEHICLE_DAY_RATE[vehicleClass(volume)]
+fuel          = distanceMiles * 2 * FUEL_PER_MILE
+materials     = volume * 1.2               // boxes, blankets, tape
 
-Domestic and international flows are unchanged.
+subtotal      = (labour + vehicle + fuel + materials) * TYPE_MULTIPLIER[moveType]
+demandFactor  = 1 + seasonalLift(month) + dayOfWeekLift(dow) + shortNoticeLift(daysUntil)
+total         = clamp(subtotal * demandFactor, MIN_BY_TYPE, MAX_BY_TYPE)
 
-## 2. Surcharge corrections
+low           = round10(total * 0.92)
+high          = round10(total * 1.08)
+```
 
-- Short-notice premium window: **< 2 days** out (was < 7). Value stays 15%.
-- Weekend premium: **5%** (was 10%).
+**Tuned constants (GBP)**
 
-Surcharge labels in the breakdown update to match ("Short notice (under 2 days)", "Weekend move (5%)").
+- `HOURLY_RATE` 28 (per crew member)
+- `FUEL_PER_MILE` 0.42
+- `VEHICLE_DAY_RATE`: Luton 95, 7.5t 160, 18t 240
+- `VOLUME_M3`: 1-bed 18, 2-bed 30, 3-bed 45, 4-bed 60, 5+ 80, commercial small/medium/large from a new `COMMERCIAL_VOLUME_M3` table (office S 22, M 55, L 130 etc.)
+- `TYPE_MULTIPLIER`: domestic 1.00, commercial 1.10, international 1.85
+- `seasonalLift`: Jun–Aug +0.05, Dec/Jan –0.03, else 0
+- `dayOfWeekLift`: Sat/Sun +0.05, Fri +0.02
+- `shortNoticeLift`: <2 days +0.15, 2–6 days +0.05
+- Range spread tightened from ±10% to ±8% (cleaner-looking quote)
 
-## 3. Em-dash sweep
+**Sanity samples**
 
-Replace every `—` with a comma, period, or regular hyphen (`-`) across the calculator surface and the supporting edge function comments/strings the customer can see. Confirmed occurrences:
+- 1-bed flat, 7 mi, midweek: ~£230–£280
+- Small office, 7 mi, midweek: ~£360–£440  *(today: £730–£890)*
+- 3-bed house, 35 mi, Saturday: ~£780–£920
+- Enterprise commercial: still returns `requiresCustomQuote`, unchanged
 
-- `src/pages/MoveCalculator.tsx` (4 lines)
-- `src/components/move-calculator/CalculatorWizard.tsx` (1 line)
-- `src/components/move-calculator/BookEstimateDialog.tsx` (1 line)
-- `supabase/functions/calculate-move-estimate/pricing-config.ts` (1 comment)
-- `supabase/functions/submit-move-request/index.ts` (4 comments)
+**Edge function changes**
 
-Code comments get the same treatment for consistency.
+- `pricing-config.ts`: replace flat `BASE_BY_SIZE`/`COMMERCIAL_BASE` numbers with `VOLUME_M3`, `COMMERCIAL_VOLUME_M3`, `HOURLY_RATE`, `VEHICLE_DAY_RATE`, `FUEL_PER_MILE`, `MATERIALS_PER_M3`, plus the lift helpers.
+- `index.ts`: compute total via the new pipeline. Surcharge list returned in `breakdown.surcharges` now shows the active lifts (Weekend +5%, Short notice +15%, Peak season +5%, etc.) so the "How we calculated this" panel still makes sense.
+- Signed payload (`signing.ts`) unchanged in shape, only the `low`/`high` values change.
+
+## 2. Trim copy
+
+- `EstimateResult.tsx`: drop the trailing sentence. New copy: "Approximately {n} miles by road. Final price confirmed by your matched mover." (delete "This reflects typical UK market rates.")
+- `BookEstimateDialog.tsx`: delete the line "Free for you. Movers pay to be matched. No card required." (lines 162–164) entirely.
+
+## 3. Reset after successful booking
+
+Currently after a booking succeeds the user clicks "Done" or dismisses the dialog and the estimate hero + Book/Recalculate buttons stay on screen.
+
+- `BookEstimateDialog.tsx`: when submission succeeds, call a new `onBookingComplete` prop (in addition to the existing close behaviour). Triggered when the user clicks "Done" or closes the dialog via outside click / Esc after `success === true`.
+- `MoveCalculator.tsx`: implement `onBookingComplete` that clears `estimate` + `inputs`, scrolls to top, and forces `CalculatorWizard` to remount (bump a `wizardKey` state). Remounting the wizard naturally resets it to step 1 with empty inputs, no extra reset plumbing needed.
+- Net effect: dialog closes, hero result disappears, wizard returns to step 1.
 
 ## 4. Out of scope
 
-- No DB migration. The existing nullable estimate columns already cover the new shape; we only persist `low / high / distanceMiles` (plus `null` when bespoke).
-- The legacy `estimated_value` column stays untouched — the calculator writes to `estimated_price_low/high` as it does now.
-- Driving-distance / Mapbox work — already done.
+- No database/migration changes.
+- No design or layout changes beyond removing the two copy lines.
+- Mapbox driving-distance integration stays as-is.
 
----
-
-## Technical section
-
-### Files
+## Files to change
 
 - `supabase/functions/calculate-move-estimate/pricing-config.ts`
-  - Remove `office | warehouse | retail | business` from `BASE_BY_SIZE`.
-  - Add:
-    ```ts
-    export type CommercialPremises = "office" | "retail" | "warehouse" | "industrial" | "other";
-    export type CommercialScale = "small" | "medium" | "large" | "enterprise";
-    export const COMMERCIAL_BASE: Record<CommercialPremises, Record<CommercialScale, number | "custom">> = {
-      office:     { small: 650,  medium: 1400, large: 3200, enterprise: "custom" },
-      retail:     { small: 700,  medium: 1500, large: 3400, enterprise: "custom" },
-      warehouse:  { small: 900,  medium: 2200, large: 5200, enterprise: "custom" },
-      industrial: { small: 950,  medium: 2400, large: 5600, enterprise: "custom" },
-      other:      { small: 700,  medium: 1600, large: 3600, enterprise: "custom" },
-    };
-    ```
-  - `SURCHARGE_SHORT_NOTICE_DAYS = 2`, `SURCHARGE_WEEKEND = 0.05`.
-
 - `supabase/functions/calculate-move-estimate/index.ts`
-  - Input schema: when `moveType === "commercial"`, expect `commercialProfile: { premisesType, scale }` and ignore `propertySize`. Domestic/international keep `propertySize` as today.
-  - Base lookup branches on move type. If commercial scale is `enterprise` (or COMMERCIAL_BASE lookup returns `"custom"`), short-circuit and return `requiresCustomQuote: true` with no price.
-  - Replace short-notice check with `daysUntil < 2`.
-  - Token payload includes `commercialProfile` (or `propertySize`) so verify can re-derive base.
-
-- `supabase/functions/calculate-move-estimate/signing.ts` + `submit-move-request/estimate-verify.ts`
-  - Extend the signed payload shape with optional `commercialProfile`. Verify recomputes base using the same branching logic.
-
-- `supabase/functions/_shared/move-request-validation.ts`
-  - Loosen / split: `propertySize` only required for domestic + international; commercial gets the new `commercialProfile` object validated with a zod discriminated union.
-
-- `src/types/move-request.ts`
-  - Add `CommercialPremises`, `CommercialScale`, `CommercialProfile` types. Keep existing `PropertySize` for domestic/international.
-
-- `src/components/move-calculator/CalculatorWizard.tsx`
-  - Step 2 becomes either the existing `PropertySizeStep` (domestic/international) or a new inline two-field `CommercialProfileStep` (premises + scale dropdowns/radio).
-  - `canProceed(2)` checks the right field.
-  - Payload sent to `use-calculate-estimate` and (later) `submit-move-request` includes whichever field is set.
-
-- `src/hooks/use-calculate-estimate.ts`
-  - Input type widened with optional `commercialProfile`. Pass through to the edge function.
-
 - `src/components/move-calculator/EstimateResult.tsx`
-  - When `requiresCustomQuote && !low`, render the bespoke-quote variant (already partly there) with copy: "We'll prepare a tailored quote for this move. Book now and a specialist will be in touch."
-
 - `src/components/move-calculator/BookEstimateDialog.tsx`
-  - When the estimate is bespoke (no price), submit still works; we send `null` for `estimated_price_low/high` and include the commercial profile in the move request payload.
+- `src/pages/MoveCalculator.tsx`
 
-### Validation checks after build
-
-- 7-mile commercial Small Office now lands in a sane £650 + distance band, not £950.
-- 7-mile commercial Large Warehouse lands in the multi-thousand range.
-- Move date 5 days out: no short-notice surcharge. 1 day out: 15% applies.
-- Saturday move: 5% surcharge, not 10%.
-- Em-dash grep returns zero hits in the listed files.
+Re-deploy `calculate-move-estimate` after the edits.
