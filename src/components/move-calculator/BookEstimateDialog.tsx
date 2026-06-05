@@ -58,6 +58,7 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
     open, onOpenChange, moveType, propertySize, commercialProfile,
     pickupAddress, deliveryAddress,
     pickupCoords, deliveryCoords, moveDate, estimateToken, estimateLow, estimateHigh,
+    onBookingComplete,
   } = props;
 
   const hasPrice = typeof estimateLow === "number" && typeof estimateHigh === "number";
@@ -65,6 +66,22 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<ContactForm>();
+
+  const finishAndReset = () => {
+    onOpenChange(false);
+    setSuccess(false);
+    onBookingComplete?.();
+  };
+
+  // When the user dismisses the dialog (outside click / Esc / close button)
+  // after a successful booking, treat it as a completed flow and reset.
+  const handleOpenChange = (next: boolean) => {
+    if (!next && success) {
+      finishAndReset();
+      return;
+    }
+    onOpenChange(next);
+  };
 
   const onSubmit = handleSubmit(async (form) => {
     setSubmitting(true);
