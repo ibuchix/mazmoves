@@ -1,6 +1,10 @@
 // CommonRoutes.tsx - Town-specific table of common move routes with price bands.
-// Removed the Notes column entirely as most rows had no notes content.
+// Polished: shared Section + SectionHeading, rounded-2xl border, zebra rows,
+// hover row tint, brand-slate header that reads as "sticky-style".
 import type { PriceRoute } from "@/data/locations";
+import { Section } from "./Section";
+import { SectionHeading } from "./SectionHeading";
+import { MotionSection } from "./MotionSection";
 
 interface CommonRoutesProps {
   townName: string;
@@ -9,34 +13,39 @@ interface CommonRoutesProps {
 
 export function CommonRoutes({ townName, routes }: CommonRoutesProps) {
   return (
-    <section className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
-      <div className="max-w-5xl mx-auto">
-        <h2 className="text-3xl font-bold text-brand-slate font-montserrat mb-2">
-          Common routes from {townName}
-        </h2>
-        <p className="text-gray-700 font-roboto mb-6">
-          Indicative bands for a small 1-2 bed move. Bigger properties, weekend timing or
-          specialty items will sit above these ranges.
-        </p>
-        <div className="overflow-hidden rounded-lg border bg-white shadow-sm">
+    <Section tone="muted">
+      <MotionSection>
+        <SectionHeading
+          eyebrow="Typical routes"
+          title={`Common routes from ${townName}`}
+          lede="Indicative bands for a small 1-2 bed move. Bigger properties, weekend timing or specialty items will sit above these ranges."
+        />
+      </MotionSection>
+      <MotionSection delay={0.05}>
+        <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
           <table className="w-full text-left">
             <thead className="bg-brand-slate text-white font-montserrat">
               <tr>
-                <th className="px-4 py-3 text-sm">From {townName} to</th>
-                <th className="px-4 py-3 text-sm">Typical band (1-2 bed)</th>
+                <th className="px-5 py-4 text-sm font-semibold">From {townName} to</th>
+                <th className="px-5 py-4 text-sm font-semibold">Typical band (1-2 bed)</th>
               </tr>
             </thead>
             <tbody className="font-roboto">
-              {routes.map((r) => (
-                <tr key={r.to} className="border-t">
-                  <td className="px-4 py-3 font-medium text-brand-slate">{r.to}</td>
-                  <td className="px-4 py-3 text-gray-800">{r.oneBedBand}</td>
+              {routes.map((r, i) => (
+                <tr
+                  key={r.to}
+                  className={`border-t transition-colors hover:bg-brand-green/5 ${
+                    i % 2 === 1 ? "bg-gray-50/60" : "bg-white"
+                  }`}
+                >
+                  <td className="px-5 py-4 font-medium text-brand-slate">{r.to}</td>
+                  <td className="px-5 py-4 text-gray-800">{r.oneBedBand}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
-      </div>
-    </section>
+      </MotionSection>
+    </Section>
   );
 }
