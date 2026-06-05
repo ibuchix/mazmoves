@@ -17,3 +17,7 @@ verify_jwt = false
 [[functions]]
 name = "submit-move-request"
 verify_jwt = false
+
+[[functions]]
+name = "calculate-move-estimate"
+verify_jwt = false
