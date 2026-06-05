@@ -50,7 +50,7 @@ export const HeroForm = ({ moveType, setMoveType, onGetQuotes }: HeroFormProps) 
         >
           Get Free Quotes
         </Button>
-        <div className="flex items-center justify-center gap-1.5 mt-3 text-xs text-gray-500 font-roboto">
+        <div className="flex items-center justify-center gap-1.5 mt-3 text-xs text-brand-green font-roboto font-medium">
           <Lock className="w-3.5 h-3.5" aria-hidden="true" />
           <span>Your information is protected by 128-bit SSL encryption.</span>
         </div>
