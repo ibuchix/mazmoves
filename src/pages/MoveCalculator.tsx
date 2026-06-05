@@ -33,6 +33,9 @@ export default function MoveCalculator() {
   const [estimate, setEstimate] = useState<EstimateResponse | null>(null);
   const [inputs, setInputs] = useState<CapturedInputs | null>(null);
   const [bookOpen, setBookOpen] = useState(false);
+  // Bumping this key remounts the wizard, which resets it to step 1
+  // with empty fields after a successful booking.
+  const [wizardKey, setWizardKey] = useState(0);
 
   const handleEstimate = (e: EstimateResponse, i: CapturedInputs) => {
     setEstimate(e);
@@ -41,6 +44,15 @@ export default function MoveCalculator() {
       document.getElementById("estimate-result")?.scrollIntoView({ behavior: "smooth", block: "start" });
     }, 50);
   };
+
+  const handleBookingComplete = () => {
+    setEstimate(null);
+    setInputs(null);
+    setBookOpen(false);
+    setWizardKey((k) => k + 1);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
 
   return (
     <div className="flex-1">

@@ -126,7 +126,7 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
     : "We've received your request. A specialist will prepare a tailored quote and be in touch shortly.";
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         {success ? (
           <div className="text-center py-2">
@@ -142,7 +142,7 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
               <div className="flex items-center justify-center gap-2"><Mail className="h-4 w-4 text-brand-slateLight" /><span>Confirmation sent to your inbox</span></div>
             </div>
             <Button
-              onClick={() => { onOpenChange(false); setSuccess(false); }}
+              onClick={finishAndReset}
               className="mt-6 bg-brand-slate hover:bg-brand-slateLight text-white font-montserrat"
             >
               Done
@@ -182,9 +182,7 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
               >
                 {submitting ? <><LoadingSpinner size="sm" className="border-white mr-2" /> Submitting...</> : hasPrice ? "Confirm booking" : "Submit request"}
               </Button>
-              <p className="text-xs text-center text-brand-slateLight font-roboto">
-                Free for you. Movers pay to be matched. No card required.
-              </p>
+
             </form>
           </>
         )}
