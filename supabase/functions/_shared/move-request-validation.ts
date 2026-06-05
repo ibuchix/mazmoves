@@ -2,6 +2,11 @@
 // Zod schema for incoming customer move requests. Mirrors the existing
 // validate-move-request rules but is the single source of truth for the
 // new server-mediated submission path.
+//
+// Updated: commercial moves accept a commercialProfile { premisesType, scale }
+// in place of the legacy single propertySize string. propertySize is
+// required for domestic and international moves; commercialProfile is
+// required for commercial moves.
 
 import { z } from "https://esm.sh/zod@3.23.8";
 
@@ -13,9 +18,15 @@ const addressSchema = z.object({
   country: z.string().trim().max(100).optional().default(""),
 });
 
+const commercialProfileSchema = z.object({
+  premisesType: z.enum(["office", "retail", "warehouse", "industrial", "other"]),
+  scale: z.enum(["small", "medium", "large", "enterprise"]),
+});
+
 export const moveRequestSchema = z.object({
   moveType: z.enum(["domestic", "commercial", "international"]),
-  propertySize: z.enum(["1", "2", "3", "4", "5+", "office", "warehouse", "retail"]),
+  propertySize: z.enum(["1", "2", "3", "4", "5+", "business"]).optional(),
+  commercialProfile: commercialProfileSchema.optional(),
   pickupAddress: addressSchema,
   deliveryAddress: addressSchema,
   moveDate: z.string().refine((v) => {
@@ -44,7 +55,13 @@ export const moveRequestSchema = z.object({
   estimate: z.object({
     token: z.string().min(10).max(2048),
   }).nullable().optional(),
-});
+}).refine(
+  (v) =>
+    v.moveType === "commercial"
+      ? !!v.commercialProfile
+      : !!v.propertySize,
+  { message: "propertySize or commercialProfile is required", path: ["propertySize"] },
+);
 
 export type ValidatedMoveRequest = z.infer<typeof moveRequestSchema>;
 
