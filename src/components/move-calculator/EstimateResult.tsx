@@ -39,13 +39,13 @@ export function EstimateResult({ estimate, onBook, onRecalculate }: Props) {
 
   return (
     <div className="rounded-2xl bg-white border border-brand-slateLight/30 shadow-xl overflow-hidden">
-      <div className="bg-gradient-to-br from-brand-slate via-brand-slateLight to-brand-slate text-white p-8 text-center">
+      <div className="bg-gradient-to-br from-brand-slate via-brand-slateLight to-brand-slate text-white p-5 sm:p-8 text-center">
         {hasPrice ? (
           <>
-            <p className="text-sm uppercase tracking-wider text-white/80 font-roboto">
+            <p className="text-xs sm:text-sm uppercase tracking-wider text-white/80 font-roboto">
               Your estimated total
             </p>
-            <p className="text-4xl md:text-5xl font-bold font-montserrat mt-2">
+            <p className="text-3xl sm:text-4xl md:text-5xl font-bold font-montserrat mt-2 break-words">
               {gbp(estimate.low!)} <span className="text-white/60">to</span>{" "}
               {gbp(estimate.high!)}
             </p>
@@ -71,7 +71,7 @@ export function EstimateResult({ estimate, onBook, onRecalculate }: Props) {
         )}
       </div>
 
-      <div className="p-6 md:p-8 space-y-5">
+      <div className="p-5 sm:p-6 md:p-8 space-y-5">
         {hasPrice && estimate.breakdown && estimate.breakdown.surcharges.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {estimate.breakdown.surcharges.map((s) => (
@@ -135,20 +135,21 @@ export function EstimateResult({ estimate, onBook, onRecalculate }: Props) {
         <div className="grid sm:grid-cols-2 gap-3 pt-2">
           <Button
             onClick={onBook}
-            className="bg-brand-orange hover:bg-brand-green text-white font-montserrat font-semibold py-6 text-base shadow-lg transition-all"
+            className="w-full bg-brand-orange hover:bg-brand-green text-white font-montserrat font-semibold py-5 sm:py-6 text-sm sm:text-base shadow-lg transition-all whitespace-normal h-auto min-h-[3rem]"
           >
-            <CheckCircle className="w-5 h-5 mr-2" />
-            {hasPrice ? "Book this move" : "Request bespoke quote"}
+            <CheckCircle className="w-5 h-5 mr-2 shrink-0" />
+            <span className="truncate">{hasPrice ? "Book this move" : "Request bespoke quote"}</span>
           </Button>
           <Button
             variant="outline"
             onClick={onRecalculate}
-            className="border-brand-slate text-brand-slate hover:bg-brand-slate hover:text-white font-montserrat py-6 text-base"
+            className="w-full border-brand-slate text-brand-slate hover:bg-brand-slate hover:text-white font-montserrat py-5 sm:py-6 text-sm sm:text-base whitespace-normal h-auto min-h-[3rem]"
           >
-            <RotateCcw className="w-4 h-4 mr-2" />
+            <RotateCcw className="w-4 h-4 mr-2 shrink-0" />
             Recalculate
           </Button>
         </div>
+
 
         {hasPrice && (
           <div className="flex items-center justify-center gap-1.5 text-xs text-brand-green font-roboto font-medium pt-1">

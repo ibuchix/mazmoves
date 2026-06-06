@@ -209,13 +209,13 @@ export function CalculatorWizard({ onEstimate }: CalculatorWizardProps) {
           </div>
         )}
 
-        <div className="flex justify-between pt-6">
+        <div className="flex justify-between items-stretch gap-2 pt-6">
           <Button
             type="button"
             variant="outline"
             onClick={prev}
             disabled={step === 1 || busy}
-            className="bg-white"
+            className="bg-white shrink-0"
           >
             Previous
           </Button>
@@ -233,16 +233,17 @@ export function CalculatorWizard({ onEstimate }: CalculatorWizardProps) {
               type="button"
               onClick={handleCalculate}
               disabled={!canNext || busy}
-              className="bg-brand-orange hover:bg-brand-green text-white font-montserrat font-semibold px-6"
+              className="bg-brand-orange hover:bg-brand-green text-white font-montserrat font-semibold px-4 sm:px-6 text-sm sm:text-base whitespace-normal h-auto min-h-[2.5rem] flex-1 sm:flex-none"
             >
               {busy ? (
-                <><LoadingSpinner size="sm" className="border-white mr-2" /> Crunching numbers...</>
+                <><LoadingSpinner size="sm" className="border-white mr-2 shrink-0" /> <span>Crunching...</span></>
               ) : (
-                "Calculate my estimate"
+                "Calculate estimate"
               )}
             </Button>
           )}
         </div>
+
       </form>
     </div>
   );

@@ -127,7 +127,7 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto p-5 sm:p-6">
         {success ? (
           <div className="text-center py-2">
             <CheckCircle className="h-12 w-12 text-brand-green mx-auto" />
@@ -143,7 +143,7 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
             </div>
             <Button
               onClick={finishAndReset}
-              className="mt-6 bg-brand-slate hover:bg-brand-slateLight text-white font-montserrat"
+              className="mt-6 w-full sm:w-auto bg-brand-slate hover:bg-brand-slateLight text-white font-montserrat"
             >
               Done
             </Button>
@@ -151,10 +151,11 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
         ) : (
           <>
             <DialogHeader>
-              <DialogTitle className="font-montserrat text-brand-slate">
+              <DialogTitle className="font-montserrat text-brand-slate text-base sm:text-lg pr-6 leading-snug break-words">
                 {headerTitle}
               </DialogTitle>
             </DialogHeader>
+
             <form onSubmit={onSubmit} className="space-y-4 mt-2">
               <div className="space-y-1.5">
                 <Label htmlFor="be-name">Full name *</Label>
