@@ -71,7 +71,7 @@ export function EstimateResult({ estimate, onBook, onRecalculate }: Props) {
         )}
       </div>
 
-      <div className="p-6 md:p-8 space-y-5">
+      <div className="p-5 sm:p-6 md:p-8 space-y-5">
         {hasPrice && estimate.breakdown && estimate.breakdown.surcharges.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {estimate.breakdown.surcharges.map((s) => (
