@@ -140,24 +140,37 @@ serve(async (req) => {
     let emailsFailed = 0;
     let emailsSkipped = 0;
     if (matches.length > 0) {
-      const results = await Promise.allSettled(
-        matches.map((m) => {
-          if (!m.company.contact_email) {
-            emailsSkipped += 1;
-            return Promise.resolve({ ok: false, error: "no contact_email" });
-          }
-          return sendCompanyJobEmail({
-            to: m.company.contact_email,
-            companyName: m.company.name,
-            pickupAddress: (moveRequest.pickup_address as any) ?? null,
-            deliveryAddress: (moveRequest.delivery_address as any) ?? null,
-            requestedDate: moveRequest.requested_date ?? null,
-            moveType: moveRequest.move_type ?? null,
-            estimatedSize: moveRequest.estimated_size ?? null,
-            distanceMiles: m.distance,
-          });
-        }),
-      );
+      // Resend free tier limits to 5 requests/second. Send sequentially with
+      // a 250ms gap (≈4/sec) so we stay safely under the cap. Retry once on
+      // 429 after a longer wait so a transient burst doesn't drop a company
+      // (this is what caused NB Movers to miss emails previously).
+      const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+      const results: { status: "fulfilled"; value: { ok: boolean; id?: string; error?: string } }[] = [];
+      for (let i = 0; i < matches.length; i++) {
+        const m = matches[i];
+        if (!m.company.contact_email) {
+          emailsSkipped += 1;
+          results.push({ status: "fulfilled", value: { ok: false, error: "no contact_email" } });
+          continue;
+        }
+        const payload = {
+          to: m.company.contact_email,
+          companyName: m.company.name,
+          pickupAddress: (moveRequest.pickup_address as any) ?? null,
+          deliveryAddress: (moveRequest.delivery_address as any) ?? null,
+          requestedDate: moveRequest.requested_date ?? null,
+          moveType: moveRequest.move_type ?? null,
+          estimatedSize: moveRequest.estimated_size ?? null,
+          distanceMiles: m.distance,
+        };
+        let res = await sendCompanyJobEmail(payload);
+        if (!res.ok && res.error && /Too many requests|rate limit|429/i.test(res.error)) {
+          await sleep(1100);
+          res = await sendCompanyJobEmail(payload);
+        }
+        results.push({ status: "fulfilled", value: res });
+        if (i < matches.length - 1) await sleep(250);
+      }
       for (let i = 0; i < results.length; i++) {
         const r = results[i];
         const companyId = matches[i].company.id;
