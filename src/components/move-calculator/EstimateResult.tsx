@@ -39,13 +39,13 @@ export function EstimateResult({ estimate, onBook, onRecalculate }: Props) {
 
   return (
     <div className="rounded-2xl bg-white border border-brand-slateLight/30 shadow-xl overflow-hidden">
-      <div className="bg-gradient-to-br from-brand-slate via-brand-slateLight to-brand-slate text-white p-8 text-center">
+      <div className="bg-gradient-to-br from-brand-slate via-brand-slateLight to-brand-slate text-white p-5 sm:p-8 text-center">
         {hasPrice ? (
           <>
-            <p className="text-sm uppercase tracking-wider text-white/80 font-roboto">
+            <p className="text-xs sm:text-sm uppercase tracking-wider text-white/80 font-roboto">
               Your estimated total
             </p>
-            <p className="text-4xl md:text-5xl font-bold font-montserrat mt-2">
+            <p className="text-3xl sm:text-4xl md:text-5xl font-bold font-montserrat mt-2 break-words">
               {gbp(estimate.low!)} <span className="text-white/60">to</span>{" "}
               {gbp(estimate.high!)}
             </p>
