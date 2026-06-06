@@ -155,7 +155,7 @@ export function CalculatorWizard({ onEstimate }: CalculatorWizardProps) {
     <div className="bg-white rounded-2xl shadow-xl border border-brand-slateLight/20 p-5 md:p-8">
       <FormProgress step={step} totalSteps={TOTAL_STEPS} />
 
-      <form onSubmit={(e) => e.preventDefault()}>
+      <form onSubmit={(e) => e.preventDefault()} onFocus={handleFocusIn}>
         {step === 1 && (
           <MoveTypeStep
             value={moveType}
