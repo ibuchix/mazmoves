@@ -103,4 +103,18 @@
   body {
     @apply bg-gradient-to-bl from-brand-green/5 to-brand-orange/5 text-foreground min-h-screen;
   }
+
+  /* iOS Safari: prevent auto-zoom on input focus by guaranteeing >=16px font
+     size on form fields, and reserve space below focused fields so the
+     on-screen keyboard never covers them. */
+  input, select, textarea {
+    font-size: 16px;
+    scroll-margin-top: 96px;
+    scroll-margin-bottom: 40vh;
+  }
+  @media (min-width: 768px) {
+    input, select, textarea {
+      font-size: inherit;
+    }
+  }
 }
