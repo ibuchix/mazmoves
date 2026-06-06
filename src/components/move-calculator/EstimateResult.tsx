@@ -135,20 +135,21 @@ export function EstimateResult({ estimate, onBook, onRecalculate }: Props) {
         <div className="grid sm:grid-cols-2 gap-3 pt-2">
           <Button
             onClick={onBook}
-            className="bg-brand-orange hover:bg-brand-green text-white font-montserrat font-semibold py-6 text-base shadow-lg transition-all"
+            className="w-full bg-brand-orange hover:bg-brand-green text-white font-montserrat font-semibold py-5 sm:py-6 text-sm sm:text-base shadow-lg transition-all whitespace-normal h-auto min-h-[3rem]"
           >
-            <CheckCircle className="w-5 h-5 mr-2" />
-            {hasPrice ? "Book this move" : "Request bespoke quote"}
+            <CheckCircle className="w-5 h-5 mr-2 shrink-0" />
+            <span className="truncate">{hasPrice ? "Book this move" : "Request bespoke quote"}</span>
           </Button>
           <Button
             variant="outline"
             onClick={onRecalculate}
-            className="border-brand-slate text-brand-slate hover:bg-brand-slate hover:text-white font-montserrat py-6 text-base"
+            className="w-full border-brand-slate text-brand-slate hover:bg-brand-slate hover:text-white font-montserrat py-5 sm:py-6 text-sm sm:text-base whitespace-normal h-auto min-h-[3rem]"
           >
-            <RotateCcw className="w-4 h-4 mr-2" />
+            <RotateCcw className="w-4 h-4 mr-2 shrink-0" />
             Recalculate
           </Button>
         </div>
+
 
         {hasPrice && (
           <div className="flex items-center justify-center gap-1.5 text-xs text-brand-green font-roboto font-medium pt-1">
