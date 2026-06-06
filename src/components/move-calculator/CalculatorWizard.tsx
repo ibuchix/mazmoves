@@ -136,7 +136,20 @@ export function CalculatorWizard({ onEstimate }: CalculatorWizardProps) {
     }
   };
 
+  // iOS Safari often fails to scroll focused fields above the on-screen
+  // keyboard when they live inside a transformed/grid container. Force the
+  // focused field into view after a short delay so it always sits above the
+  // keyboard.
+  const handleFocusIn = (e: React.FocusEvent<HTMLFormElement>) => {
+    const target = e.target as HTMLElement;
+    if (!target.matches?.("input, select, textarea")) return;
+    window.setTimeout(() => {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 250);
+  };
+
   const busy = geocoding || isCalculating;
+
 
   return (
     <div className="bg-white rounded-2xl shadow-xl border border-brand-slateLight/20 p-5 md:p-8">
