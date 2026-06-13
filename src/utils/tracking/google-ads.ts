@@ -43,7 +43,11 @@ export function trackAdsConversion({
   currency = "GBP",
   transactionId,
 }: AdsConversionParams): void {
-  if (typeof window === "undefined" || typeof window.gtag !== "function") return;
+  if (typeof window === "undefined") return;
+  if (typeof window.gtag !== "function") {
+    console.warn("[google-ads] gtag not available — conversion not sent:", sendTo);
+    return;
+  }
   try {
     window.gtag("event", "conversion", {
       send_to: sendTo,
