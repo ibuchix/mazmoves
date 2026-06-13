@@ -34,17 +34,14 @@ export function TownHero({ townName, county, trustWord = "vetted" }: TownHeroPro
   ];
 
   return (
-    <section className="relative flex items-center px-2 sm:px-6 lg:px-8 py-4 md:pt-12 md:pb-24">
+    <section className="relative flex items-center px-2 sm:px-6 lg:px-8 pt-6 pb-4 md:pt-12 md:pb-24">
       <div className="absolute inset-x-2 sm:inset-x-6 lg:inset-x-8 inset-y-0 md:top-12 md:bottom-24 rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-brand-slate via-brand-slateLight to-brand-slate shadow-2xl">
         <div className="absolute inset-0 opacity-20 bg-[url('/grid.svg')] bg-center" />
         <div className="absolute inset-0 bg-black/5" />
       </div>
       <div className="relative w-full max-w-7xl mx-auto px-3 sm:px-8 lg:px-8 py-6 md:py-20">
         <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-stretch">
-          <div className={`${isMobile ? "order-1" : "order-2 md:order-1"} animate-fade-in min-w-0`}>
-            <HeroForm moveType={moveType} setMoveType={setMoveType} onGetQuotes={onGetQuotes} />
-          </div>
-          <div className={`${isMobile ? "order-2" : "order-1 md:order-2"} animate-fade-in [animation-delay:200ms] flex flex-col justify-center h-full text-white min-w-0`}>
+          <div className={`${isMobile ? "order-2" : "order-1"} animate-fade-in [animation-delay:200ms] flex flex-col justify-center h-full text-white min-w-0`}>
             <p className="text-brand-green font-montserrat font-semibold tracking-wide text-sm uppercase mb-2">
               {county}
             </p>
@@ -63,8 +60,12 @@ export function TownHero({ townName, county, trustWord = "vetted" }: TownHeroPro
               ))}
             </ul>
           </div>
+          <div className={`${isMobile ? "order-1" : "order-2"} animate-fade-in min-w-0`}>
+            <HeroForm moveType={moveType} setMoveType={setMoveType} onGetQuotes={onGetQuotes} />
+          </div>
         </div>
       </div>
     </section>
+
   );
 }

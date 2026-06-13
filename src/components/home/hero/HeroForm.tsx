@@ -1,17 +1,19 @@
-// Hero form for selecting move type. Removed the "moving company? Join us" link
-// since registration has been removed from the platform.
+// Hero form for selecting move type.
+// Changes: CTA button stays fully orange (no disabled-dim) so users see it as a live CTA.
+// Click without a move type selected shows a toast prompting selection — wizard is NOT
+// advanced until a move type has been chosen, preserving the original guard.
 // Fires TikTok ClickButton event when the user clicks "Get Free Quotes" so the
 // lead-gen funnel (ViewContent → ClickButton → SubmitForm → CompleteRegistration) is complete.
 // Also fires the internal campaign `move_type_selected` event when the user
 // picks a move type, so admin campaign attribution captures hero selections.
-// Added a subtle SSL-encryption trust line under the "Get Free Quotes" button to
-// reassure customers that their details are protected.
+// Includes a subtle SSL-encryption trust line under the button.
 import { Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MoveTypeStep } from "@/components/move-request/MoveTypeStep";
 import { MoveType } from "@/types/move-request";
 import { trackEvent } from "@/utils/tracking/tiktok";
 import { track } from "@/lib/campaign-tracking";
+import { useToast } from "@/hooks/use-toast";
 
 interface HeroFormProps {
   moveType: MoveType | null;
@@ -20,11 +22,19 @@ interface HeroFormProps {
 }
 
 export const HeroForm = ({ moveType, setMoveType, onGetQuotes }: HeroFormProps) => {
+  const { toast } = useToast();
+
   const handleGetQuotes = () => {
+    if (!moveType) {
+      toast({
+        title: "Select your move type",
+        description: "Please choose Domestic, Commercial or International to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
     trackEvent("ClickButton", {
-      contents: moveType
-        ? [{ content_id: `move-${moveType}`, content_type: "product", content_name: `Move Request - ${moveType}` }]
-        : [],
+      contents: [{ content_id: `move-${moveType}`, content_type: "product", content_name: `Move Request - ${moveType}` }],
     });
     onGetQuotes();
   };
@@ -44,9 +54,9 @@ export const HeroForm = ({ moveType, setMoveType, onGetQuotes }: HeroFormProps) 
           onNext={handleGetQuotes}
         />
         <Button
-          className="w-full mt-6 bg-brand-orange hover:bg-brand-green text-white text-lg font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
+          className="w-full mt-6 bg-brand-orange hover:bg-brand-orange/90 text-white text-lg font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-300"
           onClick={handleGetQuotes}
-          disabled={!moveType}
+          aria-disabled={!moveType}
         >
           Get Free Quotes
         </Button>
