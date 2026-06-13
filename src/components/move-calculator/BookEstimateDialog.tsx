@@ -6,6 +6,8 @@
 //
 // Updated: supports commercial profile (premises + scale) and bespoke
 // quote responses (no low/high price). Em-dash removed from footer copy.
+// Updated: fires the Google Ads "House Move Lead" conversion on successful
+// submission so Move Calculator bookings are tracked alongside the hero form.
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -18,6 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { CheckCircle, Clock, Mail } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { trackAdsConversion, GOOGLE_ADS_LEAD_CONVERSION_SEND_TO, GOOGLE_ADS_CONVERSION_VALUE } from "@/utils/tracking/google-ads";
 import type { MoveType, PropertySize, CommercialProfile } from "@/types/move-request";
 import type { Address } from "@/types/address";
 
