@@ -15,6 +15,9 @@ export const GOOGLE_ADS_ID = "AW-18198179087";
 
 // Submit lead form conversion label from Google Ads.
 export const GOOGLE_ADS_CONVERSION_SEND_TO = "AW-18198179087/xmIOCK2v97UcEI_ayOVD";
+// "House Move Lead" conversion action — fires on every successful move-request
+// submission across the hero form, all location pages, and the Move Calculator.
+export const GOOGLE_ADS_LEAD_CONVERSION_SEND_TO = "AW-18198179087/zqK-CKHAnL4cEI_ayOVD";
 // Default conversion value (GBP) — matches the value configured in Google Ads.
 export const GOOGLE_ADS_CONVERSION_VALUE = 1.0;
 

@@ -1,52 +1,30 @@
-# Plan
+## Goal
+Fire the new Google Ads "House Move Lead" conversion (`AW-18198179087/zqK-CKHAnL4cEI_ayOVD`) on every successful move-request submission across the entire customer site — the homepage hero wizard, all 34 location pages (they all submit through the same hook), and the Move Calculator's BookEstimateDialog.
 
-## 1. Track `/move-calculator` in campaign attribution
+## Current state
+- `src/utils/tracking/google-ads.ts` already exposes `trackAdsConversion()` and an existing conversion label `xmIOCK2v97UcEI_ayOVD` (kept as-is — different Google Ads action).
+- `src/hooks/use-submit-move-request.tsx` (line 231) already fires the existing conversion on successful submit. This hook backs the homepage hero form, the standalone Request-a-Move page, and every location page.
+- `src/components/move-calculator/BookEstimateDialog.tsx` submits via `supabase.functions.invoke("submit-move-request", ...)` directly and currently fires **no** Google Ads conversion.
 
-Goal: when a user lands on `/move-calculator` (especially via `?cid=...`), fire a `landing_view` event with `location_slug: "move-calculator"`, so the page appears in the same campaign-performance reports as the 34 town pages (Option 1).
+## Changes
 
-**Change `src/hooks/useCampaignTracking.ts`:**
-- After the existing `LOCATION_SLUGS` check, add a branch: if `location.pathname === "/move-calculator"`, fire `track({ event_type: "landing_view", location_slug: "move-calculator" })`.
-- `captureCidFromUrl()` already runs on every navigation, so `?cid=...` attribution is unchanged.
+1. **`src/utils/tracking/google-ads.ts`**
+   - Add a new exported constant:
+     ```ts
+     export const GOOGLE_ADS_LEAD_CONVERSION_SEND_TO = "AW-18198179087/zqK-CKHAnL4cEI_ayOVD";
+     ```
+   - Update top-of-file comment to document both conversion labels.
 
-No other files need to change for tracking — `move_requests` submissions from the calculator already inherit `campaign_id` / `first_campaign_id` / `landing_location_slug` from the cookie/session set by `captureCidFromUrl`.
+2. **`src/hooks/use-submit-move-request.tsx`**
+   - Import the new constant.
+   - Right after the existing `trackAdsConversion(...)` call on successful submission, fire a second `trackAdsConversion({ sendTo: GOOGLE_ADS_LEAD_CONVERSION_SEND_TO, value: GOOGLE_ADS_CONVERSION_VALUE, transactionId: <same id> })`.
+   - This automatically covers the homepage hero, `/request-move`, and all 34 location pages since they all flow through this hook.
 
-### Note on reports
-After deploy, the admin location-performance list will include a row labelled `move-calculator` alongside real town slugs. That matches what you asked for ("one unified list").
+3. **`src/components/move-calculator/BookEstimateDialog.tsx`**
+   - After the successful `supabase.functions.invoke("submit-move-request", ...)` response (before `onSubmitted`), call `trackAdsConversion({ sendTo: GOOGLE_ADS_LEAD_CONVERSION_SEND_TO, value: GOOGLE_ADS_CONVERSION_VALUE, transactionId: <request id from response, if returned> })`.
+   - Update the file's top comment to note the conversion fire.
 
----
-
-## 2. Rename "State/Province" → "County" on both forms (label-only)
-
-Goal: UK-friendly wording without breaking submissions.
-
-### Why this is safe
-The underlying data key everywhere — TypeScript `Address` type, Zod schemas (`submit-move-request/validation.ts`, `_shared/move-request-validation.ts`), and the `pickup_address` / `delivery_address` JSONB columns in `move_requests` — is `state`. The DB stores whatever JSON we send under that key. If we only change the **visible label and placeholder text** (not the form field `name`/register key), the payload shape stays identical and every existing validator, edge function, notification email, and admin view keeps working.
-
-We will NOT:
-- rename the `state` property in `src/types/address.ts`
-- change Zod schemas
-- run a DB migration
-- touch `register("...Address.state")` keys
-
-We WILL only change visible text.
-
-### Files to edit (label/placeholder text only)
-
-1. **`src/components/move-request/AddressStep.tsx`**
-   - `<Label>` text: `State/Province` → `County`
-   - Validation messages: `"State/Province is required"` → `"County is required"`, `"State/Province name cannot exceed 20 characters"` → `"County name cannot exceed 50 characters"` (UK counties can be longer than 20 chars, e.g. "Buckinghamshire" is 15 but "East Riding of Yorkshire" is 24 — bumping to 50 prevents legitimate rejections).
-   - Keep `register("${type}Address.state" as any, ...)` unchanged.
-   - Relax the regex slightly to allow spaces typical in UK counties (already allowed) — no change needed.
-
-2. **Move calculator wizard address step** — check `src/components/move-calculator/CalculatorWizard.tsx` (and any address sub-step it renders) for a "State/Province" label and apply the same rename. If the wizard reuses `AddressStep.tsx`, step 1 covers it.
-
-3. **Optional UX nicety:** make the County field optional in the UI for UK addresses (many UK addresses don't need a county — town + postcode is enough). The Zod schemas already treat `state` as `.optional().default("")`, so we can drop the `required: "County is required"` rule on the client. **Confirm if you want this** — otherwise we keep it required and just relabel.
-
-### Verification after the change
-- Submit one test move from `/move-calculator` and one from the home-page hero. Confirm both reach `move_requests` and the County value lands in `pickup_address.state` / `delivery_address.state` as expected.
-- Confirm admin views and notification emails still render the address correctly (they read `state` from JSONB — unaffected).
-
----
-
-## Open question
-Should the County field stay **required** (current behaviour, just relabelled), or become **optional** since many UK addresses don't include a county? Let me know and I'll lock it into the implementation.
+## Notes
+- The existing `xmIOCK2v97UcEI_ayOVD` conversion stays in place — this is purely additive so the new "House Move Lead" action is tracked alongside it.
+- No `<script>` tags need to be added to `index.html`; the global `gtag` is already loaded there, and `trackAdsConversion` uses it.
+- Conversions fire only on **successful** submission (after server confirms), matching how the existing one works — avoids counting validation failures.
