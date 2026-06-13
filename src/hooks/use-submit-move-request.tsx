@@ -234,6 +234,14 @@ export function useSubmitMoveRequest(): SubmitMoveRequestHook {
         currency: "GBP",
         transactionId: moveRequestId,
       });
+      // "House Move Lead" Google Ads conversion — fires for every successful
+      // submission (hero form + all 34 location pages route through this hook).
+      trackAdsConversion({
+        sendTo: GOOGLE_ADS_LEAD_CONVERSION_SEND_TO,
+        value: GOOGLE_ADS_CONVERSION_VALUE,
+        currency: "GBP",
+        transactionId: moveRequestId,
+      });
 
       setShowSuccess(true);
     } catch (error) {
