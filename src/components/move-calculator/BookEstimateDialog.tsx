@@ -112,6 +112,13 @@ export function BookEstimateDialog(props: BookEstimateDialogProps) {
       supabase.functions.invoke("send-confirmation-email", {
         body: { customerEmail: form.email, customerName: form.fullName },
       }).catch(() => undefined);
+      // Google Ads "House Move Lead" conversion.
+      trackAdsConversion({
+        sendTo: GOOGLE_ADS_LEAD_CONVERSION_SEND_TO,
+        value: GOOGLE_ADS_CONVERSION_VALUE,
+        currency: "GBP",
+        transactionId: data?.moveRequestId ?? data?.id,
+      });
       setSuccess(true);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong");
