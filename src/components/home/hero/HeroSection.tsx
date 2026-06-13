@@ -17,7 +17,7 @@ export const HeroSection = ({ moveType, setMoveType, onGetQuotes }: HeroSectionP
     <section className="relative flex items-center px-2 sm:px-6 lg:px-8 pt-6 pb-4 md:pt-12 md:pb-24">
       {/* Slate background covers the full section on mobile so section padding becomes
           the inset around the form, preventing the form from floating past the slate edge. */}
-      <div className="absolute inset-x-2 sm:inset-x-6 lg:inset-x-8 inset-y-0 md:top-12 md:bottom-24 rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-brand-slate via-brand-slateLight to-brand-slate shadow-2xl">
+      <div className="absolute inset-x-2 sm:inset-x-6 lg:inset-x-8 top-4 bottom-0 md:top-12 md:bottom-24 rounded-[1.5rem] sm:rounded-[2rem] md:rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-brand-slate via-brand-slateLight to-brand-slate shadow-2xl">
         <div className="absolute inset-0 opacity-20 bg-[url('/grid.svg')] bg-center" />
         <div className="absolute inset-0 bg-black/5" />
       </div>
