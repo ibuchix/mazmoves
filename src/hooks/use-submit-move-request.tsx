@@ -21,7 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { MoveRequestForm } from "@/types/move-request";
 import type { Address } from "@/types/address";
 import { identifyUser, trackEvent } from "@/utils/tracking/tiktok";
-import { trackAdsConversion, GOOGLE_ADS_CONVERSION_SEND_TO, GOOGLE_ADS_CONVERSION_VALUE } from "@/utils/tracking/google-ads";
+import { trackAdsConversion, GOOGLE_ADS_CONVERSION_SEND_TO, GOOGLE_ADS_LEAD_CONVERSION_SEND_TO, GOOGLE_ADS_CONVERSION_VALUE } from "@/utils/tracking/google-ads";
 import { track } from "@/lib/campaign-tracking";
 
 export interface SubmitMoveRequestHook {
