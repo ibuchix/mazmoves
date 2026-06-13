@@ -46,7 +46,10 @@ export function TownHero({ townName, county, trustWord = "vetted" }: TownHeroPro
               {county}
             </p>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold font-montserrat mb-4 leading-tight break-words">
-              House Removals in {townName}
+              House{" "}
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-brand-green to-white">
+                Removals in {townName}
+              </span>
             </h1>
             <p className="text-base sm:text-lg text-white/90 font-roboto mb-6 max-w-xl">
               Compare free quotes from {trustWord} {townName} movers in one place, with no obligation and no chasing calls.
