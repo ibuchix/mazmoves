@@ -1,16 +1,66 @@
+// ContactStep
+// Step 5 of the move request wizard: collects name, email, phone, move date,
+// and special instructions. Updated to sync browser/password-manager autofill
+// values back into react-hook-form so the "Submit" button enables correctly
+// when fields are populated by Chrome / Safari / iOS Keychain / 1Password etc.
+// (Native autofill does not always fire `input`/`change` events, which left
+// RHF's internal state empty and kept the CTA disabled.)
+
+import { useEffect, useRef } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { UseFormRegister, FieldErrors } from "react-hook-form";
+import { UseFormRegister, FieldErrors, UseFormSetValue } from "react-hook-form";
 import { MoveRequestForm } from "@/types/move-request";
 
 interface ContactStepProps {
   register: UseFormRegister<MoveRequestForm>;
   errors: FieldErrors<MoveRequestForm>;
+  setValue?: UseFormSetValue<MoveRequestForm>;
 }
 
-export function ContactStep({ register, errors }: ContactStepProps) {
+const AUTOFILL_FIELDS = ["fullName", "email", "phone", "moveDate", "specialInstructions"] as const;
+
+export function ContactStep({ register, errors, setValue }: ContactStepProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Re-read raw DOM values into react-hook-form. Called on autofill animation
+  // events and on mount (covers values populated before the step rendered).
+  useEffect(() => {
+    if (!setValue || !containerRef.current) return;
+    const root = containerRef.current;
+
+    const syncAll = () => {
+      AUTOFILL_FIELDS.forEach((name) => {
+        const el = root.querySelector<HTMLInputElement>(`#${name}`);
+        if (el && el.value) {
+          setValue(name as any, el.value, { shouldValidate: true, shouldDirty: true });
+        }
+      });
+    };
+
+    // Initial sync (some browsers autofill before mount/focus).
+    const t1 = window.setTimeout(syncAll, 100);
+    const t2 = window.setTimeout(syncAll, 600);
+
+    const onAnimStart = (e: AnimationEvent) => {
+      if (e.animationName !== "onAutoFillStart") return;
+      const target = e.target as HTMLInputElement | null;
+      if (!target || !target.id) return;
+      if ((AUTOFILL_FIELDS as readonly string[]).includes(target.id)) {
+        setValue(target.id as any, target.value, { shouldValidate: true, shouldDirty: true });
+      }
+    };
+
+    root.addEventListener("animationstart", onAnimStart, true);
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      root.removeEventListener("animationstart", onAnimStart, true);
+    };
+  }, [setValue]);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4" ref={containerRef}>
       <h3 className="text-lg font-semibold text-brand-slate">Contact Information</h3>
       <div className="grid gap-4">
         <div className="space-y-2">
@@ -20,12 +70,10 @@ export function ContactStep({ register, errors }: ContactStepProps) {
           </Label>
           <Input
             id="fullName"
-            {...register("fullName", { 
+            autoComplete="name"
+            {...register("fullName", {
               required: "Full name is required",
-              minLength: {
-                value: 2,
-                message: "Name must be at least 2 characters"
-              }
+              minLength: { value: 2, message: "Name must be at least 2 characters" }
             })}
             className={`h-11 border-brand-slateLight focus:ring-brand-green transition-all duration-300 ${
               errors.fullName ? "border-red-500" : ""
@@ -44,6 +92,7 @@ export function ContactStep({ register, errors }: ContactStepProps) {
           <Input
             id="email"
             type="email"
+            autoComplete="email"
             {...register("email", {
               required: "Email address is required",
               pattern: {
@@ -68,6 +117,7 @@ export function ContactStep({ register, errors }: ContactStepProps) {
           <Input
             id="phone"
             type="tel"
+            autoComplete="tel"
             {...register("phone", {
               required: "Phone number is required",
               pattern: {

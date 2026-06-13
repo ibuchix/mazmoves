@@ -117,4 +117,13 @@
       font-size: inherit;
     }
   }
+
+  /* Autofill detection: browsers fire the `onAnimationStart` event when
+     `:-webkit-autofill` matches, which lets react-hook-form re-read DOM
+     values for fields filled by Chrome / Safari / iOS Keychain / 1Password. */
+  @keyframes onAutoFillStart { from { opacity: 1; } to { opacity: 1; } }
+  @keyframes onAutoFillCancel { from { opacity: 1; } to { opacity: 1; } }
+  input:-webkit-autofill { animation-name: onAutoFillStart; animation-duration: 1ms; }
+  input:not(:-webkit-autofill) { animation-name: onAutoFillCancel; animation-duration: 1ms; }
 }
+

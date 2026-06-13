@@ -97,8 +97,10 @@ export function MoveRequestFormContent({
         <ContactStep 
           register={register}
           errors={errors}
+          setValue={setValue}
         />
       )}
+
 
       <FormNavigation
         step={step}
