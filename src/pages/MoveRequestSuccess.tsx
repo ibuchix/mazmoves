@@ -39,7 +39,6 @@ export default function MoveRequestSuccess() {
         description="Your move request has been received. Verified UK moving companies will be in touch shortly."
         path="/move-request-success"
         type="website"
-        noindex
       />
       <div className="max-w-xl mx-auto p-6 sm:p-10">
         <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-6 sm:p-10 text-center">
