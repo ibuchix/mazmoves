@@ -234,16 +234,15 @@ export function useSubmitMoveRequest(): SubmitMoveRequestHook {
         currency: "GBP",
         transactionId: moveRequestId,
       });
-      // "House Move Lead" Google Ads conversion — fires for every successful
-      // submission (hero form + all 34 location pages route through this hook).
-      trackAdsConversion({
-        sendTo: GOOGLE_ADS_LEAD_CONVERSION_SEND_TO,
-        value: GOOGLE_ADS_CONVERSION_VALUE,
-        currency: "GBP",
-        transactionId: moveRequestId,
-      });
+      // "House Move Lead" conversion is fired by the dedicated success page
+      // (/move-request-success) we navigate to below. That matches Google's
+      // "install the event snippet on the conversion page" guidance and
+      // makes the event visible to Google Tag Assistant.
 
       setShowSuccess(true);
+      // Navigate to the dedicated conversion / thank-you page so the Google
+      // Ads conversion event fires on a real page view.
+      navigate(`/move-request-success?rid=${encodeURIComponent(moveRequestId)}`);
     } catch (error) {
       console.error("Submission error:", error);
       toast.error(
