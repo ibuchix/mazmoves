@@ -1,43 +1,45 @@
-## What I checked
+## What I found
 
-- The published `housemove.co` HTML does contain the Google Ads base tag:
-  - `https://www.googletagmanager.com/gtag/js?id=AW-18198179087`
-  - `gtag('config', 'AW-18198179087')`
-- It is present on the homepage, `www` domain, a location page, and `/move-calculator` because this is a single-page Vite app and all routes share `index.html`.
-- Successful move-request submissions already call the new conversion action `AW-18198179087/zqK-CKHAnL4cEI_ayOVD`.
-- Move Calculator bookings also call the same conversion action.
-
-## Likely issue
-
-Google Tag Assistant is not connecting to the page even though the tag is in the HTML. The most likely remaining blocker is the current Content Security Policy. It uses a restrictive `frame-ancestors` rule and does not include every Google debug/measurement endpoint Tag Assistant commonly uses. Because `frame-ancestors` controls who may embed/debug the page, a `<meta http-equiv="Content-Security-Policy">` is also not the best place for that directive.
+- The live site does have the base Google tag on every SPA route because `index.html` is shared across `/`, `/request-move`, `/removals/:slug`, and `/move-calculator`.
+- The required conversion label `AW-18198179087/zqK-CKHAnL4cEI_ayOVD` is present in the published JavaScript bundle, but it only fires after a successful form submission.
+- The Google instruction you pasted expects an **event snippet on the conversion page**. This app currently shows a success dialog on the same page, not a real thank-you/conversion page, so Google Tag Assistant may never see a dedicated conversion-page snippet.
+- The current Google loader URL has extra parameters (`&l=dataLayer&cx=c`) compared with Google’s exact recommended snippet. It should be simplified to the official format.
+- Cloudflare is present on the custom domain. If Google Tag Assistant still times out after the app-side fix, the remaining likely cause is Cloudflare/bot protection blocking Tag Assistant’s browser session.
 
 ## Plan
 
-1. **Make the Google tag easier for Google to detect**
-   - Keep the Google Ads base tag in `index.html`.
-   - Add the standard compatibility form using `https://www.googletagmanager.com/gtag/js?id=AW-18198179087&l=dataLayer&cx=c`.
-   - Keep the existing `gtag('config', 'AW-18198179087')` initialization.
+1. **Make the base Google tag match Google’s exact guidance**
+   - In `index.html`, change the loader to exactly:
+     `https://www.googletagmanager.com/gtag/js?id=AW-18198179087`
+   - Keep:
+     `gtag('js', new Date());`
+     `gtag('config', 'AW-18198179087');`
+   - Keep it in `<head>` so it is present on every route.
 
-2. **Fix the CSP for Google Ads and Tag Assistant**
-   - Update the `Content-Security-Policy` meta tag to allow the common Google Ads / Tag Assistant endpoints:
-     - `googletagmanager.com`
-     - `googleadservices.com`
-     - `google.com`
-     - `google.co.uk`
-     - `doubleclick.net`
-     - `g.doubleclick.net`
-     - `stats.g.doubleclick.net`
-     - `tagassistant.google.com`
-   - Remove `frame-ancestors` from the meta CSP because browsers ignore or inconsistently apply it from meta tags; it should be an HTTP header, not a meta directive.
+2. **Add a real conversion route for Google’s “conversion page” model**
+   - Add a lightweight route such as `/move-request-success`.
+   - This page will fire the Google Ads event snippet on page load:
+     `gtag('event', 'conversion', { send_to: 'AW-18198179087/zqK-CKHAnL4cEI_ayOVD' })`
+   - This directly matches Google’s instruction to install the event snippet on the page customers reach after converting.
 
-3. **Add a diagnostic-only Google Ads ping helper**
-   - Update the Google Ads tracking wrapper so conversion calls log a clear console warning if `window.gtag` is not available.
-   - Keep tracking non-blocking so a failed ad script never breaks form submission.
+3. **Redirect successful submissions to that conversion page**
+   - For the main move-request wizard, after a successful request, show/route to the success page instead of relying only on a modal-based conversion event.
+   - Pass the submitted request ID as the transaction ID where available, so repeated test submissions are easier to distinguish.
 
-4. **Confirm all intended submission paths are covered**
-   - Standard move request flow: homepage hero, `/request-move`, and all 34 town/location pages route through `useSubmitMoveRequest`, so they fire conversion after successful submission.
-   - Move Calculator flow: `BookEstimateDialog` fires conversion after successful booking.
+4. **Keep existing conversion tracking as a backup where appropriate**
+   - Keep the current `trackAdsConversion(...)` helper, but ensure the new success page is the primary Google Ads conversion signal.
+   - For the Move Calculator booking dialog, either route to the same success page after successful booking or call the same shared conversion helper from its success state.
 
-5. **After implementation**
-   - Re-check the published/preview HTML contains the updated tag and CSP.
-   - You will need to publish again, then retry Tag Assistant. If it still times out after this, the remaining cause is likely outside app code, such as Cloudflare/Bot protection/challenge behavior blocking Google’s debugger session.
+5. **Improve diagnostics without changing the site design**
+   - Add safe console diagnostics only when `gtag` is unavailable or when the conversion event is sent.
+   - No visual design changes.
+
+6. **Verify before handing back**
+   - Check that the live/published HTML includes the exact Google tag.
+   - Check that all key routes still share the tag.
+   - Check that the success route contains/fires the conversion event.
+   - After you publish, re-test in Google Tag Assistant on `https://housemove.co/`, then submit a test lead and confirm the `House Move Lead` conversion event appears.
+
+## Important note
+
+If this still times out after the above changes and republishing, the app code will likely no longer be the issue; the next place to check is Cloudflare/security settings for `housemove.co`, because Tag Assistant must be able to open and inspect the site without being challenged or blocked.
