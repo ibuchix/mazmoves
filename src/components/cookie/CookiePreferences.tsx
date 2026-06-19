@@ -1,6 +1,5 @@
-// CookiePreferences.tsx - Granular cookie preference dialog
-// Created: Moved from src/components/footer/ (now removed) into the cookie folder.
-// Lets users customize analytics and marketing cookie consent.
+// CookiePreferences.tsx - Granular cookie preference dialog.
+// Updated: copy now references Housemove as the service provider.
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
@@ -69,7 +68,7 @@ export default function CookiePreferences() {
         <DialogHeader>
           <DialogTitle>Cookie Preferences</DialogTitle>
           <DialogDescription>
-            Choose which cookies you allow us to use.
+            Choose which cookies you allow Housemove to use.
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">

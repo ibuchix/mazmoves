@@ -1,4 +1,9 @@
+// CookieConsent.tsx - First-visit cookie consent banner.
+// Updated: banner copy now identifies the controller as Housemove (Housemove NB Ltd)
+// and links to the dedicated Cookie Policy page.
+
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import CookiePreferences from "@/components/cookie/CookiePreferences";
@@ -49,7 +54,7 @@ export default function CookieConsent() {
     toast({
       title: "Preferences Saved",
       description: "Your cookie preferences have been updated.",
-      className: "bg-white p-2 text-sm w-auto max-w-[250px]",
+      className: "bg-background p-2 text-sm w-auto max-w-[250px]",
       duration: 2000,
     });
   };
@@ -57,26 +62,32 @@ export default function CookieConsent() {
   if (!showBanner) return null;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 bg-white border-t border-gray-200 p-4 shadow-lg z-50">
+    <div className="fixed inset-x-0 bottom-0 bg-background border-t border-border p-4 shadow-lg z-50">
       <div className="container mx-auto max-w-7xl">
         <div className="flex flex-col space-y-4">
           <div>
-            <p className="text-sm text-gray-600">
-              We use cookies to enhance your browsing experience, serve personalized content, and analyze our traffic. 
-              By clicking "Accept All", you consent to our use of cookies.
+            <p className="text-sm text-muted-foreground">
+              <strong>Housemove</strong> (Housemove NB Ltd) uses cookies to enhance your browsing experience, serve personalised content, and analyse our traffic. By clicking "Accept All", you consent to our use of cookies.{" "}
+              <Link
+                to="/cookie-policy"
+                className="underline hover:text-brand-orange transition-colors"
+              >
+                Read our Cookie Policy
+              </Link>
+              .
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-2 justify-end">
             <CookiePreferences />
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={acceptNecessary}
               className="w-full sm:w-auto whitespace-nowrap text-sm"
               size="sm"
             >
               Necessary Only
             </Button>
-            <Button 
+            <Button
               onClick={acceptAll}
               className="w-full sm:w-auto bg-brand-green hover:bg-brand-orange text-brand-slate hover:text-white whitespace-nowrap text-sm font-semibold"
               size="sm"

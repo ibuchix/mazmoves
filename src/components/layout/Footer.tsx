@@ -3,6 +3,7 @@
 // Intentionally compact — no logo, single row on desktop.
 // "For AI agents" link removed — /agents route still exists for agent discovery
 // via /.well-known/ai-plugin.json, but is no longer surfaced in human navigation.
+// Updated: added a "Cookie Policy" link to the legal navigation.
 
 import { Link } from "react-router-dom";
 
@@ -11,6 +12,7 @@ export function Footer() {
   const links = [
     { to: "/removals", label: "Locations" },
     { to: "/privacy-policy", label: "Privacy Policy" },
+    { to: "/cookie-policy", label: "Cookie Policy" },
     { to: "/terms-and-conditions", label: "Terms & Conditions" },
     { to: "/contact", label: "Contact" },
   ];
