@@ -2,12 +2,14 @@
 // Services standalone page removed; the homepage still shows ServicesSection.
 // Added /agents page documenting the MCP endpoint for AI agents.
 // Added /removals hub and /removals/:slug dynamic town landing pages for SEO.
+// Added /cookie-policy page setting out cookie use by Housemove (Housemove NB Ltd).
 import { lazy } from "react";
 import { RouteConfig } from "@/types/route";
 
 const Index = lazy(() => import("@/pages/Index"));
 const Contact = lazy(() => import("@/pages/Contact"));
 const PrivacyPolicy = lazy(() => import("@/pages/PrivacyPolicy"));
+const CookiePolicy = lazy(() => import("@/pages/CookiePolicy"));
 const TermsAndConditions = lazy(() => import("@/pages/TermsAndConditions"));
 const RequestMove = lazy(() => import("@/pages/RequestMove"));
 const Agents = lazy(() => import("@/pages/Agents"));
@@ -21,6 +23,7 @@ export const publicRoutes: RouteConfig[] = [
   { path: "/", element: <Index /> },
   { path: "/contact", element: <Contact /> },
   { path: "/privacy-policy", element: <PrivacyPolicy /> },
+  { path: "/cookie-policy", element: <CookiePolicy /> },
   { path: "/terms-and-conditions", element: <TermsAndConditions /> },
   { path: "/request-move/*", element: <RequestMove /> },
   { path: "/agents", element: <Agents /> },
@@ -30,4 +33,3 @@ export const publicRoutes: RouteConfig[] = [
   { path: "/go/:code", element: <CampaignRedirect /> },
   { path: "/move-request-success", element: <MoveRequestSuccess /> },
 ];
-
