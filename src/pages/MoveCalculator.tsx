@@ -79,7 +79,7 @@ export default function MoveCalculator() {
                 <span>Free • Instant • No signup</span>
               </div>
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold font-montserrat mb-4 leading-tight">
-                Estimate your move in 60 seconds
+                Estimate your house move in 60 seconds
               </h1>
               <p className="text-base md:text-lg text-white/90 font-roboto max-w-xl">
                 Tell us a few details and we'll show you a transparent price range

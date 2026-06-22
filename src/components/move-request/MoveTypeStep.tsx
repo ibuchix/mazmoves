@@ -24,7 +24,7 @@ export function MoveTypeStep({ value, onChange }: MoveTypeStepProps) {
       >
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="domestic" id="domestic" />
-          <Label htmlFor="domestic">Domestic Move</Label>
+          <Label htmlFor="domestic">House Move</Label>
         </div>
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="commercial" id="commercial" />
